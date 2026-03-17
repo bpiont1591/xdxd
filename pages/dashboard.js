@@ -4,15 +4,28 @@ import { useEffect, useMemo, useState } from "react";
 import { signIn, signOut, useSession } from "next-auth/react";
 import DiscordServerIcon from "../components/DiscordServerIcon";
 
-const defaultForm = { description: "", tags: "", inviteUrl: "", listingType: "public" };
+const defaultForm = { description: "", tags: [], tagInput: "", inviteUrl: "" };
+const MAX_TAGS = 5;
+const MAX_DESCRIPTION = 250;
 
-function sanitizeTagsInput(value) {
-  return value
-    .split(",")
-    .map((tag) => tag.trim())
-    .filter(Boolean)
-    .slice(0, 5)
-    .join(", ");
+function normalizeTag(value) {
+  return String(value || "")
+    .trim()
+    .toLowerCase()
+    .replace(/^#+/, "")
+    .replace(/\s+/g, "-")
+    .slice(0, 24);
+}
+
+function buildTags(input = "", existing = []) {
+  const next = [...existing];
+  for (const raw of String(input || "").split(",")) {
+    const tag = normalizeTag(raw);
+    if (!tag || next.includes(tag)) continue;
+    next.push(tag);
+    if (next.length >= MAX_TAGS) break;
+  }
+  return next.slice(0, MAX_TAGS);
 }
 
 function formatLastBump(value) {
@@ -68,9 +81,9 @@ export default function Dashboard() {
     if (selectedServer) {
       setForm({
         description: selectedServer.description || "",
-        tags: Array.isArray(selectedServer.tags) ? selectedServer.tags.join(", ") : "",
-        inviteUrl: selectedServer.inviteUrl || "",
-        listingType: selectedServer.listingType || "public"
+        tags: Array.isArray(selectedServer.tags) ? selectedServer.tags.slice(0, MAX_TAGS) : [],
+        tagInput: "",
+        inviteUrl: selectedServer.inviteUrl || ""
       });
     } else {
       setForm(defaultForm);
@@ -84,15 +97,16 @@ export default function Dashboard() {
     setSaving(true);
     setNotice("");
 
+    const finalTags = buildTags(form.tagInput, form.tags);
+
     try {
       const res = await fetch(`/api/servers/${selectedServer.id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          description: form.description,
-          tags: form.tags,
-          inviteUrl: form.inviteUrl,
-          listingType: form.listingType
+          description: form.description.slice(0, MAX_DESCRIPTION),
+          tags: finalTags,
+          inviteUrl: form.inviteUrl
         })
       });
 
@@ -100,6 +114,7 @@ export default function Dashboard() {
       if (!res.ok) throw new Error(data.error || "Nie udało się zapisać");
 
       setServers((prev) => prev.map((server) => (server.id === data.id ? { ...server, ...data } : server)));
+      setForm((prev) => ({ ...prev, tags: finalTags, tagInput: "" }));
       setNotice("Zapisano zmiany.");
     } catch (err) {
       setNotice(err.message || "Błąd zapisu");
@@ -284,10 +299,6 @@ export default function Dashboard() {
                   <span className="overview-label">Invite</span>
                   <strong>{selectedServer.inviteUrl ? "Ustawiony" : "Brak"}</strong>
                 </article>
-                <article className="overview-card glass">
-                  <span className="overview-label">Typ</span>
-                  <strong>{(form.listingType || selectedServer.listingType || "public") === "nsfw" ? "NSFW 18+" : "Publiczny"}</strong>
-                </article>
               </div>
 
               <div className="dashboard-content-split">
@@ -304,12 +315,12 @@ export default function Dashboard() {
                       <span>Opis serwera</span>
                       <textarea
                         rows={8}
-                        maxLength={250}
+                        maxLength={MAX_DESCRIPTION}
                         value={form.description}
-                        onChange={(e) => setForm((prev) => ({ ...prev, description: e.target.value.slice(0, 250) }))}
+                        onChange={(e) => setForm((prev) => ({ ...prev, description: e.target.value.slice(0, MAX_DESCRIPTION) }))}
                         placeholder="Opisz serwer krótko i konkretnie."
                       />
-                      <small className="muted">{form.description.length}/250 znaków</small>
+                      <small className="muted">{form.description.length}/{MAX_DESCRIPTION} znaków</small>
                     </label>
 
                     <div className="split-grid">
@@ -317,24 +328,65 @@ export default function Dashboard() {
                         <span>Tagi</span>
                         <input
                           type="text"
-                          value={form.tags}
-                          onChange={(e) => setForm((prev) => ({ ...prev, tags: sanitizeTagsInput(e.target.value) }))}
-                          placeholder="gaming, community, social"
-                        />
-                        <small className="muted">Maksymalnie 5 tagów oddzielonych przecinkami.</small>
-                      </label>
+                          value={form.tagInput}
+                          onChange={(e) => {
+                            const value = e.target.value;
+                            if (value.includes(",")) {
+                              setForm((prev) => ({
+                                ...prev,
+                                tags: buildTags(value, prev.tags),
+                                tagInput: ""
+                              }));
+                              return;
+                            }
 
-                      <label className="field">
-                        <span>Typ serwera</span>
-                        <select
-                          className="select"
-                          value={form.listingType}
-                          onChange={(e) => setForm((prev) => ({ ...prev, listingType: e.target.value === "nsfw" ? "nsfw" : "public" }))}
-                        >
-                          <option value="public">Publiczny</option>
-                          <option value="nsfw">NSFW (18+)</option>
-                        </select>
-                        <small className="muted">Dla NSFW użytkownik dostanie potwierdzenie wieku 18+ przed wejściem.</small>
+                            setForm((prev) => ({ ...prev, tagInput: value }));
+                          }}
+                          onKeyDown={(e) => {
+                            if (e.key === "," || e.key === "Enter") {
+                              e.preventDefault();
+                              setForm((prev) => ({
+                                ...prev,
+                                tags: buildTags(prev.tagInput, prev.tags),
+                                tagInput: ""
+                              }));
+                            }
+
+                            if (e.key === "Backspace" && !form.tagInput && form.tags.length) {
+                              e.preventDefault();
+                              setForm((prev) => ({ ...prev, tags: prev.tags.slice(0, -1) }));
+                            }
+                          }}
+                          onBlur={() => {
+                            if (!form.tagInput.trim()) return;
+                            setForm((prev) => ({
+                              ...prev,
+                              tags: buildTags(prev.tagInput, prev.tags),
+                              tagInput: ""
+                            }));
+                          }}
+                          placeholder="gaming, community, social"
+                          disabled={form.tags.length >= MAX_TAGS}
+                        />
+                        <small className="muted">Wpisz tag i naciśnij przecinek albo Enter. Maksymalnie {MAX_TAGS} tagów.</small>
+
+                        <div className="tag-list top-gap">
+                          {form.tags.length ? (
+                            form.tags.map((tag) => (
+                              <button
+                                key={tag}
+                                type="button"
+                                className="tag"
+                                onClick={() => setForm((prev) => ({ ...prev, tags: prev.tags.filter((item) => item !== tag) }))}
+                                title="Usuń tag"
+                              >
+                                #{tag} ×
+                              </button>
+                            ))
+                          ) : (
+                            <span className="muted">Brak tagów</span>
+                          )}
+                        </div>
                       </label>
 
                       <label className="field">
@@ -383,15 +435,9 @@ export default function Dashboard() {
                     </div>
 
                     <div className="tag-list">
-                      {(form.tags || "")
-                        .split(",")
-                        .map((tag) => tag.trim())
-                        .filter(Boolean)
-                         .slice(0, 5)
-                        .map((tag) => (
-                          <span key={tag} className="tag">#{tag}</span>
-                        ))}
-                      {!form.tags.trim() && <span className="muted">Brak tagów</span>}
+                      {form.tags.length ? form.tags.map((tag) => (
+                        <span key={tag} className="tag">#{tag}</span>
+                      )) : <span className="muted">Brak tagów</span>}
                     </div>
 
                     <p className="server-description clamp-5">
@@ -402,7 +448,6 @@ export default function Dashboard() {
                       <div className="server-metrics">
                         <span className="metric">Bumpy: {selectedServer.bumpCount || 0}</span>
                         <span className="metric">{selectedServer.botInstalled ? "Bot online" : "Bot brak"}</span>
-                        <span className="metric">{form.listingType === "nsfw" ? "NSFW 18+" : "Publiczny"}</span>
                       </div>
                     </div>
                   </article>
