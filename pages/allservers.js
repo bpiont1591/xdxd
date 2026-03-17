@@ -1,6 +1,7 @@
 import Head from "next/head";
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import DiscordServerIcon from "../components/DiscordServerIcon";
 
 function formatTimeAgo(dateString) {
   if (!dateString) return "Nigdy";
@@ -13,11 +14,6 @@ function formatTimeAgo(dateString) {
   return `${days} dni temu`;
 }
 
-function serverIconUrl(server) {
-  if (!server.icon) return null;
-  const ext = String(server.icon).startsWith("a_") ? "gif" : "png";
-  return `https://cdn.discordapp.com/icons/${server.id}/${server.icon}.${ext}?size=128`;
-}
 
 export default function AllServersPage() {
   const [servers, setServers] = useState([]);
@@ -142,13 +138,12 @@ export default function AllServersPage() {
           ) : (
             <div className="home-list">
               {servers.map((server) => {
-                const iconUrl = serverIconUrl(server);
                 return (
                   <article key={server.id} className="home-list-card glass">
                     <div className="home-list-main">
                       <div className="server-avatar">
-                        {iconUrl ? (
-                          <img src={iconUrl} alt={server.name} />
+                        {server.icon ? (
+                          <DiscordServerIcon server={server} size={128} />
                         ) : (
                           <span>{server.name.slice(0, 1)}</span>
                         )}

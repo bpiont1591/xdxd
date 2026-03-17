@@ -2,6 +2,7 @@ import Head from "next/head";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { signIn, signOut, useSession } from "next-auth/react";
+import DiscordServerIcon from "../components/DiscordServerIcon";
 
 const defaultForm = { description: "", tags: "", inviteUrl: "" };
 
@@ -195,10 +196,7 @@ export default function Dashboard() {
                   >
                     <div className="server-icon">
                       {server.icon ? (
-                        <img
-                          src={`https://cdn.discordapp.com/icons/${server.id}/${server.icon}.png?size=128`}
-                          alt={server.name}
-                        />
+                        <DiscordServerIcon server={server} size={128} />
                       ) : (
                         <span>{server.name.slice(0, 1)}</span>
                       )}
@@ -228,10 +226,7 @@ export default function Dashboard() {
                 <div className="banner-main">
                   <div className="server-avatar xl">
                     {selectedServer.icon ? (
-                      <img
-                        src={`https://cdn.discordapp.com/icons/${selectedServer.id}/${selectedServer.icon}.png?size=256`}
-                        alt={selectedServer.name}
-                      />
+                      <DiscordServerIcon server={selectedServer} size={256} />
                     ) : (
                       <span>{selectedServer.name.slice(0, 1)}</span>
                     )}
@@ -344,10 +339,7 @@ export default function Dashboard() {
                     <div className="directory-card-head">
                       <div className="server-avatar">
                         {selectedServer.icon ? (
-                          <img
-                            src={`https://cdn.discordapp.com/icons/${selectedServer.id}/${selectedServer.icon}.png?size=128`}
-                            alt={selectedServer.name}
-                          />
+                          <DiscordServerIcon server={selectedServer} size={128} />
                         ) : (
                           <span>{selectedServer.name.slice(0, 1)}</span>
                         )}

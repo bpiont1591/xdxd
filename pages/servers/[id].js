@@ -1,13 +1,9 @@
 import Head from "next/head";
+import DiscordServerIcon, { getDiscordServerIconCandidates } from "../../components/DiscordServerIcon";
 import Link from "next/link";
 import { signIn, useSession } from "next-auth/react";
 import { useState } from "react";
 
-function serverIconUrl(server) {
-  if (!server.icon) return null;
-  const ext = String(server.icon).startsWith("a_") ? "gif" : "png";
-  return `https://cdn.discordapp.com/icons/${server.id}/${server.icon}.${ext}?size=256`;
-}
 
 export async function getServerSideProps({ params, req }) {
   const proto = req.headers["x-forwarded-proto"] || "http";
@@ -80,7 +76,7 @@ export default function ServerDetail({ server }) {
     }
   }
 
-  const iconUrl = serverIconUrl(server);
+  const iconUrl = getDiscordServerIconCandidates(server, 256)[0] || null;
 
   return (
     <>
@@ -111,7 +107,7 @@ export default function ServerDetail({ server }) {
             <div className="detail-left">
               <div className="server-avatar xl">
                 {iconUrl ? (
-                  <img src={iconUrl} alt={server.name} />
+                  <DiscordServerIcon server={server} size={256} />
                 ) : (
                   <span>{server.name.slice(0, 1)}</span>
                 )}
