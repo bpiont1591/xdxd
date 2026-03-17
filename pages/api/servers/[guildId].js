@@ -81,6 +81,7 @@ export default async function handler(req, res) {
       .filter((tag, index, arr) => arr.indexOf(tag) === index)
       .slice(0, 5);
     const inviteUrl = String(body.inviteUrl || "").trim();
+    const serverType = String(body.serverType || existing?.serverType || "public").toLowerCase() === "nsfw" ? "nsfw" : "public";
 
     if (!isValidInviteUrl(inviteUrl)) {
       return res.status(400).json({
@@ -111,6 +112,7 @@ export default async function handler(req, res) {
           inviteUrl,
           ownerDiscordId: session.user?.id || null,
           permissionLabel: getPermissionLabel(targetGuild),
+          serverType,
           moderationStatus: existing?.moderationStatus || "pending",
           moderationNote: existing?.moderationNote || "",
           botInstalled: Boolean(existing?.botInstalled)
@@ -123,7 +125,8 @@ export default async function handler(req, res) {
           tags: JSON.stringify(tags),
           inviteUrl,
           ownerDiscordId: session.user?.id || null,
-          permissionLabel: getPermissionLabel(targetGuild)
+          permissionLabel: getPermissionLabel(targetGuild),
+          serverType
         }
       });
 
@@ -141,6 +144,7 @@ export default async function handler(req, res) {
         inviteUrl,
         ownerDiscordId: session.user?.id || null,
         permissionLabel: getPermissionLabel(targetGuild),
+        serverType,
         moderationStatus: existing?.moderationStatus || "pending",
         moderationNote: existing?.moderationNote || "",
         botInstalled: Boolean(existing?.botInstalled)

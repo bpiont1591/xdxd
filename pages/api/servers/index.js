@@ -78,6 +78,7 @@ export default async function handler(req, res) {
         moderationNote: saved?.moderationNote || "",
         slug: saved?.slug || null,
         ownerDiscordId: saved?.ownerDiscordId || null,
+        serverType: saved?.serverType || "public",
         createdAt: saved?.createdAt || null,
         updatedAt: saved?.updatedAt || null
       };

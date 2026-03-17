@@ -24,3 +24,10 @@ DISCORD_BOT_CLIENT_ID=
 Dodatkowo:
 - /api/servers działa nawet jeśli odczyt z bazy padnie i nadal zwraca serwery z Discorda
 - dashboard odświeża status bota co 5 sekund, kiedy bot nie jest jeszcze dodany
+
+
+[2026-03-17] Dodano typ serwera (public / nsfw)
+- Prisma schema: nowe pole Server.serverType z domyślną wartością public
+- Dashboard: można ustawić rodzaj serwera
+- Admin: widać typ serwera i można go zmieniać
+- Po wrzuceniu zmian na hosting odpal migrację bazy, np. prisma migrate deploy albo prisma db push

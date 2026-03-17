@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { signIn, signOut, useSession } from "next-auth/react";
 import DiscordServerIcon from "../components/DiscordServerIcon";
 
-const defaultForm = { description: "", tags: [], tagInput: "", inviteUrl: "" };
+const defaultForm = { description: "", tags: [], tagInput: "", inviteUrl: "", serverType: "public" };
 const MAX_TAGS = 5;
 const MAX_DESCRIPTION = 250;
 
@@ -83,7 +83,8 @@ export default function Dashboard() {
         description: selectedServer.description || "",
         tags: Array.isArray(selectedServer.tags) ? selectedServer.tags.slice(0, MAX_TAGS) : [],
         tagInput: "",
-        inviteUrl: selectedServer.inviteUrl || ""
+        inviteUrl: selectedServer.inviteUrl || "",
+        serverType: selectedServer.serverType === "nsfw" ? "nsfw" : "public"
       });
     } else {
       setForm(defaultForm);
@@ -106,7 +107,8 @@ export default function Dashboard() {
         body: JSON.stringify({
           description: form.description.slice(0, MAX_DESCRIPTION),
           tags: finalTags,
-          inviteUrl: form.inviteUrl
+          inviteUrl: form.inviteUrl,
+          serverType: form.serverType
         })
       });
 
@@ -268,6 +270,9 @@ export default function Dashboard() {
                       <span className={`status-pill ${selectedServer.moderationStatus === "approved" ? "ok" : selectedServer.moderationStatus === "rejected" ? "danger" : "warn"}`}>
                         {moderationLabel}
                       </span>
+                      <span className={`status-pill ${selectedServer.serverType === "nsfw" ? "danger" : "ok"}`}>
+                        {selectedServer.serverType === "nsfw" ? "NSFW" : "Publiczny"}
+                      </span>
                       <span className="metric">{selectedServer.permissionLabel}</span>
                     </div>
                   </div>
@@ -398,6 +403,18 @@ export default function Dashboard() {
                           placeholder="https://discord.gg/twoj-link"
                         />
                       </label>
+
+                      <label className="field">
+                        <span>Rodzaj serwera</span>
+                        <select
+                          value={form.serverType}
+                          onChange={(e) => setForm((prev) => ({ ...prev, serverType: e.target.value === "nsfw" ? "nsfw" : "public" }))}
+                        >
+                          <option value="public">Publiczny</option>
+                          <option value="nsfw">NSFW</option>
+                        </select>
+                        <small className="muted">Ustaw czy listing ma być zwykły publiczny czy oznaczony jako NSFW.</small>
+                      </label>
                     </div>
 
                     <div className="button-row">
@@ -448,6 +465,7 @@ export default function Dashboard() {
                       <div className="server-metrics">
                         <span className="metric">Bumpy: {selectedServer.bumpCount || 0}</span>
                         <span className="metric">{selectedServer.botInstalled ? "Bot online" : "Bot brak"}</span>
+                        <span className="metric">Typ: {form.serverType === "nsfw" ? "NSFW" : "Publiczny"}</span>
                       </div>
                     </div>
                   </article>

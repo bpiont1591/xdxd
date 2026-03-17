@@ -1,0 +1,2 @@
+ALTER TABLE "Server"
+ADD COLUMN IF NOT EXISTS "serverType" TEXT NOT NULL DEFAULT 'public';

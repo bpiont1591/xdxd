@@ -68,12 +68,18 @@ export default function AdminPage() {
     setServers([]);
   }
 
-  async function updateStatus(id, moderationStatus) {
+  async function updateServer(id, payload) {
     setNotice("");
+    const current = servers.find((server) => server.id === id);
     const res = await fetch("/api/admin/servers", {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id, moderationStatus, moderationNote: "" })
+      body: JSON.stringify({
+        id,
+        moderationStatus: payload.moderationStatus || current?.moderationStatus || "pending",
+        moderationNote: "",
+        serverType: payload.serverType || current?.serverType || "public"
+      })
     });
 
     const data = await res.json();
@@ -215,13 +221,19 @@ export default function AdminPage() {
                         <span className="metric">Bot: {server.botInstalled ? "tak" : "nie"}</span>
                         <span className="metric">Bumpy: {server.bumpCount || 0}</span>
                         <span className="metric">Invite: {server.inviteUrl ? "ustawiony" : "brak"}</span>
+                        <span className={`metric ${server.serverType === "nsfw" ? "danger-text" : ""}`}>Typ: {server.serverType === "nsfw" ? "NSFW" : "Publiczny"}</span>
                       </div>
 
                       <div className="button-row">
-                        <button className="btn btn-primary" onClick={() => updateStatus(server.id, "approved")}>Zatwierdź</button>
-                        <button className="btn btn-ghost" onClick={() => updateStatus(server.id, "pending")}>Pending</button>
-                        <button className="btn btn-danger" onClick={() => updateStatus(server.id, "rejected")}>Odrzuć</button>
+                        <button className="btn btn-primary" onClick={() => updateServer(server.id, { moderationStatus: "approved" })}>Zatwierdź</button>
+                        <button className="btn btn-ghost" onClick={() => updateServer(server.id, { moderationStatus: "pending" })}>Pending</button>
+                        <button className="btn btn-danger" onClick={() => updateServer(server.id, { moderationStatus: "rejected" })}>Odrzuć</button>
                         <Link className="btn btn-ghost" href={`/servers/${server.id}`}>Podgląd</Link>
+                      </div>
+
+                      <div className="button-row top-gap">
+                        <button className={`btn ${server.serverType === "public" ? "btn-primary" : "btn-ghost"}`} onClick={() => updateServer(server.id, { serverType: "public" })}>Ustaw publiczny</button>
+                        <button className={`btn ${server.serverType === "nsfw" ? "btn-danger" : "btn-ghost"}`} onClick={() => updateServer(server.id, { serverType: "nsfw" })}>Ustaw NSFW</button>
                       </div>
                     </div>
                   ))}

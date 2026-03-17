@@ -42,6 +42,7 @@ export default async function handler(req, res) {
     const id = String(body.id || "");
     const moderationStatus = String(body.moderationStatus || "");
     const moderationNote = String(body.moderationNote || "").trim().slice(0, 300);
+    const serverType = String(body.serverType || "public").toLowerCase() === "nsfw" ? "nsfw" : "public";
 
     if (!["pending", "approved", "rejected"].includes(moderationStatus)) {
       return res.status(400).json({ error: "Nieprawidłowy status moderacji" });
@@ -57,7 +58,8 @@ export default async function handler(req, res) {
       where: { id },
       data: {
         moderationStatus,
-        moderationNote
+        moderationNote,
+        serverType
       }
     });
 
