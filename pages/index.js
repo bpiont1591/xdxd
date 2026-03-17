@@ -210,6 +210,7 @@ export default function Home() {
                         </div>
 
                         <div className="tag-list">
+                          <span className={`tag ${server.listingType === "nsfw" ? "tag-danger" : ""}`}>{server.listingType === "nsfw" ? "18+ NSFW" : "Publiczny"}</span>
                           {server.tags?.length ? (
                             server.tags.slice(0, 5).map((tag) => (
                               <span className="tag" key={tag}>#{tag}</span>
@@ -228,9 +229,15 @@ export default function Home() {
                     <div className="home-list-actions">
                       <Link className="btn btn-ghost" href={`/servers/${server.id}`}>Szczegóły</Link>
                       {server.inviteUrl ? (
-                        <a className="btn btn-primary" href={server.inviteUrl} target="_blank" rel="noreferrer">
-                          Dołącz
-                        </a>
+                        server.listingType === "nsfw" ? (
+                          <Link className="btn btn-primary" href={`/servers/${server.id}`}>
+                            18+ Potwierdź
+                          </Link>
+                        ) : (
+                          <a className="btn btn-primary" href={server.inviteUrl} target="_blank" rel="noreferrer">
+                            Dołącz
+                          </a>
+                        )
                       ) : (
                         <button className="btn btn-disabled" disabled>Brak invite</button>
                       )}

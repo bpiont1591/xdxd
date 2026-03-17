@@ -2,7 +2,7 @@ import Head from "next/head";
 import DiscordServerIcon, { getDiscordServerIconCandidates } from "../../components/DiscordServerIcon";
 import Link from "next/link";
 import { signIn, useSession } from "next-auth/react";
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 
 export async function getServerSideProps({ params, req }) {
@@ -30,6 +30,25 @@ export default function ServerDetail({ server }) {
   const [reportCount, setReportCount] = useState(server.reportCount || 0);
   const [notice, setNotice] = useState("");
   const [reportReason, setReportReason] = useState("");
+  const isNsfw = server.listingType === "nsfw";
+  const ageStorageKey = useMemo(() => `discordboard-age-ok:${server.id}`, [server.id]);
+  const [ageConfirmed, setAgeConfirmed] = useState(!isNsfw);
+
+  useEffect(() => {
+    if (!isNsfw) return;
+    try {
+      setAgeConfirmed(window.localStorage.getItem(ageStorageKey) === "yes");
+    } catch {
+      setAgeConfirmed(false);
+    }
+  }, [ageStorageKey, isNsfw]);
+
+  function confirmAdult() {
+    try {
+      window.localStorage.setItem(ageStorageKey, "yes");
+    } catch {}
+    setAgeConfirmed(true);
+  }
 
   async function toggleFavorite() {
     if (!session) {
@@ -116,6 +135,9 @@ export default function ServerDetail({ server }) {
               <div>
                 <span className="badge">profil serwera</span>
                 <h1>{server.name}</h1>
+                <div className="tag-list top-gap">
+                  <span className={`tag ${isNsfw ? "tag-danger" : ""}`}>{isNsfw ? "18+ NSFW" : "Publiczny"}</span>
+                </div>
                 <p className="muted large">
                   {server.description || "Brak opisu serwera."}
                 </p>
@@ -124,9 +146,15 @@ export default function ServerDetail({ server }) {
 
             <div className="detail-actions">
               {server.inviteUrl ? (
-                <a className="btn btn-primary" href={server.inviteUrl} target="_blank" rel="noreferrer">
-                  Dołącz do serwera
-                </a>
+                isNsfw && !ageConfirmed ? (
+                  <button className="btn btn-primary" type="button" onClick={confirmAdult}>
+                    Mam 18 lat
+                  </button>
+                ) : (
+                  <a className="btn btn-primary" href={server.inviteUrl} target="_blank" rel="noreferrer">
+                    Dołącz do serwera
+                  </a>
+                )
               ) : (
                 <button className="btn btn-disabled" disabled>Brak invite</button>
               )}
@@ -166,6 +194,18 @@ export default function ServerDetail({ server }) {
               </div>
             </div>
           </div>
+
+          {isNsfw && !ageConfirmed ? (
+            <div className="panel-card glass top-gap">
+              <span className="badge">bezpieczeństwo 18+</span>
+              <h2>Ten serwer jest oznaczony jako NSFW</h2>
+              <p className="muted top-gap">Przed pokazaniem linku zapraszającego potwierdź, że masz ukończone 18 lat. Taki mały bezpiecznik, bo internet bez zabezpieczeń to szambo z neonami.</p>
+              <div className="button-row top-gap">
+                <button className="btn btn-primary" type="button" onClick={confirmAdult}>Mam ukończone 18 lat</button>
+                <Link className="btn btn-ghost" href="/">Wróć na stronę główną</Link>
+              </div>
+            </div>
+          ) : null}
 
           <div className="panel-card glass top-gap">
             <span className="badge">zgłoś serwer</span>

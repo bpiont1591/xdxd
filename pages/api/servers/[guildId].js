@@ -1,7 +1,7 @@
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "../auth/[...nextauth]";
 import { prisma } from "../../../lib/prisma";
-import { normalizeServer, slugify, upsertJsonServer, getJsonServerById } from "../../../lib/storage";
+import { normalizeServer, slugify, upsertJsonServer, getJsonServerById, serializeServerMeta } from "../../../lib/storage";
 
 const MANAGE_GUILD = 32n;
 const DISCORD_API_BASE = "https://discord.com/api/v10";
@@ -73,13 +73,14 @@ export default async function handler(req, res) {
     }
 
     const body = req.body || {};
-    const description = String(body.description || "").trim().slice(0, 230);
-    const tags = String(body.tags || "")
+    const description = String(body.description || "").trim().slice(0, 250);
+    const tags = [...new Set(String(body.tags || "")
       .split(",")
       .map((tag) => tag.trim().toLowerCase())
-      .filter(Boolean)
+      .filter(Boolean))]
       .slice(0, 5);
     const inviteUrl = String(body.inviteUrl || "").trim();
+    const listingType = String(body.listingType || "public").toLowerCase() === "nsfw" ? "nsfw" : "public";
 
     if (!isValidInviteUrl(inviteUrl)) {
       return res.status(400).json({
@@ -106,7 +107,7 @@ export default async function handler(req, res) {
           slug: safeSlug,
           icon: targetGuild.icon,
           description,
-          tags: JSON.stringify(tags),
+          tags: serializeServerMeta(tags, listingType),
           inviteUrl,
           ownerDiscordId: session.user?.id || null,
           permissionLabel: getPermissionLabel(targetGuild),
@@ -119,7 +120,7 @@ export default async function handler(req, res) {
           slug: safeSlug,
           icon: targetGuild.icon,
           description,
-          tags: JSON.stringify(tags),
+          tags: serializeServerMeta(tags, listingType),
           inviteUrl,
           ownerDiscordId: session.user?.id || null,
           permissionLabel: getPermissionLabel(targetGuild)
@@ -140,6 +141,7 @@ export default async function handler(req, res) {
         inviteUrl,
         ownerDiscordId: session.user?.id || null,
         permissionLabel: getPermissionLabel(targetGuild),
+        listingType,
         moderationStatus: existing?.moderationStatus || "pending",
         moderationNote: existing?.moderationNote || "",
         botInstalled: Boolean(existing?.botInstalled)

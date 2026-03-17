@@ -4,7 +4,16 @@ import { useEffect, useMemo, useState } from "react";
 import { signIn, signOut, useSession } from "next-auth/react";
 import DiscordServerIcon from "../components/DiscordServerIcon";
 
-const defaultForm = { description: "", tags: "", inviteUrl: "" };
+const defaultForm = { description: "", tags: "", inviteUrl: "", listingType: "public" };
+
+function sanitizeTagsInput(value) {
+  return value
+    .split(",")
+    .map((tag) => tag.trim())
+    .filter(Boolean)
+    .slice(0, 5)
+    .join(", ");
+}
 
 function formatLastBump(value) {
   if (!value) return "Brak bumpa";
@@ -60,7 +69,8 @@ export default function Dashboard() {
       setForm({
         description: selectedServer.description || "",
         tags: Array.isArray(selectedServer.tags) ? selectedServer.tags.join(", ") : "",
-        inviteUrl: selectedServer.inviteUrl || ""
+        inviteUrl: selectedServer.inviteUrl || "",
+        listingType: selectedServer.listingType || "public"
       });
     } else {
       setForm(defaultForm);
@@ -81,7 +91,8 @@ export default function Dashboard() {
         body: JSON.stringify({
           description: form.description,
           tags: form.tags,
-          inviteUrl: form.inviteUrl
+          inviteUrl: form.inviteUrl,
+          listingType: form.listingType
         })
       });
 
@@ -273,6 +284,10 @@ export default function Dashboard() {
                   <span className="overview-label">Invite</span>
                   <strong>{selectedServer.inviteUrl ? "Ustawiony" : "Brak"}</strong>
                 </article>
+                <article className="overview-card glass">
+                  <span className="overview-label">Typ</span>
+                  <strong>{(form.listingType || selectedServer.listingType || "public") === "nsfw" ? "NSFW 18+" : "Publiczny"}</strong>
+                </article>
               </div>
 
               <div className="dashboard-content-split">
@@ -289,10 +304,12 @@ export default function Dashboard() {
                       <span>Opis serwera</span>
                       <textarea
                         rows={8}
+                        maxLength={250}
                         value={form.description}
-                        onChange={(e) => setForm((prev) => ({ ...prev, description: e.target.value }))}
+                        onChange={(e) => setForm((prev) => ({ ...prev, description: e.target.value.slice(0, 250) }))}
                         placeholder="Opisz serwer krótko i konkretnie."
                       />
+                      <small className="muted">{form.description.length}/250 znaków</small>
                     </label>
 
                     <div className="split-grid">
@@ -301,9 +318,23 @@ export default function Dashboard() {
                         <input
                           type="text"
                           value={form.tags}
-                          onChange={(e) => setForm((prev) => ({ ...prev, tags: e.target.value }))}
+                          onChange={(e) => setForm((prev) => ({ ...prev, tags: sanitizeTagsInput(e.target.value) }))}
                           placeholder="gaming, community, social"
                         />
+                        <small className="muted">Maksymalnie 5 tagów oddzielonych przecinkami.</small>
+                      </label>
+
+                      <label className="field">
+                        <span>Typ serwera</span>
+                        <select
+                          className="select"
+                          value={form.listingType}
+                          onChange={(e) => setForm((prev) => ({ ...prev, listingType: e.target.value === "nsfw" ? "nsfw" : "public" }))}
+                        >
+                          <option value="public">Publiczny</option>
+                          <option value="nsfw">NSFW (18+)</option>
+                        </select>
+                        <small className="muted">Dla NSFW użytkownik dostanie potwierdzenie wieku 18+ przed wejściem.</small>
                       </label>
 
                       <label className="field">
@@ -356,7 +387,7 @@ export default function Dashboard() {
                         .split(",")
                         .map((tag) => tag.trim())
                         .filter(Boolean)
-                        .slice(0, 6)
+                         .slice(0, 5)
                         .map((tag) => (
                           <span key={tag} className="tag">#{tag}</span>
                         ))}
@@ -371,6 +402,7 @@ export default function Dashboard() {
                       <div className="server-metrics">
                         <span className="metric">Bumpy: {selectedServer.bumpCount || 0}</span>
                         <span className="metric">{selectedServer.botInstalled ? "Bot online" : "Bot brak"}</span>
+                        <span className="metric">{form.listingType === "nsfw" ? "NSFW 18+" : "Publiczny"}</span>
                       </div>
                     </div>
                   </article>
