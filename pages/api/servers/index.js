@@ -22,10 +22,7 @@ function getPermissionLabel(guild) {
 }
 
 async function checkBotInstalledLive(guildId) {
-  const botToken =
-    process.env.DISCORD_BOT_TOKEN ||
-    process.env.BOT_TOKEN;
-
+  const botToken = process.env.DISCORD_BOT_TOKEN || process.env.BOT_TOKEN;
   const botClientId =
     process.env.DISCORD_BOT_CLIENT_ID ||
     process.env.CLIENT_ID ||
@@ -69,6 +66,20 @@ async function checkBotInstalledLive(guildId) {
   }
 }
 
+async function readSavedRows(guildIds) {
+  if (!guildIds.length) return [];
+  try {
+    return await prisma.server.findMany({
+      where: {
+        id: { in: guildIds }
+      }
+    });
+  } catch (error) {
+    console.error("DB fallback in GET /api/servers:", error);
+    return [];
+  }
+}
+
 export default async function handler(req, res) {
   const session = await getServerSession(req, res, authOptions);
 
@@ -94,17 +105,10 @@ export default async function handler(req, res) {
       });
     }
 
-    const manageableGuilds = guilds.filter(canManageGuild);
+    const manageableGuilds = Array.isArray(guilds) ? guilds.filter(canManageGuild) : [];
     const guildIds = manageableGuilds.map((guild) => guild.id);
 
-    const savedRows = guildIds.length
-      ? await prisma.server.findMany({
-          where: {
-            id: { in: guildIds }
-          }
-        })
-      : [];
-
+    const savedRows = await readSavedRows(guildIds);
     const savedMap = new Map(savedRows.map((row) => [row.id, normalizeServer(row)]));
 
     const liveBotStatuses = await Promise.all(
@@ -126,8 +130,8 @@ export default async function handler(req, res) {
 
       return {
         id: guild.id,
-        name: saved?.name || guild.name,
-        icon: saved?.icon || guild.icon,
+        name: guild.name,
+        icon: guild.icon,
         owner: guild.owner,
         permissions: guild.permissions,
         permissionLabel: getPermissionLabel(guild),

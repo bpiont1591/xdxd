@@ -29,9 +29,9 @@ export default function Dashboard() {
 
       if (!res.ok) throw new Error(data.error || "Nie udało się pobrać serwerów");
 
-      setServers(data);
+      setServers(Array.isArray(data) ? data : []);
 
-      if (data.length > 0) {
+      if (Array.isArray(data) && data.length > 0) {
         const nextId = selectedId && data.find((x) => x.id === selectedId) ? selectedId : data[0].id;
         setSelectedId(nextId);
       } else {
@@ -46,7 +46,11 @@ export default function Dashboard() {
 
   useEffect(() => {
     if (status === "authenticated") loadServers();
-    if (status === "unauthenticated") setLoading(false);
+    if (status === "unauthenticated") {
+      setServers([]);
+      setSelectedId("");
+      setLoading(false);
+    }
   }, [status, loadServers]);
 
   const selectedServer = useMemo(
@@ -73,7 +77,7 @@ export default function Dashboard() {
 
     const interval = setInterval(() => {
       loadServers();
-    }, 8000);
+    }, 5000);
 
     const onFocus = () => loadServers();
     const onVisible = () => {
@@ -134,11 +138,22 @@ export default function Dashboard() {
     return (
       <main className="panel-page">
         <div className="panel-only glass">
-          <h1>Musisz się zalogować</h1>
-          <p className="muted">Bez Discord OAuth nie wiemy jakimi serwerami zarządzasz.</p>
-          <button className="btn btn-primary" onClick={() => signIn("discord")}>
-            Zaloguj przez Discord
-          </button>
+          <h1>Najpierw zaloguj się przez Discord</h1>
+          <p className="muted">
+            Flow jest prosty: logowanie pobiera twoje serwery z Discorda, a przycisk dodania bota tylko dodaje bota.
+          </p>
+
+          <div className="button-row">
+            <button
+              className="btn btn-primary"
+              onClick={() => signIn("discord", { callbackUrl: "/dashboard" })}
+            >
+              Zaloguj przez Discord
+            </button>
+            <Link className="btn btn-ghost" href="/">
+              Wróć na stronę główną
+            </Link>
+          </div>
         </div>
       </main>
     );
@@ -200,12 +215,27 @@ export default function Dashboard() {
             </div>
           </div>
 
+          <div className="panel-card glass" style={{ marginBottom: 16 }}>
+            <div className="panel-head simple">
+              <div>
+                <span className="badge">jak to działa</span>
+                <h1>Flow dashboardu</h1>
+              </div>
+            </div>
+            <div className="tag-list">
+              <span className="metric">1. Logujesz się przez Discord</span>
+              <span className="metric">2. Widzisz swoje serwery</span>
+              <span className="metric">3. Wybierasz serwer</span>
+              <span className="metric">4. Gdy trzeba, dodajesz bota</span>
+            </div>
+          </div>
+
           <div className="sidebar-block">
             <div className="section-label">Twoje serwery</div>
 
             {loading ? (
               <div className="server-list">
-                <div className="server-item active">Ładowanie serwerów...</div>
+                <div className="server-item active">Ładowanie serwerów z Discorda...</div>
               </div>
             ) : servers.length === 0 ? (
               <div className="empty-box">
@@ -270,7 +300,15 @@ export default function Dashboard() {
                       <span className={`status-pill ${selectedServer.botInstalled ? "ok" : "warn"}`}>
                         {selectedServer.botInstalled ? "Bot aktywny" : "Bot nie dodany"}
                       </span>
-                      <span className={`status-pill ${selectedServer.moderationStatus === "approved" ? "ok" : selectedServer.moderationStatus === "rejected" ? "danger" : "warn"}`}>
+                      <span
+                        className={`status-pill ${
+                          selectedServer.moderationStatus === "approved"
+                            ? "ok"
+                            : selectedServer.moderationStatus === "rejected"
+                            ? "danger"
+                            : "warn"
+                        }`}
+                      >
                         {moderationLabel}
                       </span>
                       <span className="metric">{selectedServer.permissionLabel}</span>
@@ -279,9 +317,15 @@ export default function Dashboard() {
                 </div>
 
                 <div className="button-row compact-actions">
-                  <a className="btn btn-primary" href={botAddUrl} target="_blank" rel="noreferrer">
-                    Dodaj bota
-                  </a>
+                  {!selectedServer.botInstalled ? (
+                    <a className="btn btn-primary" href={botAddUrl} target="_blank" rel="noreferrer">
+                      Dodaj bota
+                    </a>
+                  ) : (
+                    <button className="btn btn-primary" type="button" disabled>
+                      Bot już dodany
+                    </button>
+                  )}
                   <Link className="btn btn-ghost" href={`/servers/${selectedServer.id}`}>
                     Podgląd strony
                   </Link>
@@ -290,6 +334,21 @@ export default function Dashboard() {
                   </button>
                 </div>
               </div>
+
+              {!selectedServer.botInstalled ? (
+                <div className="panel-card glass" style={{ marginBottom: 20 }}>
+                  <div className="panel-head simple">
+                    <div>
+                      <span className="badge">krok wymagany</span>
+                      <h1>Najpierw dodaj bota na ten serwer</h1>
+                    </div>
+                  </div>
+                  <p className="muted">
+                    Lista serwerów jest pobierana z twojego Discorda po logowaniu. Ten status bota jest sprawdzany live z
+                    Discorda co kilka sekund, więc po dodaniu bota wróć tutaj albo kliknij odśwież.
+                  </p>
+                </div>
+              ) : null}
 
               <div className="server-overview-grid">
                 <article className="overview-card glass">
@@ -414,7 +473,18 @@ export default function Dashboard() {
           ) : (
             <div className="panel-card glass">
               <h1>Brak wybranego serwera</h1>
-              <p className="muted">Wybierz serwer z listy po lewej.</p>
+              <p className="muted">Zaloguj się przez Discord i wybierz serwer z listy po lewej.</p>
+              <div className="button-row">
+                <button
+                  className="btn btn-primary"
+                  onClick={() => signIn("discord", { callbackUrl: "/dashboard" })}
+                >
+                  Zaloguj przez Discord
+                </button>
+                <button className="btn btn-ghost" onClick={loadServers}>
+                  Spróbuj odświeżyć
+                </button>
+              </div>
             </div>
           )}
         </section>

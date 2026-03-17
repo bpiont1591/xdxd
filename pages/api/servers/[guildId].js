@@ -4,6 +4,7 @@ import { prisma } from "../../../lib/prisma";
 import { normalizeServer, slugify } from "../../../lib/storage";
 
 const MANAGE_GUILD = 32n;
+const DISCORD_API_BASE = "https://discord.com/api/v10";
 
 function canManageGuild(guild) {
   try {
@@ -39,7 +40,7 @@ export default async function handler(req, res) {
   }
 
   try {
-    const discordRes = await fetch("https://discord.com/api/users/@me/guilds", {
+    const discordRes = await fetch(`${DISCORD_API_BASE}/users/@me/guilds`, {
       headers: { Authorization: `Bearer ${session.accessToken}` }
     });
 
@@ -50,7 +51,9 @@ export default async function handler(req, res) {
     }
 
     const guilds = await discordRes.json();
-    const targetGuild = guilds.find((guild) => guild.id === guildId && canManageGuild(guild));
+    const targetGuild = Array.isArray(guilds)
+      ? guilds.find((guild) => guild.id === guildId && canManageGuild(guild))
+      : null;
 
     if (!targetGuild) {
       return res.status(403).json({

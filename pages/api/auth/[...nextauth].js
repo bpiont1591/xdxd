@@ -14,6 +14,9 @@ export const authOptions = {
     })
   ],
   secret: process.env.NEXTAUTH_SECRET,
+  pages: {
+    signIn: "/dashboard"
+  },
   callbacks: {
     async jwt({ token, account, profile }) {
       if (account?.access_token) token.accessToken = account.access_token;
