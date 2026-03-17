@@ -1,14 +1,32 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+
+function isAbsoluteUrl(value = "") {
+  return /^https?:\/\//i.test(String(value).trim());
+}
 
 export function getDiscordServerIconCandidates(server, size = 128) {
   const id = server?.id;
-  const icon = server?.icon;
-  if (!id || !icon) return [];
+  const icon = String(server?.icon || "").trim();
+  if (!icon) return [];
+
+  if (isAbsoluteUrl(icon)) {
+    try {
+      const url = new URL(icon);
+      if (!url.searchParams.has("size")) {
+        url.searchParams.set("size", String(size));
+      }
+      return [url.toString()];
+    } catch {
+      return [icon];
+    }
+  }
+
+  if (!id) return [];
 
   const base = `https://cdn.discordapp.com/icons/${id}/${icon}`;
   const candidates = [];
 
-  if (String(icon).startsWith("a_")) {
+  if (icon.startsWith("a_")) {
     candidates.push(`${base}.gif?size=${size}`);
   }
 
@@ -29,6 +47,10 @@ export default function DiscordServerIcon({
   const candidates = useMemo(() => getDiscordServerIconCandidates(server, size), [server, size]);
   const [index, setIndex] = useState(0);
 
+  useEffect(() => {
+    setIndex(0);
+  }, [server?.id, server?.icon, size]);
+
   const label = String(server?.name || "?").trim().slice(0, 1).toUpperCase() || "?";
   const src = candidates[index] || null;
 
@@ -38,12 +60,15 @@ export default function DiscordServerIcon({
 
   return (
     <img
+      key={`${server?.id || "server"}-${server?.icon || "no-icon"}-${index}`}
       className={className}
       src={src}
       alt={alt || server?.name || "Server icon"}
+      loading="lazy"
+      referrerPolicy="no-referrer"
       onError={() => {
         setIndex((current) => {
-          if (current >= candidates.length - 1) return current;
+          if (current >= candidates.length - 1) return current + 1;
           return current + 1;
         });
       }}
