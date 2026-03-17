@@ -89,9 +89,9 @@ export default function Home() {
         <header className="topbar container">
           <Link href="/" className="brand brand-link">
             <img
-              src="/bumply-logo.svg"
+              src="/bumply-logo.png"
               alt="Bumply"
-              style={{ height: "120px", width: "auto", display: "block" }}
+              style={{ height: "200px", width: "auto", display: "block" }}
             />
           </Link>
 
