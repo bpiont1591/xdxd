@@ -74,13 +74,14 @@ export default async function handler(req, res) {
     }
 
     const existing = await prisma.server.findUnique({ where: { id: guildId } });
+    const safeSlug = `${slugify(targetGuild.name)}-${guildId}`;
 
     const row = await prisma.server.upsert({
       where: { id: guildId },
       create: {
         id: guildId,
         name: targetGuild.name,
-        slug: slugify(targetGuild.name),
+        slug: safeSlug,
         icon: targetGuild.icon,
         description,
         tags: JSON.stringify(tags),
@@ -88,11 +89,12 @@ export default async function handler(req, res) {
         ownerDiscordId: session.user?.id || null,
         permissionLabel: getPermissionLabel(targetGuild),
         moderationStatus: existing?.moderationStatus || "pending",
-        moderationNote: existing?.moderationNote || ""
+        moderationNote: existing?.moderationNote || "",
+        botInstalled: Boolean(existing?.botInstalled)
       },
       update: {
         name: targetGuild.name,
-        slug: slugify(targetGuild.name),
+        slug: safeSlug,
         icon: targetGuild.icon,
         description,
         tags: JSON.stringify(tags),

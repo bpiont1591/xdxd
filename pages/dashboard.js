@@ -1,6 +1,6 @@
 import Head from "next/head";
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { signIn, signOut, useSession } from "next-auth/react";
 
 const defaultForm = { description: "", tags: "", inviteUrl: "" };
@@ -19,7 +19,7 @@ export default function Dashboard() {
   const [saving, setSaving] = useState(false);
   const [notice, setNotice] = useState("");
 
-  async function loadServers() {
+  const loadServers = useCallback(async () => {
     setLoading(true);
     setNotice("");
 
@@ -42,12 +42,12 @@ export default function Dashboard() {
     } finally {
       setLoading(false);
     }
-  }
+  }, [selectedId]);
 
   useEffect(() => {
     if (status === "authenticated") loadServers();
     if (status === "unauthenticated") setLoading(false);
-  }, [status]);
+  }, [status, loadServers]);
 
   const selectedServer = useMemo(
     () => servers.find((server) => server.id === selectedId),
@@ -65,6 +65,32 @@ export default function Dashboard() {
       setForm(defaultForm);
     }
   }, [selectedServer]);
+
+  useEffect(() => {
+    if (status !== "authenticated" || !selectedServer || selectedServer.botInstalled) {
+      return;
+    }
+
+    const interval = setInterval(() => {
+      loadServers();
+    }, 8000);
+
+    const onFocus = () => loadServers();
+    const onVisible = () => {
+      if (document.visibilityState === "visible") {
+        loadServers();
+      }
+    };
+
+    window.addEventListener("focus", onFocus);
+    document.addEventListener("visibilitychange", onVisible);
+
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener("focus", onFocus);
+      document.removeEventListener("visibilitychange", onVisible);
+    };
+  }, [status, selectedServer?.id, selectedServer?.botInstalled, loadServers]);
 
   async function saveServer(e) {
     e.preventDefault();

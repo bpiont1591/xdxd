@@ -1,5 +1,7 @@
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "../auth/[...nextauth]";
+import { prisma } from "../../../lib/prisma";
+import { normalizeServer } from "../../../lib/storage";
 
 const MANAGE_GUILD = 32n;
 
@@ -43,26 +45,45 @@ export default async function handler(req, res) {
       });
     }
 
-    const manageableGuilds = guilds
-      .filter(canManageGuild)
-      .map((guild) => ({
+    const manageableGuilds = guilds.filter(canManageGuild);
+    const guildIds = manageableGuilds.map((guild) => guild.id);
+
+    const savedRows = guildIds.length
+      ? await prisma.server.findMany({
+          where: {
+            id: { in: guildIds }
+          }
+        })
+      : [];
+
+    const savedMap = new Map(savedRows.map((row) => [row.id, normalizeServer(row)]));
+
+    const mergedGuilds = manageableGuilds.map((guild) => {
+      const saved = savedMap.get(guild.id);
+
+      return {
         id: guild.id,
-        name: guild.name,
-        icon: guild.icon,
+        name: saved?.name || guild.name,
+        icon: saved?.icon || guild.icon,
         owner: guild.owner,
         permissions: guild.permissions,
         permissionLabel: getPermissionLabel(guild),
-        description: "",
-        tags: [],
-        inviteUrl: "",
-        lastBumpAt: null,
-        bumpCount: 0,
-        botInstalled: false,
-        moderationStatus: "pending",
-        moderationNote: ""
-      }));
+        description: saved?.description || "",
+        tags: saved?.tags || [],
+        inviteUrl: saved?.inviteUrl || "",
+        lastBumpAt: saved?.lastBumpAt || null,
+        bumpCount: saved?.bumpCount || 0,
+        botInstalled: Boolean(saved?.botInstalled),
+        moderationStatus: saved?.moderationStatus || "pending",
+        moderationNote: saved?.moderationNote || "",
+        slug: saved?.slug || null,
+        ownerDiscordId: saved?.ownerDiscordId || null,
+        createdAt: saved?.createdAt || null,
+        updatedAt: saved?.updatedAt || null
+      };
+    });
 
-    return res.status(200).json(manageableGuilds);
+    return res.status(200).json(mergedGuilds);
   } catch (error) {
     console.error("GET /api/servers error:", error);
     return res.status(500).json({
