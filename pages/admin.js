@@ -135,7 +135,7 @@ export default function AdminPage() {
   return (
     <>
       <Head>
-        <title>Moderacja • DiscordBoard Premium</title>
+        <title>Moderacja • Bumply</title>
       </Head>
 
       <main className="site-shell">
@@ -144,11 +144,11 @@ export default function AdminPage() {
 
         <header className="topbar container">
           <Link href="/" className="brand brand-link">
-            <div className="brand-badge">DB</div>
-            <div>
-              <strong>DiscordBoard Premium</strong>
-              <span>Panel moderacji</span>
-            </div>
+            <img
+              src="/bumply-logo.png"
+              alt="Bumply"
+              style={{ height: "15-px", width: "auto", display: "block" }}
+            />
           </Link>
 
           <div className="topbar-actions">
