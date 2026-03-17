@@ -4,7 +4,6 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
 }
 
 model Server {
@@ -12,50 +11,16 @@ model Server {
   name             String
   slug             String   @unique
   icon             String?
-  description      String   @default("")
-  tags             String   @default("[]")
-  inviteUrl        String   @default("")
+  description      String?
+  tags             String?
+  inviteUrl        String?
   lastBumpAt       DateTime?
   bumpCount        Int      @default(0)
   botInstalled     Boolean  @default(false)
   moderationStatus String   @default("pending")
-  moderationNote   String   @default("")
+  moderationNote   String?
   ownerDiscordId   String?
-  permissionLabel  String   @default("Owner")
+  permissionLabel  String?
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
-
-  favorites        Favorite[]
-  reports          Report[]
-
-  @@index([moderationStatus])
-  @@index([lastBumpAt])
-  @@index([bumpCount])
-  @@index([ownerDiscordId])
-}
-
-model Favorite {
-  id            String   @id @default(cuid())
-  userDiscordId String
-  serverId      String
-  createdAt     DateTime @default(now())
-
-  server        Server   @relation(fields: [serverId], references: [id], onDelete: Cascade)
-
-  @@unique([userDiscordId, serverId])
-  @@index([userDiscordId])
-  @@index([serverId])
-}
-
-model Report {
-  id            String   @id @default(cuid())
-  userDiscordId String
-  serverId      String
-  reason        String
-  createdAt     DateTime @default(now())
-
-  server        Server   @relation(fields: [serverId], references: [id], onDelete: Cascade)
-
-  @@index([serverId])
-  @@index([userDiscordId])
 }
