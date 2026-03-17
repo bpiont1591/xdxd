@@ -30,22 +30,22 @@ model Server {
 }
 
 model Favorite {
-  id        String   @id @default(cuid())
-  serverId  String
-  userId    String
-  createdAt DateTime @default(now())
+  id            String   @id @default(cuid())
+  serverId      String
+  userDiscordId String
+  createdAt     DateTime @default(now())
 
-  server    Server   @relation(fields: [serverId], references: [id], onDelete: Cascade)
+  server        Server   @relation(fields: [serverId], references: [id], onDelete: Cascade)
 
-  @@unique([serverId, userId])
+  @@unique([userDiscordId, serverId])
 }
 
 model Report {
-  id        String   @id @default(cuid())
-  serverId  String
-  userId    String?
-  reason    String?
-  createdAt DateTime @default(now())
+  id            String   @id @default(cuid())
+  serverId      String
+  userDiscordId String?
+  reason        String?
+  createdAt     DateTime @default(now())
 
-  server    Server   @relation(fields: [serverId], references: [id], onDelete: Cascade)
+  server        Server   @relation(fields: [serverId], references: [id], onDelete: Cascade)
 }
