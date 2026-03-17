@@ -1,0 +1,61 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Server {
+  id               String   @id
+  name             String
+  slug             String   @unique
+  icon             String?
+  description      String   @default("")
+  tags             String   @default("[]")
+  inviteUrl        String   @default("")
+  lastBumpAt       DateTime?
+  bumpCount        Int      @default(0)
+  botInstalled     Boolean  @default(false)
+  moderationStatus String   @default("pending")
+  moderationNote   String   @default("")
+  ownerDiscordId   String?
+  permissionLabel  String   @default("Owner")
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  favorites        Favorite[]
+  reports          Report[]
+
+  @@index([moderationStatus])
+  @@index([lastBumpAt])
+  @@index([bumpCount])
+  @@index([ownerDiscordId])
+}
+
+model Favorite {
+  id            String   @id @default(cuid())
+  userDiscordId String
+  serverId      String
+  createdAt     DateTime @default(now())
+
+  server        Server   @relation(fields: [serverId], references: [id], onDelete: Cascade)
+
+  @@unique([userDiscordId, serverId])
+  @@index([userDiscordId])
+  @@index([serverId])
+}
+
+model Report {
+  id            String   @id @default(cuid())
+  userDiscordId String
+  serverId      String
+  reason        String
+  createdAt     DateTime @default(now())
+
+  server        Server   @relation(fields: [serverId], references: [id], onDelete: Cascade)
+
+  @@index([serverId])
+  @@index([userDiscordId])
+}

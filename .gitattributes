@@ -1,2 +1,12 @@
-# Auto detect text files and perform LF normalization
-* text=auto
+node_modules
+.next
+.env
+.vercel
+dist
+build
+coverage
+*.log
+dev.db
+web/node_modules
+bot/node_modules
+web/.next
