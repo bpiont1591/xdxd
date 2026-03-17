@@ -21,26 +21,39 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: "Brak guildId albo guildName" });
     }
 
+    const safeSlug = `${slugify(guildName)}-${guildId}`;
+
     const row = await prisma.server.upsert({
       where: { id: guildId },
       create: {
         id: guildId,
         name: guildName,
-        slug: slugify(guildName),
+        slug: safeSlug,
         icon: guildIcon,
         botInstalled: true
       },
       update: {
         name: guildName,
-        slug: slugify(guildName),
+        slug: safeSlug,
         icon: guildIcon,
         botInstalled: true
       }
     });
 
-    return res.status(200).json({ ok: true, server: normalizeServer(row) });
+    return res.status(200).json({
+      ok: true,
+      server: normalizeServer(row)
+    });
   } catch (error) {
-    console.error("POST /api/bot/install error:", error);
-    return res.status(500).json({ error: "Nie udało się oznaczyć instalacji bota" });
+    console.error("POST /api/bot/install error:", {
+      message: error?.message,
+      code: error?.code,
+      meta: error?.meta,
+      stack: error?.stack
+    });
+
+    return res.status(500).json({
+      error: "Nie udało się oznaczyć instalacji bota"
+    });
   }
 }
