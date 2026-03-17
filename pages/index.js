@@ -91,7 +91,7 @@ export default function Home() {
             <img
               src="/bumply-logo.svg"
               alt="Bumply"
-              style={{ height: "56px", width: "auto", display: "block" }}
+              style={{ height: "90px", width: "auto", display: "block" }}
             />
           </Link>
 
