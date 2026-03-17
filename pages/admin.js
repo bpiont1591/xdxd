@@ -147,7 +147,7 @@ export default function AdminPage() {
             <img
               src="/bumply-logo.png"
               alt="Bumply"
-              style={{ height: "15-px", width: "auto", display: "block" }}
+              style={{ height: "150px", width: "auto", display: "block" }}
             />
           </Link>
 
