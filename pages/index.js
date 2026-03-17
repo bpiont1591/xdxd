@@ -15,11 +15,16 @@ function formatTimeAgo(dateString) {
   return `${days} dni temu`;
 }
 
-
 export default function Home() {
   const { data: session, status } = useSession();
   const [servers, setServers] = useState([]);
-  const [meta, setMeta] = useState({ totalServers: 0, totalBumps: 0, totalFavorites: 0, totalReports: 0, categories: [] });
+  const [meta, setMeta] = useState({
+    totalServers: 0,
+    totalBumps: 0,
+    totalFavorites: 0,
+    totalReports: 0,
+    categories: [],
+  });
   const [loading, setLoading] = useState(true);
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState("all");
@@ -33,7 +38,7 @@ export default function Home() {
       const params = new URLSearchParams({
         query: q,
         category: c,
-        sort: "top"
+        sort: "top",
       });
 
       const res = await fetch(`/api/public-servers?${params.toString()}`);
@@ -41,7 +46,15 @@ export default function Home() {
 
       if (res.ok) {
         setServers((data.servers || []).slice(0, 12));
-        setMeta(data.meta || { totalServers: 0, totalBumps: 0, totalFavorites: 0, totalReports: 0, categories: [] });
+        setMeta(
+          data.meta || {
+            totalServers: 0,
+            totalBumps: 0,
+            totalFavorites: 0,
+            totalReports: 0,
+            categories: [],
+          }
+        );
       }
     } finally {
       setLoading(false);
@@ -52,7 +65,10 @@ export default function Home() {
     loadServers();
   }, []);
 
-  const featuredCategories = useMemo(() => meta.categories.slice(0, 10), [meta.categories]);
+  const featuredCategories = useMemo(
+    () => meta.categories.slice(0, 10),
+    [meta.categories]
+  );
   const isModerator = String(session?.user?.id || "") === "1418289596457812088";
 
   return (
@@ -65,9 +81,13 @@ export default function Home() {
         />
       </Head>
 
-      <main>
-<img src="/bumply-logo.svg" alt="Bumply" style="height:80px;display:block;margin:20px auto;" />
- className="site-shell directory-home home-v11">
+      <main className="site-shell directory-home home-v11">
+        <img
+          src="/bumply-logo.svg"
+          alt="Bumply"
+          style={{ height: "80px", display: "block", margin: "20px auto" }}
+        />
+
         <div className="ambient ambient-a" />
         <div className="ambient ambient-b" />
 
@@ -83,14 +103,26 @@ export default function Home() {
           <div className="topbar-actions">
             {status === "authenticated" ? (
               <>
-                <Link href="/dashboard" className="btn btn-ghost">Dashboard</Link>
-                {isModerator ? <Link href="/admin" className="btn btn-ghost">Moderacja</Link> : null}
-                <button className="btn btn-ghost" onClick={() => signOut({ callbackUrl: "/" })}>
+                <Link href="/dashboard" className="btn btn-ghost">
+                  Dashboard
+                </Link>
+                {isModerator ? (
+                  <Link href="/admin" className="btn btn-ghost">
+                    Moderacja
+                  </Link>
+                ) : null}
+                <button
+                  className="btn btn-ghost"
+                  onClick={() => signOut({ callbackUrl: "/" })}
+                >
                   Wyloguj
                 </button>
               </>
             ) : (
-              <button className="btn btn-primary" onClick={() => signIn("discord")}>
+              <button
+                className="btn btn-primary"
+                onClick={() => signIn("discord")}
+              >
                 Zaloguj przez Discord
               </button>
             )}
@@ -101,7 +133,10 @@ export default function Home() {
           <div className="home-v9-hero-copy">
             <span className="badge">katalog serwerów</span>
             <h1>Znajdź aktywne serwery Discord</h1>
-            <p>Przeglądaj kategorie, szukaj po tagach i sprawdzaj najaktywniejsze listingi.</p>
+            <p>
+              Przeglądaj kategorie, szukaj po tagach i sprawdzaj
+              najaktywniejsze listingi.
+            </p>
 
             <div className="hero-mini-stats">
               <span>{meta.totalServers} serwerów</span>
@@ -111,28 +146,40 @@ export default function Home() {
             </div>
           </div>
 
-          <form className="directory-search home-v9-search" onSubmit={(e) => {
-            e.preventDefault();
-            loadServers();
-          }}>
+          <form
+            className="directory-search home-v9-search"
+            onSubmit={(e) => {
+              e.preventDefault();
+              loadServers();
+            }}
+          >
             <input
               type="text"
               placeholder="Wpisz nazwę serwera, tag lub kategorię..."
               value={query}
               onChange={(e) => setQuery(e.target.value)}
             />
-            <button className="btn btn-primary" type="submit">Szukaj</button>
+            <button className="btn btn-primary" type="submit">
+              Szukaj
+            </button>
           </form>
 
           <div className="home-v9-actions">
             {status === "authenticated" ? (
-              <Link href="/dashboard" className="btn btn-primary">Dodaj serwer</Link>
+              <Link href="/dashboard" className="btn btn-primary">
+                Dodaj serwer
+              </Link>
             ) : (
-              <button className="btn btn-primary" onClick={() => signIn("discord")}>
+              <button
+                className="btn btn-primary"
+                onClick={() => signIn("discord")}
+              >
                 Dodaj serwer
               </button>
             )}
-            <Link href="/allservers" className="btn btn-ghost">Zobacz wszystkie</Link>
+            <Link href="/allservers" className="btn btn-ghost">
+              Zobacz wszystkie
+            </Link>
           </div>
         </section>
 
@@ -146,7 +193,9 @@ export default function Home() {
 
           <div className="category-grid compact-categories">
             <button
-              className={`category-chip large ${category === "all" ? "active" : ""}`}
+              className={`category-chip large ${
+                category === "all" ? "active" : ""
+              }`}
               onClick={() => {
                 setCategory("all");
                 loadServers({ category: "all" });
@@ -159,7 +208,9 @@ export default function Home() {
             {featuredCategories.map((item) => (
               <button
                 key={item.name}
-                className={`category-chip large ${category === item.name ? "active" : ""}`}
+                className={`category-chip large ${
+                  category === item.name ? "active" : ""
+                }`}
                 onClick={() => {
                   setCategory(item.name);
                   loadServers({ category: item.name });
@@ -179,7 +230,9 @@ export default function Home() {
               <h2>Najaktywniejsze serwery</h2>
               <p>Maksymalnie 12 pozycji na stronie głównej.</p>
             </div>
-            <Link href="/allservers" className="btn btn-ghost">Zobacz wszystkie</Link>
+            <Link href="/allservers" className="btn btn-ghost">
+              Zobacz wszystkie
+            </Link>
           </div>
 
           {loading ? (
@@ -206,15 +259,23 @@ export default function Home() {
                       <div className="home-list-copy">
                         <div className="home-list-topline">
                           <h3>{server.name}</h3>
-                          <span className="metric">Bumpów: {server.bumpCount || 0}</span>
-                          <span className="metric">⭐ {server.favoriteCount || 0}</span>
-                          <span className="metric">Ostatni: {formatTimeAgo(server.lastBumpAt)}</span>
+                          <span className="metric">
+                            Bumpów: {server.bumpCount || 0}
+                          </span>
+                          <span className="metric">
+                            ⭐ {server.favoriteCount || 0}
+                          </span>
+                          <span className="metric">
+                            Ostatni: {formatTimeAgo(server.lastBumpAt)}
+                          </span>
                         </div>
 
                         <div className="tag-list">
                           {server.tags?.length ? (
                             server.tags.slice(0, 5).map((tag) => (
-                              <span className="tag" key={tag}>#{tag}</span>
+                              <span className="tag" key={tag}>
+                                #{tag}
+                              </span>
                             ))
                           ) : (
                             <span className="muted">Brak tagów</span>
@@ -228,13 +289,22 @@ export default function Home() {
                     </div>
 
                     <div className="home-list-actions">
-                      <Link className="btn btn-ghost" href={`/servers/${server.id}`}>Szczegóły</Link>
+                      <Link className="btn btn-ghost" href={`/servers/${server.id}`}>
+                        Szczegóły
+                      </Link>
                       {server.inviteUrl ? (
-                        <a className="btn btn-primary" href={server.inviteUrl} target="_blank" rel="noreferrer">
+                        <a
+                          className="btn btn-primary"
+                          href={server.inviteUrl}
+                          target="_blank"
+                          rel="noreferrer"
+                        >
                           Dołącz
                         </a>
                       ) : (
-                        <button className="btn btn-disabled" disabled>Brak invite</button>
+                        <button className="btn btn-disabled" disabled>
+                          Brak invite
+                        </button>
                       )}
                     </div>
                   </article>
