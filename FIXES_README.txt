@@ -5,3 +5,13 @@ Poprawki w paczce:
 4. Dodany endpoint /api/bot/uninstall.
 5. Bot ma synchronizację wszystkich guild przy starcie i obsługę guildDelete.
 6. Ujednolicony slug serwera z guildId, żeby nie wywalać unique constraint dla podobnych nazw.
+
+
+LIVE BOT STATUS UPDATE (dashboard)
+- Dashboard nie bierze już statusu bota z bazy.
+- /api/servers sprawdza status na żywo z Discord API przez endpoint guild member lookup.
+- Wymagane env na stronie / backendzie:
+  - DISCORD_BOT_TOKEN albo BOT_TOKEN
+  - DISCORD_BOT_CLIENT_ID albo CLIENT_ID
+- Pole botInstalled w bazie może dalej istnieć dla kompatybilności, ale dashboard go nie używa do wyświetlania statusu.
+- /api/bot/bump nie blokuje już bumpa na podstawie botInstalled z bazy, bo sam fakt wywołania komendy przez bota oznacza, że bot siedzi na serwerze.

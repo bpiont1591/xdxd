@@ -27,10 +27,6 @@ export default async function handler(req, res) {
       return res.status(404).json({ error: "Serwer nie został wcześniej dodany w panelu strony" });
     }
 
-    if (!existing.botInstalled) {
-      return res.status(403).json({ error: "Bot nie jest aktywowany dla tego serwera" });
-    }
-
     const now = Date.now();
     const last = existing.lastBumpAt ? new Date(existing.lastBumpAt).getTime() : 0;
     const nextAllowed = last + BUMP_COOLDOWN_MS;

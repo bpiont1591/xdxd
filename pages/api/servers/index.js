@@ -4,6 +4,7 @@ import { prisma } from "../../../lib/prisma";
 import { normalizeServer } from "../../../lib/storage";
 
 const MANAGE_GUILD = 32n;
+const DISCORD_API_BASE = "https://discord.com/api/v10";
 
 function canManageGuild(guild) {
   try {
@@ -20,6 +21,54 @@ function getPermissionLabel(guild) {
   return "Brak dostępu";
 }
 
+async function checkBotInstalledLive(guildId) {
+  const botToken =
+    process.env.DISCORD_BOT_TOKEN ||
+    process.env.BOT_TOKEN;
+
+  const botClientId =
+    process.env.DISCORD_BOT_CLIENT_ID ||
+    process.env.CLIENT_ID ||
+    process.env.NEXT_PUBLIC_DISCORD_CLIENT_ID;
+
+  if (!botToken || !botClientId) {
+    return {
+      installed: false,
+      source: "discord-live",
+      error: "Brak DISCORD_BOT_TOKEN/BOT_TOKEN albo DISCORD_BOT_CLIENT_ID/CLIENT_ID w env"
+    };
+  }
+
+  try {
+    const response = await fetch(`${DISCORD_API_BASE}/guilds/${guildId}/members/${botClientId}`, {
+      headers: {
+        Authorization: `Bot ${botToken}`
+      }
+    });
+
+    if (response.status === 404) {
+      return { installed: false, source: "discord-live", error: null };
+    }
+
+    if (response.ok) {
+      return { installed: true, source: "discord-live", error: null };
+    }
+
+    const rawText = await response.text();
+    return {
+      installed: false,
+      source: "discord-live",
+      error: `Discord API ${response.status}: ${rawText || "unknown error"}`
+    };
+  } catch (error) {
+    return {
+      installed: false,
+      source: "discord-live",
+      error: error?.message || "Nie udało się sprawdzić statusu bota"
+    };
+  }
+}
+
 export default async function handler(req, res) {
   const session = await getServerSession(req, res, authOptions);
 
@@ -30,7 +79,7 @@ export default async function handler(req, res) {
   }
 
   try {
-    const discordRes = await fetch("https://discord.com/api/users/@me/guilds", {
+    const discordRes = await fetch(`${DISCORD_API_BASE}/users/@me/guilds`, {
       headers: {
         Authorization: `Bearer ${session.accessToken}`
       }
@@ -58,8 +107,22 @@ export default async function handler(req, res) {
 
     const savedMap = new Map(savedRows.map((row) => [row.id, normalizeServer(row)]));
 
+    const liveBotStatuses = await Promise.all(
+      manageableGuilds.map(async (guild) => {
+        const status = await checkBotInstalledLive(guild.id);
+        return [guild.id, status];
+      })
+    );
+
+    const botStatusMap = new Map(liveBotStatuses);
+
     const mergedGuilds = manageableGuilds.map((guild) => {
       const saved = savedMap.get(guild.id);
+      const liveBotStatus = botStatusMap.get(guild.id) || {
+        installed: false,
+        source: "discord-live",
+        error: "Brak wyniku sprawdzenia"
+      };
 
       return {
         id: guild.id,
@@ -73,7 +136,9 @@ export default async function handler(req, res) {
         inviteUrl: saved?.inviteUrl || "",
         lastBumpAt: saved?.lastBumpAt || null,
         bumpCount: saved?.bumpCount || 0,
-        botInstalled: Boolean(saved?.botInstalled),
+        botInstalled: Boolean(liveBotStatus.installed),
+        botStatusSource: liveBotStatus.source,
+        botStatusError: liveBotStatus.error,
         moderationStatus: saved?.moderationStatus || "pending",
         moderationNote: saved?.moderationNote || "",
         slug: saved?.slug || null,
