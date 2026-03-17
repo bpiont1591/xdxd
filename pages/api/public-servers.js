@@ -18,6 +18,10 @@ export default async function handler(req, res) {
         moderationStatus: "approved",
         NOT: { lastBumpAt: null }
       },
+      include: {
+        favorites: true,
+        reports: true
+      },
       orderBy: [
         { bumpCount: "desc" },
         { lastBumpAt: "desc" }
@@ -28,8 +32,8 @@ export default async function handler(req, res) {
       const server = normalizeServer(row);
       return {
         ...server,
-        favoriteCount: 0,
-        reportCount: 0
+        favoriteCount: row.favorites.length,
+        reportCount: row.reports.length
       };
     });
 
