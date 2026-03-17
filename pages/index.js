@@ -65,7 +65,9 @@ export default function Home() {
         />
       </Head>
 
-      <main className="site-shell directory-home home-v11">
+      <main>
+<img src="/bumply-logo.svg" alt="Bumply" style="height:80px;display:block;margin:20px auto;" />
+ className="site-shell directory-home home-v11">
         <div className="ambient ambient-a" />
         <div className="ambient ambient-b" />
 

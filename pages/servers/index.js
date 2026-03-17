@@ -8,7 +8,9 @@ export default function ServersPage() {
         <title>Serwery • DiscordBoard Premium</title>
       </Head>
 
-      <main className="panel-page">
+      <main>
+<img src="/bumply-logo.svg" alt="Bumply" style="height:80px;display:block;margin:20px auto;" />
+ className="panel-page">
         <div className="panel-only glass">
           <h1>Serwery</h1>
           <p className="muted">Ta strona będzie rozwinięta później.</p>
