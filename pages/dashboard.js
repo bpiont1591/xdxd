@@ -18,6 +18,7 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [notice, setNotice] = useState("");
+  const [showServerPicker, setShowServerPicker] = useState(false);
 
   const loadServers = useCallback(async () => {
     setLoading(true);
@@ -57,6 +58,10 @@ export default function Dashboard() {
     () => servers.find((server) => server.id === selectedId),
     [servers, selectedId]
   );
+
+  const availableServers = useMemo(() => {
+    return servers.filter((server) => !!server?.id);
+  }, [servers]);
 
   useEffect(() => {
     if (selectedServer) {
@@ -140,7 +145,7 @@ export default function Dashboard() {
         <div className="panel-only glass">
           <h1>Najpierw zaloguj się przez Discord</h1>
           <p className="muted">
-            Flow jest prosty: logowanie pobiera twoje serwery z Discorda, a przycisk dodania bota tylko dodaje bota.
+            Zalogowanie pobiera twoje serwery z Discorda, a przycisk dodania bota tylko dodaje bota.
           </p>
 
           <div className="button-row">
@@ -215,39 +220,49 @@ export default function Dashboard() {
             </div>
           </div>
 
-          <div className="panel-card glass" style={{ marginBottom: 16 }}>
-            <div className="panel-head simple">
-              <div>
-                <span className="badge">jak to działa</span>
-                <h1>Flow dashboardu</h1>
-              </div>
-            </div>
-            <div className="tag-list">
-              <span className="metric">1. Logujesz się przez Discord</span>
-              <span className="metric">2. Widzisz swoje serwery</span>
-              <span className="metric">3. Wybierasz serwer</span>
-              <span className="metric">4. Gdy trzeba, dodajesz bota</span>
-            </div>
-          </div>
-
           <div className="sidebar-block">
             <div className="section-label">Twoje serwery</div>
+
+            <div className="button-row" style={{ marginBottom: 12 }}>
+              <button
+                className="btn btn-primary"
+                type="button"
+                onClick={() => setShowServerPicker((prev) => !prev)}
+                disabled={loading || availableServers.length === 0}
+              >
+                {availableServers.length === 0
+                  ? "Brak serwerów"
+                  : showServerPicker
+                  ? "Ukryj listę"
+                  : "Dodaj serwer"}
+              </button>
+            </div>
 
             {loading ? (
               <div className="server-list">
                 <div className="server-item active">Ładowanie serwerów z Discorda...</div>
               </div>
-            ) : servers.length === 0 ? (
-              <div className="empty-box">
-                Nie znaleziono serwerów, gdzie jesteś ownerem albo masz Manage Server.
+            ) : availableServers.length === 0 ? (
+              <div className="empty-server-state glass-lite">
+                <div className="empty-server-icon">+</div>
+                <div className="empty-server-copy">
+                  <strong>Brak dostępnych serwerów</strong>
+                  <p>
+                    Nie znaleziono serwerów, którymi możesz zarządzać. Dodaj bota na serwer albo upewnij się,
+                    że masz uprawnienie <b>Manage Server</b>.
+                  </p>
+                </div>
               </div>
-            ) : (
+            ) : showServerPicker ? (
               <div className="server-list deluxe-list visible-list">
-                {servers.map((server) => (
+                {availableServers.map((server) => (
                   <button
                     key={server.id}
                     className={`server-item rich-server-item ${server.id === selectedId ? "active" : ""}`}
-                    onClick={() => setSelectedId(server.id)}
+                    onClick={() => {
+                      setSelectedId(server.id);
+                      setShowServerPicker(false);
+                    }}
                   >
                     <div className="server-icon">
                       {server.icon ? (
@@ -272,6 +287,14 @@ export default function Dashboard() {
                     </div>
                   </button>
                 ))}
+              </div>
+            ) : (
+              <div className="empty-server-state glass-lite">
+                <div className="empty-server-icon">+</div>
+                <div className="empty-server-copy">
+                  <strong>Dodaj serwer</strong>
+                  <p>Kliknij przycisk powyżej, aby wybrać serwer z listy dostępnych.</p>
+                </div>
               </div>
             )}
           </div>
@@ -378,11 +401,18 @@ export default function Dashboard() {
                     <label className="field">
                       <span>Opis serwera</span>
                       <textarea
-                        rows={8}
+                        rows={6}
+                        maxLength={230}
                         value={form.description}
-                        onChange={(e) => setForm((prev) => ({ ...prev, description: e.target.value }))}
+                        onChange={(e) =>
+                          setForm((prev) => ({
+                            ...prev,
+                            description: e.target.value.slice(0, 230)
+                          }))
+                        }
                         placeholder="Opisz serwer krótko i konkretnie."
                       />
+                      <small className="muted">{form.description.length}/230 znaków</small>
                     </label>
 
                     <div className="split-grid">
@@ -391,9 +421,19 @@ export default function Dashboard() {
                         <input
                           type="text"
                           value={form.tags}
-                          onChange={(e) => setForm((prev) => ({ ...prev, tags: e.target.value }))}
+                          onChange={(e) => {
+                            const limited = e.target.value
+                              .split(",")
+                              .map((tag) => tag.trim())
+                              .filter(Boolean)
+                              .slice(0, 5)
+                              .join(", ");
+
+                            setForm((prev) => ({ ...prev, tags: limited }));
+                          }}
                           placeholder="gaming, community, social"
                         />
+                        <small className="muted">Maksymalnie 5 tagów, oddzielonych przecinkami.</small>
                       </label>
 
                       <label className="field">
@@ -449,7 +489,7 @@ export default function Dashboard() {
                         .split(",")
                         .map((tag) => tag.trim())
                         .filter(Boolean)
-                        .slice(0, 6)
+                        .slice(0, 5)
                         .map((tag) => (
                           <span key={tag} className="tag">#{tag}</span>
                         ))}
