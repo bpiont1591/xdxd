@@ -8,20 +8,44 @@ datasource db {
 }
 
 model Server {
-  id               String   @id
+  id               String     @id
   name             String
-  slug             String   @unique
+  slug             String     @unique
   icon             String?
   description      String?
   tags             String?
   inviteUrl        String?
   lastBumpAt       DateTime?
-  bumpCount        Int      @default(0)
-  botInstalled     Boolean  @default(false)
-  moderationStatus String   @default("pending")
+  bumpCount        Int        @default(0)
+  botInstalled     Boolean    @default(false)
+  moderationStatus String     @default("pending")
   moderationNote   String?
   ownerDiscordId   String?
   permissionLabel  String?
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
+  createdAt        DateTime   @default(now())
+  updatedAt        DateTime   @updatedAt
+
+  favorites        Favorite[]
+  reports          Report[]
+}
+
+model Favorite {
+  id        String   @id @default(cuid())
+  serverId  String
+  userId    String
+  createdAt DateTime @default(now())
+
+  server    Server   @relation(fields: [serverId], references: [id], onDelete: Cascade)
+
+  @@unique([serverId, userId])
+}
+
+model Report {
+  id        String   @id @default(cuid())
+  serverId  String
+  userId    String?
+  reason    String?
+  createdAt DateTime @default(now())
+
+  server    Server   @relation(fields: [serverId], references: [id], onDelete: Cascade)
 }

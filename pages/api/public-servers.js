@@ -18,18 +18,18 @@ export default async function handler(req, res) {
         moderationStatus: "approved",
         NOT: { lastBumpAt: null }
       },
-      include: {
-        favorites: true,
-        reports: true
-      }
+      orderBy: [
+        { bumpCount: "desc" },
+        { lastBumpAt: "desc" }
+      ]
     });
 
     const approved = rows.map((row) => {
       const server = normalizeServer(row);
       return {
         ...server,
-        favoriteCount: row.favorites.length,
-        reportCount: row.reports.length
+        favoriteCount: 0,
+        reportCount: 0
       };
     });
 
@@ -42,6 +42,10 @@ export default async function handler(req, res) {
     });
   } catch (error) {
     console.error("GET /api/public-servers error:", error);
-    return res.status(500).json({ error: "Nie udało się pobrać listy publicznych serwerów" });
+
+    return res.status(500).json({
+      error: "Nie udało się pobrać listy publicznych serwerów",
+      details: error?.message || String(error)
+    });
   }
 }
