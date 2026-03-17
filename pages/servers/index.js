@@ -1,6 +1,5 @@
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "../auth/[...nextauth]";
-import { prisma } from "../../../lib/prisma";
 
 const MANAGE_GUILD = 32n;
 
@@ -13,22 +12,12 @@ function canManageGuild(guild) {
   }
 }
 
-function getPermissionLabel(guild) {
-  if (guild.owner) return "Owner";
-  if (canManageGuild(guild)) return "Manage Server";
-  return "Brak dostępu";
-}
-
 export default async function handler(req, res) {
   const session = await getServerSession(req, res, authOptions);
 
   if (!session?.accessToken) {
     return res.status(401).json({
-      error: "Brak sesji Discord",
-      debug: {
-        hasSession: !!session,
-        hasAccessToken: !!session?.accessToken
-      }
+      error: "Brak sesji Discord"
     });
   }
 
@@ -48,37 +37,13 @@ export default async function handler(req, res) {
       });
     }
 
-    const saved = await prisma.server.findMany();
-
-    const manageableGuilds = guilds
-      .filter(canManageGuild)
-      .map((guild) => {
-        const existing = saved.find((x) => x.id === guild.id);
-
-        return {
-          id: guild.id,
-          name: guild.name,
-          icon: guild.icon,
-          owner: guild.owner,
-          permissions: guild.permissions,
-          permissionLabel: getPermissionLabel(guild),
-          description: existing?.description || "",
-          tags: existing?.tags ? JSON.parse(existing.tags) : [],
-          inviteUrl: existing?.inviteUrl || "",
-          lastBumpAt: existing?.lastBumpAt || null,
-          bumpCount: existing?.bumpCount || 0,
-          botInstalled: existing?.botInstalled || false,
-          moderationStatus: existing?.moderationStatus || "pending",
-          moderationNote: existing?.moderationNote || ""
-        };
-      });
+    const manageableGuilds = guilds.filter(canManageGuild);
 
     return res.status(200).json(manageableGuilds);
   } catch (error) {
-    console.error("GET /api/servers error:", error);
+    console.error(error);
     return res.status(500).json({
-      error: "Błąd pobierania serwerów",
-      debug: String(error?.message || error)
+      error: "Błąd pobierania serwerów"
     });
   }
 }
