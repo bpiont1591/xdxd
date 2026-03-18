@@ -125,16 +125,16 @@ export default function Home() {
           </div>
         </header>
 
-        <section className="home-v9-hero container glass">
-          <div className="home-v9-hero-copy">
+        <section className="home-v9-hero container glass compact-hero-shell">
+          <div className="home-v9-hero-copy compact-hero-copy">
             <span className="badge">katalog serwerów</span>
-            <h1>Znajdź aktywne serwery Discord</h1>
+            <h1>Odkrywaj aktywne serwery Discord</h1>
             <p>
-              Przeglądaj kategorie, szukaj po tagach i sprawdzaj
-              najaktywniejsze listingi.
+              Szybkie wyszukiwanie, zwarte kategorie i czytelne listingi bez
+              napompowanego UI, bo to już i tak było wystarczająco męczące.
             </p>
 
-            <div className="hero-mini-stats">
+            <div className="hero-mini-stats compact-stat-row">
               <span>{meta.totalServers} serwerów</span>
               <span>{meta.totalBumps} bumpów</span>
               <span>{meta.totalFavorites} ulubionych</span>
@@ -143,7 +143,7 @@ export default function Home() {
           </div>
 
           <form
-            className="directory-search home-v9-search searchbar-clean"
+            className="directory-search home-v9-search searchbar-clean hero-search-inline"
             onSubmit={(e) => {
               e.preventDefault();
               loadServers();
@@ -155,9 +155,12 @@ export default function Home() {
               value={query}
               onChange={(e) => setQuery(e.target.value)}
             />
+            <button type="submit" className="btn btn-primary btn-search-inline">
+              Szukaj
+            </button>
           </form>
 
-          <div className="home-v9-actions">
+          <div className="home-v9-actions compact-hero-actions">
             {status === "authenticated" ? (
               <Link href="/dashboard" className="btn btn-primary">
                 Dodaj serwer
@@ -184,7 +187,7 @@ export default function Home() {
             </div>
           </div>
 
-          <div className="category-grid compact-categories">
+          <div className="category-grid compact-categories compact-chip-grid">
             <button
               className={`category-chip large ${
                 category === "all" ? "active" : ""

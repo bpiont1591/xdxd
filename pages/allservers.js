@@ -83,30 +83,42 @@ export default function AllServersPage() {
           </Link>
         </header>
 
-        <section className="container panel-card glass allservers-toolbar">
-          <div className="section-head compact">
+        <section className="container panel-card glass allservers-toolbar compact-toolbar-shell">
+          <div className="allservers-toolbar-head">
             <div>
               <span className="badge">pełna lista</span>
               <h2>Wszystkie serwery</h2>
+              <p className="muted compact-toolbar-copy">
+                Kompaktowy widok, szybsze filtrowanie i mniej wielkich kloców na pół ekranu.
+              </p>
+            </div>
+
+            <div className="hero-mini-stats compact-stat-row">
+              <span>{servers.length} wyników</span>
+              <span>{meta.categories.length} kategorii</span>
+              <span>{activeOnly ? "Aktywne only" : "Wszystkie statusy"}</span>
             </div>
           </div>
 
-          <div className="toolbar wide allservers-filters">
-            <form
-              className="searchbar searchbar-clean"
-              onSubmit={(e) => {
-                e.preventDefault();
-                loadServers();
-              }}
-            >
-              <input
-                type="text"
-                placeholder="Szukaj serwera..."
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-              />
-            </form>
+          <form
+            className="searchbar searchbar-clean allservers-search-row"
+            onSubmit={(e) => {
+              e.preventDefault();
+              loadServers();
+            }}
+          >
+            <input
+              type="text"
+              placeholder="Szukaj serwera, tagu lub kategorii..."
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+            />
+            <button type="submit" className="btn btn-primary btn-search-inline">
+              Szukaj
+            </button>
+          </form>
 
+          <div className="toolbar wide allservers-filters compact-filter-row">
             <div className="select-wrap">
               <select
                 className="select select-dark"
@@ -142,7 +154,7 @@ export default function AllServersPage() {
                 <option value="name">Nazwa A-Z</option>
               </select>
             </div>
-            <label className="checkbox-filter">
+            <label className="checkbox-filter compact-check">
               <input
                 type="checkbox"
                 checked={activeOnly}
