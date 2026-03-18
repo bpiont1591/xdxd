@@ -2142,4 +2142,29 @@ body {
     width: 100%;
     max-width: 100%;
   }
+  .server-type-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 38px;
+  padding: 8px 14px;
+  border-radius: 999px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  line-height: 1;
+  border: 1px solid var(--stroke);
+  white-space: nowrap;
+}
+
+.server-type-pill.public {
+  color: #dffcf4;
+  background: rgba(49, 208, 170, 0.12);
+  border-color: rgba(49, 208, 170, 0.28);
+}
+
+.server-type-pill.nsfw {
+  color: #ffd3dc;
+  background: rgba(255, 107, 136, 0.12);
+  border-color: rgba(255, 107, 136, 0.28);
+}
 }
