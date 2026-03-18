@@ -55,7 +55,7 @@ export default function Footer() {
             <p className="footer-description">
               disbumply.pl to katalog polskich serwerów Discord. Odkrywaj nowe
               społeczności, promuj własny serwer i trafiaj do ludzi, którzy
-              faktycznie szukają aktywnej ekipy.
+              faktycznie szukają aktywnej ekipy, a nie kolejnej martwej listy.
             </p>
 
             <p className="footer-madeby">
