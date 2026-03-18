@@ -4,7 +4,14 @@ import { useEffect, useMemo, useState } from "react";
 import { signIn, signOut, useSession } from "next-auth/react";
 import DiscordServerIcon from "../components/DiscordServerIcon";
 
-const defaultForm = { description: "", tags: [], tagInput: "", inviteUrl: "", serverType: "public" };
+const defaultForm = {
+  description: "",
+  tags: [],
+  tagInput: "",
+  inviteUrl: "",
+  serverType: "public",
+};
+
 const MAX_TAGS = 5;
 const MAX_DESCRIPTION = 250;
 
@@ -55,7 +62,10 @@ export default function Dashboard() {
       setServers(data);
 
       if (data.length > 0) {
-        const nextId = selectedId && data.find((x) => x.id === selectedId) ? selectedId : data[0].id;
+        const nextId =
+          selectedId && data.find((x) => x.id === selectedId)
+            ? selectedId
+            : data[0].id;
         setSelectedId(nextId);
       } else {
         setSelectedId("");
@@ -81,10 +91,12 @@ export default function Dashboard() {
     if (selectedServer) {
       setForm({
         description: selectedServer.description || "",
-        tags: Array.isArray(selectedServer.tags) ? selectedServer.tags.slice(0, MAX_TAGS) : [],
+        tags: Array.isArray(selectedServer.tags)
+          ? selectedServer.tags.slice(0, MAX_TAGS)
+          : [],
         tagInput: "",
         inviteUrl: selectedServer.inviteUrl || "",
-        serverType: selectedServer.serverType === "nsfw" ? "nsfw" : "public"
+        serverType: selectedServer.serverType === "nsfw" ? "nsfw" : "public",
       });
     } else {
       setForm(defaultForm);
@@ -108,14 +120,18 @@ export default function Dashboard() {
           description: form.description.slice(0, MAX_DESCRIPTION),
           tags: finalTags,
           inviteUrl: form.inviteUrl,
-          serverType: form.serverType
-        })
+          serverType: form.serverType,
+        }),
       });
 
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Nie udało się zapisać");
 
-      setServers((prev) => prev.map((server) => (server.id === data.id ? { ...server, ...data } : server)));
+      setServers((prev) =>
+        prev.map((server) =>
+          server.id === data.id ? { ...server, ...data } : server
+        )
+      );
       setForm((prev) => ({ ...prev, tags: finalTags, tagInput: "" }));
       setNotice("Zapisano zmiany.");
     } catch (err) {
@@ -138,8 +154,13 @@ export default function Dashboard() {
       <main className="panel-page">
         <div className="panel-only glass">
           <h1>Musisz się zalogować</h1>
-          <p className="muted">Bez Discord OAuth nie wiemy jakimi serwerami zarządzasz.</p>
-          <button className="btn btn-primary" onClick={() => signIn("discord")}>
+          <p className="muted">
+            Bez Discord OAuth nie wiemy jakimi serwerami zarządzasz.
+          </p>
+          <button
+            className="btn btn-primary"
+            onClick={() => signIn("discord")}
+          >
             Zaloguj przez Discord
           </button>
         </div>
@@ -148,7 +169,11 @@ export default function Dashboard() {
   }
 
   const botAddUrl = selectedServer
-    ? `https://discord.com/oauth2/authorize?client_id=${process.env.NEXT_PUBLIC_DISCORD_CLIENT_ID || ""}&scope=bot%20applications.commands&permissions=32&guild_id=${selectedServer.id}&disable_guild_select=true`
+    ? `https://discord.com/oauth2/authorize?client_id=${
+        process.env.NEXT_PUBLIC_DISCORD_CLIENT_ID || ""
+      }&scope=bot%20applications.commands&permissions=32&guild_id=${
+        selectedServer.id
+      }&disable_guild_select=true`
     : "#";
 
   const moderationLabel =
@@ -175,7 +200,10 @@ export default function Dashboard() {
               />
             </Link>
 
-            <button className="btn btn-ghost" onClick={() => signOut({ callbackUrl: "/" })}>
+            <button
+              className="btn btn-ghost"
+              onClick={() => signOut({ callbackUrl: "/" })}
+            >
               Wyloguj
             </button>
           </div>
@@ -198,7 +226,9 @@ export default function Dashboard() {
 
               <div className="profile-copy">
                 <strong>{session?.user?.name}</strong>
-                <p className="muted small">{session?.user?.email || "Discord OAuth"}</p>
+                <p className="muted small">
+                  {session?.user?.email || "Discord OAuth"}
+                </p>
               </div>
             </div>
           </div>
@@ -212,14 +242,17 @@ export default function Dashboard() {
               </div>
             ) : servers.length === 0 ? (
               <div className="empty-box">
-                Nie znaleziono serwerów, gdzie jesteś ownerem albo masz Manage Server.
+                Nie znaleziono serwerów, gdzie jesteś ownerem albo masz Manage
+                Server.
               </div>
             ) : (
               <div className="server-list deluxe-list visible-list">
                 {servers.map((server) => (
                   <button
                     key={server.id}
-                    className={`server-item rich-server-item ${server.id === selectedId ? "active" : ""}`}
+                    className={`server-item rich-server-item ${
+                      server.id === selectedId ? "active" : ""
+                    }`}
                     onClick={() => setSelectedId(server.id)}
                   >
                     <div className="server-icon">
@@ -236,7 +269,11 @@ export default function Dashboard() {
                     </div>
 
                     <div className="server-item-badges">
-                      <span className={`tiny-badge ${server.botInstalled ? "ok" : "warn"}`}>
+                      <span
+                        className={`tiny-badge ${
+                          server.botInstalled ? "ok" : "warn"
+                        }`}
+                      >
                         {server.botInstalled ? "Bot" : "Brak bota"}
                       </span>
                     </div>
@@ -247,6 +284,7 @@ export default function Dashboard() {
           </div>
         </aside>
 
+        <section className="content-panel">
           {selectedServer ? (
             <>
               <div className="dashboard-banner glass compact-banner">
@@ -263,28 +301,64 @@ export default function Dashboard() {
                     <span className="badge">wybrany serwer</span>
                     <h1>{selectedServer.name}</h1>
                     <div className="tag-list top-gap">
-                      <span className={`status-pill ${selectedServer.botInstalled ? "ok" : "warn"}`}>
-                        {selectedServer.botInstalled ? "Bot aktywny" : "Bot nie dodany"}
+                      <span
+                        className={`status-pill ${
+                          selectedServer.botInstalled ? "ok" : "warn"
+                        }`}
+                      >
+                        {selectedServer.botInstalled
+                          ? "Bot aktywny"
+                          : "Bot nie dodany"}
                       </span>
-                      <span className={`status-pill ${selectedServer.moderationStatus === "approved" ? "ok" : selectedServer.moderationStatus === "rejected" ? "danger" : "warn"}`}>
+                      <span
+                        className={`status-pill ${
+                          selectedServer.moderationStatus === "approved"
+                            ? "ok"
+                            : selectedServer.moderationStatus === "rejected"
+                            ? "danger"
+                            : "warn"
+                        }`}
+                      >
                         {moderationLabel}
                       </span>
-                      <span className={`status-pill ${selectedServer.serverType === "nsfw" ? "danger" : "ok"}`}>
-                        {selectedServer.serverType === "nsfw" ? "NSFW" : "Publiczny"}
+                      <span
+                        className={`status-pill ${
+                          selectedServer.serverType === "nsfw"
+                            ? "danger"
+                            : "ok"
+                        }`}
+                      >
+                        {selectedServer.serverType === "nsfw"
+                          ? "NSFW"
+                          : "Publiczny"}
                       </span>
-                      <span className="metric">{selectedServer.permissionLabel}</span>
+                      <span className="metric">
+                        {selectedServer.permissionLabel}
+                      </span>
                     </div>
                   </div>
                 </div>
 
                 <div className="button-row compact-actions">
-                  <a className="btn btn-primary" href={botAddUrl} target="_blank" rel="noreferrer">
+                  <a
+                    className="btn btn-primary"
+                    href={botAddUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                  >
                     Dodaj bota
                   </a>
-                  <Link className="btn btn-ghost" href={`/servers/${selectedServer.id}`}>
+                  <Link
+                    className="btn btn-ghost"
+                    href={`/servers/${selectedServer.id}`}
+                  >
                     Podgląd strony
                   </Link>
-                  <button className="btn btn-ghost" type="button" onClick={loadServers}>
+                  <button
+                    className="btn btn-ghost"
+                    type="button"
+                    onClick={loadServers}
+                  >
                     Odśwież
                   </button>
                 </div>
@@ -301,7 +375,9 @@ export default function Dashboard() {
                 </article>
                 <article className="overview-card glass">
                   <span className="overview-label">Invite</span>
-                  <strong>{selectedServer.inviteUrl ? "Ustawiony" : "Brak"}</strong>
+                  <strong>
+                    {selectedServer.inviteUrl ? "Ustawiony" : "Brak"}
+                  </strong>
                 </article>
               </div>
 
@@ -321,10 +397,20 @@ export default function Dashboard() {
                         rows={8}
                         maxLength={MAX_DESCRIPTION}
                         value={form.description}
-                        onChange={(e) => setForm((prev) => ({ ...prev, description: e.target.value.slice(0, MAX_DESCRIPTION) }))}
+                        onChange={(e) =>
+                          setForm((prev) => ({
+                            ...prev,
+                            description: e.target.value.slice(
+                              0,
+                              MAX_DESCRIPTION
+                            ),
+                          }))
+                        }
                         placeholder="Opisz serwer krótko i konkretnie."
                       />
-                      <small className="muted">{form.description.length}/{MAX_DESCRIPTION} znaków</small>
+                      <small className="muted">
+                        {form.description.length}/{MAX_DESCRIPTION} znaków
+                      </small>
                     </label>
 
                     <div className="split-grid">
@@ -339,7 +425,7 @@ export default function Dashboard() {
                               setForm((prev) => ({
                                 ...prev,
                                 tags: buildTags(value, prev.tags),
-                                tagInput: ""
+                                tagInput: "",
                               }));
                               return;
                             }
@@ -352,13 +438,20 @@ export default function Dashboard() {
                               setForm((prev) => ({
                                 ...prev,
                                 tags: buildTags(prev.tagInput, prev.tags),
-                                tagInput: ""
+                                tagInput: "",
                               }));
                             }
 
-                            if (e.key === "Backspace" && !form.tagInput && form.tags.length) {
+                            if (
+                              e.key === "Backspace" &&
+                              !form.tagInput &&
+                              form.tags.length
+                            ) {
                               e.preventDefault();
-                              setForm((prev) => ({ ...prev, tags: prev.tags.slice(0, -1) }));
+                              setForm((prev) => ({
+                                ...prev,
+                                tags: prev.tags.slice(0, -1),
+                              }));
                             }
                           }}
                           onBlur={() => {
@@ -366,13 +459,16 @@ export default function Dashboard() {
                             setForm((prev) => ({
                               ...prev,
                               tags: buildTags(prev.tagInput, prev.tags),
-                              tagInput: ""
+                              tagInput: "",
                             }));
                           }}
                           placeholder="gaming, community, social"
                           disabled={form.tags.length >= MAX_TAGS}
                         />
-                        <small className="muted">Wpisz tag i naciśnij przecinek albo Enter. Maksymalnie {MAX_TAGS} tagów.</small>
+                        <small className="muted">
+                          Wpisz tag i naciśnij przecinek albo Enter.
+                          Maksymalnie {MAX_TAGS} tagów.
+                        </small>
 
                         <div className="tag-list top-gap">
                           {form.tags.length ? (
@@ -381,7 +477,14 @@ export default function Dashboard() {
                                 key={tag}
                                 type="button"
                                 className="tag"
-                                onClick={() => setForm((prev) => ({ ...prev, tags: prev.tags.filter((item) => item !== tag) }))}
+                                onClick={() =>
+                                  setForm((prev) => ({
+                                    ...prev,
+                                    tags: prev.tags.filter(
+                                      (item) => item !== tag
+                                    ),
+                                  }))
+                                }
                                 title="Usuń tag"
                               >
                                 #{tag} ×
@@ -398,7 +501,12 @@ export default function Dashboard() {
                         <input
                           type="url"
                           value={form.inviteUrl}
-                          onChange={(e) => setForm((prev) => ({ ...prev, inviteUrl: e.target.value }))}
+                          onChange={(e) =>
+                            setForm((prev) => ({
+                              ...prev,
+                              inviteUrl: e.target.value,
+                            }))
+                          }
                           placeholder="https://discord.gg/twoj-link"
                         />
                       </label>
@@ -408,17 +516,30 @@ export default function Dashboard() {
                         <select
                           className="select"
                           value={form.serverType}
-                          onChange={(e) => setForm((prev) => ({ ...prev, serverType: e.target.value === "nsfw" ? "nsfw" : "public" }))}
+                          onChange={(e) =>
+                            setForm((prev) => ({
+                              ...prev,
+                              serverType:
+                                e.target.value === "nsfw" ? "nsfw" : "public",
+                            }))
+                          }
                         >
                           <option value="public">Publiczny</option>
                           <option value="nsfw">NSFW</option>
                         </select>
-                        <small className="muted">Ustaw czy listing ma być zwykły publiczny czy oznaczony jako NSFW.</small>
+                        <small className="muted">
+                          Ustaw czy listing ma być zwykły publiczny czy
+                          oznaczony jako NSFW.
+                        </small>
                       </label>
                     </div>
 
                     <div className="button-row">
-                      <button className="btn btn-primary" type="submit" disabled={saving}>
+                      <button
+                        className="btn btn-primary"
+                        type="submit"
+                        disabled={saving}
+                      >
                         {saving ? "Zapisywanie..." : "Zapisz zmiany"}
                       </button>
                     </div>
@@ -439,7 +560,10 @@ export default function Dashboard() {
                     <div className="directory-card-head">
                       <div className="server-avatar">
                         {selectedServer.icon ? (
-                          <DiscordServerIcon server={selectedServer} size={128} />
+                          <DiscordServerIcon
+                            server={selectedServer}
+                            size={128}
+                          />
                         ) : (
                           <span>{selectedServer.name.slice(0, 1)}</span>
                         )}
@@ -447,25 +571,44 @@ export default function Dashboard() {
 
                       <div className="directory-card-meta">
                         <h3>{selectedServer.name}</h3>
-                        <span>{selectedServer.lastBumpAt ? "Aktywny listing" : "Jeszcze bez bumpa"}</span>
+                        <span>
+                          {selectedServer.lastBumpAt
+                            ? "Aktywny listing"
+                            : "Jeszcze bez bumpa"}
+                        </span>
                       </div>
                     </div>
 
                     <div className="tag-list">
-                      {form.tags.length ? form.tags.map((tag) => (
-                        <span key={tag} className="tag">#{tag}</span>
-                      )) : <span className="muted">Brak tagów</span>}
+                      {form.tags.length ? (
+                        form.tags.map((tag) => (
+                          <span key={tag} className="tag">
+                            #{tag}
+                          </span>
+                        ))
+                      ) : (
+                        <span className="muted">Brak tagów</span>
+                      )}
                     </div>
 
                     <p className="server-description clamp-5">
-                      {form.description || "Tutaj zobaczysz podgląd opisu serwera po zapisaniu zmian."}
+                      {form.description ||
+                        "Tutaj zobaczysz podgląd opisu serwera po zapisaniu zmian."}
                     </p>
 
                     <div className="server-footer">
                       <div className="server-metrics">
-                        <span className="metric">Bumpy: {selectedServer.bumpCount || 0}</span>
-                        <span className="metric">{selectedServer.botInstalled ? "Bot online" : "Bot brak"}</span>
-                        <span className="metric">Typ: {form.serverType === "nsfw" ? "NSFW" : "Publiczny"}</span>
+                        <span className="metric">
+                          Bumpy: {selectedServer.bumpCount || 0}
+                        </span>
+                        <span className="metric">
+                          {selectedServer.botInstalled
+                            ? "Bot online"
+                            : "Bot brak"}
+                        </span>
+                        <span className="metric">
+                          Typ: {form.serverType === "nsfw" ? "NSFW" : "Publiczny"}
+                        </span>
                       </div>
                     </div>
                   </article>
