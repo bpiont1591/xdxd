@@ -2044,10 +2044,41 @@ body {
   margin-top: 10px;
   gap: 14px;
 }
-/* allservers logo + lepsze selecty */
+/* allservers logo + lepsze selecty + input bez przycisku */
 .allservers-filters {
   align-items: center;
   gap: 14px;
+}
+
+.searchbar-clean {
+  width: 100%;
+  max-width: 420px;
+}
+
+.searchbar-clean input {
+  width: 100%;
+  height: 56px;
+  padding: 0 18px;
+  border-radius: 18px;
+  border: 1px solid var(--stroke);
+  background: rgba(255, 255, 255, 0.045);
+  color: var(--text);
+  outline: none;
+  font-size: 0.95rem;
+  transition: all 0.2s ease;
+}
+
+.searchbar-clean input::placeholder {
+  color: var(--muted);
+}
+
+.searchbar-clean input:hover {
+  border-color: rgba(111, 125, 255, 0.25);
+}
+
+.searchbar-clean input:focus {
+  border-color: rgba(111, 125, 255, 0.45);
+  box-shadow: 0 0 0 3px rgba(111, 125, 255, 0.12);
 }
 
 .select-wrap {
@@ -2096,16 +2127,19 @@ body {
   color: #f5f7ff;
 }
 
+.danger-text {
+  color: #ff4d6d;
+  font-weight: 600;
+}
+
 @media (max-width: 980px) {
   .allservers-filters {
     align-items: stretch;
   }
 
+  .searchbar-clean,
   .select-wrap {
     width: 100%;
+    max-width: 100%;
   }
-  .danger-text {
-  color: #ff4d6d;
-  font-weight: 600;
 }
-  }
