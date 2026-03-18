@@ -2,8 +2,8 @@ import Head from "next/head";
 import DiscordServerIcon, { getDiscordServerIconCandidates } from "../../components/DiscordServerIcon";
 import Link from "next/link";
 import { signIn, useSession } from "next-auth/react";
+import BrandLogo from "../../components/BrandLogo";
 import { useState } from "react";
-import ServerCommunityStats from "../../components/ServerCommunityStats";
 
 
 export async function getServerSideProps({ params, req }) {
@@ -95,7 +95,11 @@ export default function ServerDetail({ server }) {
 
         <header className="topbar container">
           <Link href="/" className="brand brand-link">
-<img src="/bumply-logo.png" alt="Bumply" className="site-logo" />
+            <div className="brand-badge">DB</div>
+            <div>
+              <strong>Bumply</strong>
+              <span>Wróć do strony głównej</span>
+            </div>
           </Link>
         </header>
 
@@ -113,12 +117,6 @@ export default function ServerDetail({ server }) {
               <div>
                 <span className="badge">profil serwera</span>
                 <h1>{server.name}</h1>
-                <ServerCommunityStats
-                  online={server.communityOnline}
-                  total={server.communityTotal}
-                  status={server.communityStatus}
-                  className="top-gap-sm"
-                />
                 <p className="muted large">
                   {server.description || "Brak opisu serwera."}
                 </p>
@@ -165,14 +163,6 @@ export default function ServerDetail({ server }) {
                 <div className="metric-box">
                   <strong>{server.lastBumpAt ? new Date(server.lastBumpAt).toLocaleString() : "brak"}</strong>
                   <span>ostatni bump</span>
-                </div>
-                <div className="metric-box">
-                  <strong>{Number.isFinite(Number(server.communityOnline)) ? server.communityOnline : "--"}</strong>
-                  <span>online teraz</span>
-                </div>
-                <div className="metric-box">
-                  <strong>{Number.isFinite(Number(server.communityTotal)) ? server.communityTotal : "--"}</strong>
-                  <span>członków razem</span>
                 </div>
               </div>
             </div>

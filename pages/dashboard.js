@@ -2,10 +2,9 @@ import Head from "next/head";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { signIn, signOut, useSession } from "next-auth/react";
-import DiscordBrandIcon from "../components/DiscordBrandIcon";
 import DiscordServerIcon from "../components/DiscordServerIcon";
-import ServerCommunityStats from "../components/ServerCommunityStats";
-import { getInviteValidation } from "../lib/discord-invite";
+import BrandLogo from "../components/BrandLogo";
+import DiscordGlyph from "../components/DiscordGlyph";
 
 const defaultForm = {
   description: "",
@@ -51,7 +50,6 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [notice, setNotice] = useState("");
-  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
 
   async function loadServers() {
     setLoading(true);
@@ -91,76 +89,21 @@ export default function Dashboard() {
     [servers, selectedId]
   );
 
-  const draftKey = selectedId ? `bumply-dashboard-draft:${selectedId}` : "";
-  const inviteValidation = getInviteValidation(form.inviteUrl);
-
   useEffect(() => {
     if (selectedServer) {
-      let draft = null;
-      if (typeof window !== "undefined") {
-        try {
-          draft = JSON.parse(localStorage.getItem(`bumply-dashboard-draft:${selectedServer.id}`) || "null");
-        } catch {
-          draft = null;
-        }
-      }
-
       setForm({
-        description: draft?.description ?? selectedServer.description ?? "",
-        tags: Array.isArray(draft?.tags)
-          ? draft.tags.slice(0, MAX_TAGS)
-          : Array.isArray(selectedServer.tags)
+        description: selectedServer.description || "",
+        tags: Array.isArray(selectedServer.tags)
           ? selectedServer.tags.slice(0, MAX_TAGS)
           : [],
         tagInput: "",
-        inviteUrl: draft?.inviteUrl ?? selectedServer.inviteUrl ?? "",
-        serverType: (draft?.serverType || selectedServer.serverType) === "nsfw" ? "nsfw" : "public",
+        inviteUrl: selectedServer.inviteUrl || "",
+        serverType: selectedServer.serverType === "nsfw" ? "nsfw" : "public",
       });
-      setHasUnsavedChanges(Boolean(draft));
     } else {
       setForm(defaultForm);
-      setHasUnsavedChanges(false);
     }
   }, [selectedServer]);
-
-  useEffect(() => {
-    if (!draftKey || !selectedServer) return;
-    if (typeof window === "undefined") return;
-
-    const cleanSelected = {
-      description: selectedServer.description || "",
-      tags: Array.isArray(selectedServer.tags) ? selectedServer.tags.slice(0, MAX_TAGS) : [],
-      inviteUrl: selectedServer.inviteUrl || "",
-      serverType: selectedServer.serverType === "nsfw" ? "nsfw" : "public",
-    };
-
-    const cleanForm = {
-      description: form.description || "",
-      tags: Array.isArray(form.tags) ? form.tags.slice(0, MAX_TAGS) : [],
-      inviteUrl: form.inviteUrl || "",
-      serverType: form.serverType === "nsfw" ? "nsfw" : "public",
-    };
-
-    const changed = JSON.stringify(cleanSelected) !== JSON.stringify(cleanForm);
-    setHasUnsavedChanges(changed);
-
-    if (changed) {
-      localStorage.setItem(draftKey, JSON.stringify(cleanForm));
-    } else {
-      localStorage.removeItem(draftKey);
-    }
-  }, [draftKey, form, selectedServer]);
-
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    const handler = (event) => {
-      if (!hasUnsavedChanges) return;
-      event.preventDefault();
-      event.returnValue = "Masz niezapisane zmiany.";
-    };
-    window.addEventListener("beforeunload", handler);
-    return () => window.removeEventListener("beforeunload", handler);
-  }, [hasUnsavedChanges]);
 
   async function saveServer(e) {
     e.preventDefault();
@@ -193,10 +136,6 @@ export default function Dashboard() {
       );
       setForm((prev) => ({ ...prev, tags: finalTags, tagInput: "" }));
       setNotice("Zapisano zmiany.");
-      setHasUnsavedChanges(false);
-      if (typeof window !== "undefined" && draftKey) {
-        localStorage.removeItem(draftKey);
-      }
     } catch (err) {
       setNotice(err.message || "Błąd zapisu");
     } finally {
@@ -224,7 +163,7 @@ export default function Dashboard() {
             className="btn btn-primary btn-discord"
             onClick={() => signIn("discord")}
           >
-            <DiscordBrandIcon />
+            <DiscordGlyph />
             <span>Zaloguj przez Discord</span>
           </button>
         </div>
@@ -256,13 +195,7 @@ export default function Dashboard() {
       <main className="dashboard-shell premium dashboard-v10">
         <aside className="sidebar glass dashboard-sidebar slim-sidebar visible-sidebar">
           <div className="sidebar-header deluxe">
-            <Link href="/" className="brand brand-link">
-              <img
-                src="/bumply-logo.svg"
-                alt="Bumply"
-                className="site-logo site-logo--sidebar"
-              />
-            </Link>
+            <BrandLogo compact />
 
             <button
               className="btn btn-ghost"
@@ -302,13 +235,7 @@ export default function Dashboard() {
 
             {loading ? (
               <div className="server-list">
-                <div className="server-item active skeleton-server-item">
-                  <div className="skeleton-avatar small" />
-                  <div className="skeleton-copy">
-                    <div className="skeleton-line" />
-                    <div className="skeleton-line short" />
-                  </div>
-                </div>
+                <div className="server-item active">Ładowanie serwerów...</div>
               </div>
             ) : servers.length === 0 ? (
               <div className="empty-box">
@@ -406,13 +333,6 @@ export default function Dashboard() {
                         {selectedServer.permissionLabel}
                       </span>
                     </div>
-
-                    <ServerCommunityStats
-                      online={selectedServer.communityOnline}
-                      total={selectedServer.communityTotal}
-                      status={selectedServer.communityStatus}
-                      className="top-gap-sm"
-                    />
                   </div>
                 </div>
 
@@ -455,10 +375,6 @@ export default function Dashboard() {
                   <strong>
                     {selectedServer.inviteUrl ? "Ustawiony" : "Brak"}
                   </strong>
-                </article>
-                <article className="overview-card glass">
-                  <span className="overview-label">Wersja robocza</span>
-                  <strong>{hasUnsavedChanges ? "Niezapisana" : "Czysta"}</strong>
                 </article>
               </div>
 
@@ -590,9 +506,6 @@ export default function Dashboard() {
                           }
                           placeholder="https://discord.gg/twoj-link"
                         />
-                        <small className={`inline-validation ${inviteValidation.state}`}>
-                          {inviteValidation.message}
-                        </small>
                       </label>
 
                       <label className="field">
@@ -622,32 +535,9 @@ export default function Dashboard() {
                       <button
                         className="btn btn-primary"
                         type="submit"
-                        disabled={saving || inviteValidation.state === "invalid"}
+                        disabled={saving}
                       >
                         {saving ? "Zapisywanie..." : "Zapisz zmiany"}
-                      </button>
-                      <button
-                        className="btn btn-ghost"
-                        type="button"
-                        onClick={() => {
-                          if (!selectedServer) return;
-                          setForm({
-                            description: selectedServer.description || "",
-                            tags: Array.isArray(selectedServer.tags)
-                              ? selectedServer.tags.slice(0, MAX_TAGS)
-                              : [],
-                            tagInput: "",
-                            inviteUrl: selectedServer.inviteUrl || "",
-                            serverType: selectedServer.serverType === "nsfw" ? "nsfw" : "public",
-                          });
-                          setNotice("Przywrócono ostatni zapisany stan.");
-                          if (typeof window !== "undefined" && draftKey) {
-                            localStorage.removeItem(draftKey);
-                          }
-                          setHasUnsavedChanges(false);
-                        }}
-                      >
-                        Cofnij zmiany
                       </button>
                     </div>
                   </form>
@@ -685,13 +575,6 @@ export default function Dashboard() {
                         </span>
                       </div>
                     </div>
-
-                    <ServerCommunityStats
-                      online={selectedServer.communityOnline}
-                      total={selectedServer.communityTotal}
-                      status={selectedServer.communityStatus}
-                      className="top-gap-sm"
-                    />
 
                     <div className="tag-list">
                       {form.tags.length ? (

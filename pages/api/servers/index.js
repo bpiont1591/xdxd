@@ -2,7 +2,6 @@ import { getServerSession } from "next-auth/next";
 import { authOptions } from "../auth/[...nextauth]";
 import { prisma } from "../../../lib/prisma";
 import { normalizeServer } from "../../../lib/storage";
-import { attachInviteStatsToServers } from "../../../lib/discord-invite";
 
 const MANAGE_GUILD = 32n;
 
@@ -85,7 +84,7 @@ export default async function handler(req, res) {
       };
     });
 
-    return res.status(200).json(await attachInviteStatsToServers(mergedGuilds));
+    return res.status(200).json(mergedGuilds);
   } catch (error) {
     console.error("GET /api/servers error:", error);
     return res.status(500).json({

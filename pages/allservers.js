@@ -2,7 +2,7 @@ import Head from "next/head";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import DiscordServerIcon from "../components/DiscordServerIcon";
-import ServerCommunityStats from "../components/ServerCommunityStats";
+import BrandLogo from "../components/BrandLogo";
 
 function formatTimeAgo(dateString) {
   if (!dateString) return "Nigdy";
@@ -22,13 +22,11 @@ export default function AllServersPage() {
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState("all");
   const [sort, setSort] = useState("top");
-  const [activeOnly, setActiveOnly] = useState(false);
 
   async function loadServers(next = {}) {
     const q = next.query ?? query;
     const c = next.category ?? category;
     const s = next.sort ?? sort;
-    const onlyActive = next.activeOnly ?? activeOnly;
 
     setLoading(true);
     try {
@@ -36,7 +34,6 @@ export default function AllServersPage() {
         query: q,
         category: c,
         sort: s,
-        activeOnly: String(Boolean(onlyActive)),
       });
 
       const res = await fetch(`/api/public-servers?${params.toString()}`);
@@ -70,55 +67,37 @@ export default function AllServersPage() {
         <div className="ambient ambient-b" />
 
         <header className="topbar container">
-          <Link href="/" className="brand brand-link">
-            <img
-              src="/bumply-logo.svg"
-              alt="Bumply"
-              className="site-logo"
-            />
-          </Link>
+          <BrandLogo />
 
           <Link href="/" className="btn btn-ghost">
             Powrót
           </Link>
         </header>
 
-        <section className="container panel-card glass allservers-toolbar compact-toolbar-shell">
-          <div className="allservers-toolbar-head">
+        <section className="container panel-card glass allservers-toolbar">
+          <div className="section-head compact">
             <div>
               <span className="badge">pełna lista</span>
               <h2>Wszystkie serwery</h2>
-              <p className="muted compact-toolbar-copy">
-                Kompaktowy widok, szybsze filtrowanie i mniej wielkich kloców na pół ekranu.
-              </p>
-            </div>
-
-            <div className="hero-mini-stats compact-stat-row">
-              <span>{servers.length} wyników</span>
-              <span>{meta.categories.length} kategorii</span>
-              <span>{activeOnly ? "Aktywne only" : "Wszystkie statusy"}</span>
             </div>
           </div>
 
-          <form
-            className="searchbar searchbar-clean allservers-search-row"
-            onSubmit={(e) => {
-              e.preventDefault();
-              loadServers();
-            }}
-          >
-            <input
-              type="text"
-              placeholder="Szukaj serwera, tagu lub kategorii..."
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-            />
-            <button type="submit" className="btn btn-primary btn-search-inline">
-              Szukaj
-            </button>
-          </form>
+          <div className="toolbar wide allservers-filters">
+            <form
+              className="searchbar searchbar-clean"
+              onSubmit={(e) => {
+                e.preventDefault();
+                loadServers();
+              }}
+            >
+              <input
+                type="text"
+                placeholder="Szukaj serwera..."
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+              />
+            </form>
 
-          <div className="toolbar wide allservers-filters compact-filter-row">
             <div className="select-wrap">
               <select
                 className="select select-dark"
@@ -149,39 +128,15 @@ export default function AllServersPage() {
                 <option value="top">Top bumpy</option>
                 <option value="favorites">Najwięcej ulubionych</option>
                 <option value="recent">Najnowsze</option>
-                <option value="online">Najwięcej online</option>
-                <option value="members">Najwięcej członków</option>
                 <option value="name">Nazwa A-Z</option>
               </select>
             </div>
-            <label className="checkbox-filter compact-check">
-              <input
-                type="checkbox"
-                checked={activeOnly}
-                onChange={(e) => {
-                  setActiveOnly(e.target.checked);
-                  loadServers({ activeOnly: e.target.checked });
-                }}
-              />
-              <span>Tylko z aktywną społecznością</span>
-            </label>
           </div>
         </section>
 
         <section className="servers-section container">
           {loading ? (
-            <div className="home-list skeleton-list">
-              {Array.from({ length: 4 }).map((_, index) => (
-                <div key={index} className="home-list-card glass skeleton-card">
-                  <div className="skeleton-avatar" />
-                  <div className="skeleton-copy">
-                    <div className="skeleton-line wide" />
-                    <div className="skeleton-line" />
-                    <div className="skeleton-line short" />
-                  </div>
-                </div>
-              ))}
-            </div>
+            <div className="state-card glass">Ładowanie serwerów...</div>
           ) : servers.length === 0 ? (
             <div className="state-card glass">Brak wyników.</div>
           ) : (
@@ -214,13 +169,6 @@ export default function AllServersPage() {
                             {server.serverType === "nsfw" ? "NSFW 🔞" : "Publiczny"}
                           </span>
                         </div>
-
-                        <ServerCommunityStats
-                          online={server.communityOnline}
-                          total={server.communityTotal}
-                          status={server.communityStatus}
-                          className="top-gap-sm"
-                        />
 
                         <div className="tag-list">
                           {server.tags?.length ? (

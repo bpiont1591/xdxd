@@ -3,8 +3,8 @@ import Link from "next/link";
 import { signIn, signOut, useSession } from "next-auth/react";
 import { useEffect, useMemo, useState } from "react";
 import DiscordServerIcon from "../components/DiscordServerIcon";
-import ServerCommunityStats from "../components/ServerCommunityStats";
-import DiscordBrandIcon from "../components/DiscordBrandIcon";
+import BrandLogo from "../components/BrandLogo";
+import DiscordGlyph from "../components/DiscordGlyph";
 
 function formatTimeAgo(dateString) {
   if (!dateString) return "Nigdy";
@@ -89,13 +89,7 @@ export default function Home() {
         <div className="ambient ambient-b" />
 
         <header className="topbar container">
-          <Link href="/" className="brand brand-link">
-            <img
-              src="/bumply-logo.svg"
-              alt="Bumply"
-              className="site-logo"
-            />
-          </Link>
+          <BrandLogo />
 
           <div className="topbar-actions">
             {status === "authenticated" ? (
@@ -120,19 +114,18 @@ export default function Home() {
                 className="btn btn-primary btn-discord"
                 onClick={() => signIn("discord")}
               >
-                <DiscordBrandIcon />
+                <DiscordGlyph />
                 <span>Zaloguj przez Discord</span>
               </button>
             )}
           </div>
         </header>
 
-        <section className="home-v9-hero container glass compact-hero-shell">
-          <div className="home-v9-hero-copy compact-hero-copy">
+        <section className="home-v9-hero container glass">
+          <div className="home-v9-hero-copy compact">
             <span className="badge">katalog serwerów</span>
-            <h1>Wyszukiwarka serwerów Discord</h1>
 
-            <div className="hero-mini-stats compact-stat-row">
+            <div className="hero-mini-stats">
               <span>{meta.totalServers} serwerów</span>
               <span>{meta.totalBumps} bumpów</span>
               <span>{meta.totalFavorites} ulubionych</span>
@@ -141,7 +134,7 @@ export default function Home() {
           </div>
 
           <form
-            className="directory-search home-v9-search searchbar-clean hero-search-inline"
+            className="directory-search home-v9-search searchbar-clean hero-search"
             onSubmit={(e) => {
               e.preventDefault();
               loadServers();
@@ -153,12 +146,9 @@ export default function Home() {
               value={query}
               onChange={(e) => setQuery(e.target.value)}
             />
-            <button type="submit" className="btn btn-primary btn-search-inline">
-              Szukaj
-            </button>
           </form>
 
-          <div className="home-v9-actions compact-hero-actions">
+          <div className="home-v9-actions">
             {status === "authenticated" ? (
               <Link href="/dashboard" className="btn btn-primary">
                 Dodaj serwer
@@ -185,7 +175,7 @@ export default function Home() {
             </div>
           </div>
 
-          <div className="category-grid compact-categories compact-chip-grid">
+          <div className="category-grid compact-categories">
             <button
               className={`category-chip large ${
                 category === "all" ? "active" : ""
@@ -230,18 +220,7 @@ export default function Home() {
           </div>
 
           {loading ? (
-            <div className="home-list skeleton-list">
-              {Array.from({ length: 3 }).map((_, index) => (
-                <div key={index} className="home-list-card glass skeleton-card">
-                  <div className="skeleton-avatar" />
-                  <div className="skeleton-copy">
-                    <div className="skeleton-line wide" />
-                    <div className="skeleton-line" />
-                    <div className="skeleton-line short" />
-                  </div>
-                </div>
-              ))}
-            </div>
+            <div className="state-card glass">Ładowanie serwerów...</div>
           ) : servers.length === 0 ? (
             <div className="state-card glass">
               <h3>Brak wyników</h3>
@@ -281,13 +260,6 @@ export default function Home() {
                             {server.serverType === "nsfw" ? "NSFW 🔞" : "Publiczny"}
                           </span>
                         </div>
-
-                        <ServerCommunityStats
-                          online={server.communityOnline}
-                          total={server.communityTotal}
-                          status={server.communityStatus}
-                          className="top-gap-sm"
-                        />
 
                         <div className="tag-list">
                           {server.tags?.length ? (

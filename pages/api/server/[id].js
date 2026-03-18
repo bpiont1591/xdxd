@@ -1,6 +1,5 @@
 import { prisma } from "../../../lib/prisma";
 import { normalizeServer } from "../../../lib/storage";
-import { attachInviteStats } from "../../../lib/discord-invite";
 
 export default async function handler(req, res) {
   if (req.method !== "GET") {
@@ -30,10 +29,10 @@ export default async function handler(req, res) {
   }
 
   return res.status(200).json({
-    server: await attachInviteStats({
+    server: {
       ...server,
       favoriteCount: row.favorites.length,
       reportCount: row.reports.length
-    })
+    }
   });
 }

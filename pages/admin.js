@@ -2,7 +2,8 @@ import Head from "next/head";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { signIn, signOut, useSession } from "next-auth/react";
-import DiscordBrandIcon from "../components/DiscordBrandIcon";
+import BrandLogo from "../components/BrandLogo";
+import DiscordGlyph from "../components/DiscordGlyph";
 
 export default function AdminPage() {
   const { data: session, status } = useSession();
@@ -108,7 +109,7 @@ export default function AdminPage() {
           <h1>Zaloguj się przez Discord</h1>
           <p className="muted">Panel moderacji jest dostępny tylko dla wskazanego konta Discord.</p>
           <button className="btn btn-primary btn-discord" onClick={() => signIn("discord")}>
-            <DiscordBrandIcon />
+            <DiscordGlyph />
             <span>Zaloguj przez Discord</span>
           </button>
         </div>
@@ -145,13 +146,7 @@ export default function AdminPage() {
         <div className="ambient ambient-b" />
 
         <header className="topbar container">
-          <Link href="/" className="brand brand-link">
-            <img
-              src="/bumply-logo.svg"
-              alt="Bumply"
-              className="site-logo"
-            />
-          </Link>
+          <BrandLogo />
 
           <div className="topbar-actions">
             {authenticated && (

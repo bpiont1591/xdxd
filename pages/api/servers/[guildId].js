@@ -81,6 +81,7 @@ export default async function handler(req, res) {
       .filter((tag, index, arr) => arr.indexOf(tag) === index)
       .slice(0, 5);
     const inviteUrl = String(body.inviteUrl || "").trim();
+    const serverType = String(body.serverType || existing?.serverType || "public").toLowerCase() === "nsfw" ? "nsfw" : "public";
 
     if (!isValidInviteUrl(inviteUrl)) {
       return res.status(400).json({
@@ -96,7 +97,6 @@ export default async function handler(req, res) {
       existing = await getJsonServerById(guildId);
     }
 
-    const serverType = String(body.serverType || existing?.serverType || "public").toLowerCase() === "nsfw" ? "nsfw" : "public";
     const safeSlug = `${slugify(targetGuild.name)}-${guildId}`;
 
     try {
