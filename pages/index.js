@@ -100,14 +100,14 @@ export default function Home() {
                 </Link>
                 {isModerator ? (
                   <Link href="/admin" className="btn btn-ghost">
-                    <P>MODERACJA</P>​
+                    <p>MODERACJA</p>​
                   </Link>
                 ) : null}
                 <button
                   className="btn btn-ghost"
                   onClick={() => signOut({ callbackUrl: "/" })}
                 >
-                 <P>WYLOGUJ SIĘ</P> ​
+                 <p>WYLOGUJ SIĘ</p> ​
                 </button>
               </>
             ) : (
