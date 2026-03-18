@@ -963,3 +963,307 @@ body {
 .community-metric-box::before {
   background: linear-gradient(135deg, rgba(87,242,135,.08), rgba(88,101,242,.12));
 }
+
+
+/* Dashboard cleanup override */
+.dashboard-v10 {
+  width: min(1480px, 100%);
+  margin: 0 auto;
+  grid-template-columns: minmax(280px, 320px) minmax(0, 1fr);
+  gap: 24px;
+  padding: 24px;
+  align-items: start;
+}
+
+.dashboard-sidebar {
+  position: sticky;
+  top: 24px;
+  max-height: calc(100vh - 48px);
+  overflow: hidden;
+}
+
+.visible-sidebar {
+  padding: 20px;
+}
+
+.sidebar-header.deluxe {
+  padding-bottom: 4px;
+  border-bottom: 1px solid rgba(255,255,255,.06);
+}
+
+.compact-profile {
+  padding: 16px;
+  border-radius: 20px;
+}
+
+.profile-card-top {
+  align-items: center;
+}
+
+.profile-copy {
+  min-width: 0;
+}
+
+.profile-copy strong,
+.server-meta strong,
+.directory-card-meta h3,
+.banner-copy h1,
+.overview-card strong {
+  overflow-wrap: anywhere;
+}
+
+.profile-copy .small,
+.server-meta span,
+.directory-card-meta span {
+  line-height: 1.4;
+}
+
+.sidebar-block {
+  min-height: 0;
+  flex: 1 1 auto;
+}
+
+.visible-list {
+  max-height: calc(100vh - 280px);
+  overflow: auto;
+  padding-right: 4px;
+}
+
+.visible-list::-webkit-scrollbar {
+  width: 8px;
+}
+
+.visible-list::-webkit-scrollbar-thumb {
+  background: rgba(255,255,255,.12);
+  border-radius: 999px;
+}
+
+.rich-server-item {
+  align-items: center;
+  padding: 14px;
+  min-height: 76px;
+  transition: transform .16s ease, border-color .16s ease, background .16s ease;
+}
+
+.rich-server-item:hover {
+  transform: translateY(-1px);
+  border-color: rgba(88, 101, 242, .3);
+  background: rgba(255,255,255,.075);
+}
+
+.server-meta {
+  min-width: 0;
+  flex: 1 1 auto;
+  display: grid;
+  gap: 4px;
+}
+
+.server-meta strong,
+.server-meta span {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.server-item-badges {
+  flex: 0 0 auto;
+}
+
+.content-panel {
+  min-width: 0;
+  align-content: start;
+}
+
+.compact-banner {
+  padding: 24px;
+  border-radius: 26px;
+}
+
+.dashboard-banner {
+  gap: 20px;
+}
+
+.banner-main {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: 18px;
+}
+
+.banner-copy {
+  min-width: 0;
+}
+
+.banner-copy h1 {
+  font-size: clamp(1.8rem, 3vw, 2.5rem);
+  line-height: 1.05;
+}
+
+.compact-actions {
+  justify-content: flex-start;
+}
+
+.compact-actions .btn {
+  min-width: 150px;
+}
+
+.server-overview-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.overview-card {
+  min-height: 120px;
+  display: grid;
+  align-content: start;
+  gap: 10px;
+  padding: 18px;
+}
+
+.overview-card strong {
+  font-size: clamp(1rem, 1.25vw, 1.1rem);
+  line-height: 1.35;
+}
+
+.dashboard-content-split {
+  grid-template-columns: minmax(0, 1.35fr) minmax(320px, .85fr);
+  align-items: start;
+  gap: 18px;
+}
+
+.editor-card-deluxe,
+.server-preview-panel {
+  padding: 24px;
+  border-radius: 26px;
+}
+
+.panel-head.simple {
+  padding-bottom: 6px;
+  margin-bottom: 2px;
+}
+
+.form-grid {
+  gap: 18px;
+}
+
+.field {
+  gap: 10px;
+}
+
+.field small {
+  line-height: 1.45;
+}
+
+.field textarea {
+  min-height: 180px;
+}
+
+.button-row {
+  justify-content: flex-end;
+}
+
+.button-row .btn {
+  min-width: 180px;
+}
+
+.notice {
+  margin-top: 4px;
+}
+
+.dashboard-server-preview {
+  gap: 18px;
+  padding: 20px;
+  border-radius: 22px;
+}
+
+.server-preview-panel {
+  position: sticky;
+  top: 24px;
+}
+
+.directory-card-head {
+  align-items: center;
+}
+
+.directory-card-meta {
+  min-width: 0;
+  display: grid;
+  gap: 4px;
+}
+
+.server-description {
+  margin: 0;
+}
+
+.server-footer {
+  align-items: flex-start;
+}
+
+.server-metrics {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+@media (max-width: 1180px) {
+  .dashboard-v10 {
+    grid-template-columns: 280px minmax(0, 1fr);
+  }
+
+  .dashboard-content-split {
+    grid-template-columns: 1fr;
+  }
+
+  .server-preview-panel {
+    position: static;
+  }
+}
+
+@media (max-width: 980px) {
+  .dashboard-v10 {
+    grid-template-columns: 1fr;
+    padding: 16px;
+  }
+
+  .dashboard-sidebar {
+    position: static;
+    max-height: none;
+  }
+
+  .visible-list {
+    max-height: 320px;
+  }
+
+  .server-overview-grid,
+  .dashboard-content-split {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 720px) {
+  .compact-banner,
+  .editor-card-deluxe,
+  .server-preview-panel,
+  .visible-sidebar {
+    padding: 18px;
+  }
+
+  .banner-main {
+    grid-template-columns: 1fr;
+    align-items: start;
+  }
+
+  .compact-actions .btn,
+  .button-row .btn {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .button-row {
+    justify-content: stretch;
+  }
+
+  .rich-server-item {
+    min-height: 70px;
+  }
+}
