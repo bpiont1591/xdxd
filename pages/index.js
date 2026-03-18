@@ -152,14 +152,14 @@ export default function Home() {
           <div className="home-v9-actions">
             {status === "authenticated" ? (
               <Link href="/dashboard" className="btn btn-primary">
-                Dodaj serwer
+                🇩​​🇴​​🇩​​🇦​​🇯​ ​🇸​​🇪​​🇷​​🇼​​🇪​​🇷​
               </Link>
             ) : (
               <button
                 className="btn btn-primary"
                 onClick={() => signIn("discord")}
               >
-                Dodaj serwer
+                🇩​​🇴​​🇩​​🇦​​🇯​ ​🇸​​🇪​​🇷​​🇼​​🇪​​🇷​
               </button>
             )}
             <Link href="/allservers" className="btn btn-ghost">
