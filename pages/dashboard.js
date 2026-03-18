@@ -189,7 +189,7 @@ export default function Dashboard() {
   return (
     <>
       <Head>
-        <title>Dashboard • allserver</title>
+        <title>Dashboard • Bumply</title>
       </Head>
 
       <main className="dashboard-shell premium dashboard-v10">

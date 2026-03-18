@@ -78,7 +78,7 @@ export default function Home() {
   return (
     <>
       <Head>
-        <title>allserver</title>
+        <title>Bumply</title>
         <meta
           name="description"
           content="Polski katalog serwerów Discord z wyszukiwarką, kategoriami, ulubionymi i panelem właściciela."

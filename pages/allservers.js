@@ -56,10 +56,10 @@ export default function AllServersPage() {
   return (
     <>
       <Head>
-        <title>Wszystkie serwery • allserver</title>
+        <title>Wszystkie serwery • Bumply</title>
         <meta
           name="description"
-          content="Pełna lista serwerów Discord w katalogu allserver."
+          content="Pełna lista serwerów Discord w katalogu."
         />
       </Head>
 
