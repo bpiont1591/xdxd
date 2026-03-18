@@ -165,6 +165,9 @@ export default function AllServersPage() {
 
         <header className="topbar container">
           <BrandLogo />
+          <Link href="/" className="btn btn-ghost">
+            Powrót
+          </Link>
         </header>
 
         <section className="container panel-card glass allservers-toolbar">
