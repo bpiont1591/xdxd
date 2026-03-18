@@ -78,7 +78,7 @@ export default function Home() {
   return (
     <>
       <Head>
-        <title>DisBumply.pl</title>
+        <title>DISBUMPLY - Publiczna lista serwerów Discord</title>
         <meta
           name="description"
           content="Polski katalog serwerów Discord"
@@ -96,18 +96,18 @@ export default function Home() {
             {status === "authenticated" ? (
               <>
                 <Link href="/dashboard" className="btn btn-ghost">
-                ​<p>DASHBOARD</p>
+                DASHBOARD
                 </Link>
                 {isModerator ? (
                   <Link href="/admin" className="btn btn-ghost">
-                <p>MODERACJA</p>​
+                MODERACJA
                   </Link>
                 ) : null}
                 <button
                   className="btn btn-ghost"
                   onClick={() => signOut({ callbackUrl: "/" })}
                 >
-                <p>WYLOGUJ SIĘ</p> ​
+                WYLOGUJ SIĘ
                 </button>
               </>
             ) : (
@@ -116,7 +116,7 @@ export default function Home() {
                 onClick={() => signIn("discord")}
               >
                 <DiscordGlyph />
-                <span>​🇿​​🇦​​🇱​​🇴​​🇬​​🇺​​🇯​ ​🇵​​🇷​​🇿​​🇪​​🇿​ ​🇩​​🇮​​🇸​​🇨​​🇴​​🇷​​🇩​</span>
+                <span>​ZALOGUJ SIĘ PRZEZ DISCORD​</span>
               </button>
             )}
           </div>
@@ -152,18 +152,18 @@ export default function Home() {
           <div className="home-v9-actions">
             {status === "authenticated" ? (
               <Link href="/dashboard" className="btn btn-primary">
-                🇩​​🇴​​🇩​​🇦​​🇯​ ​🇸​​🇪​​🇷​​🇼​​🇪​​🇷​
+                DODAJ SERWER
               </Link>
             ) : (
               <button
                 className="btn btn-primary"
                 onClick={() => signIn("discord")}
               >
-                🇩​​🇴​​🇩​​🇦​​🇯​ ​🇸​​🇪​​🇷​​🇼​​🇪​​🇷​
+                DODAJ SERWER
               </button>
             )}
             <Link href="/allservers" className="btn btn-ghost">
-              ​🇿​​🇴​​🇧​​🇦​​🇨​​🇿​ ​🇼​​🇸​​🇿​​🇾​​🇸​​🇹​​🇰​​🇮​​🇪​
+              ​ZOBACZ WSZYSTKIE​
             </Link>
           </div>
         </section>
@@ -215,7 +215,7 @@ export default function Home() {
               <h2>Najaktywniejsze serwery</h2>
             </div>
             <Link href="/allservers" className="btn btn-ghost">
-              ​🇿​​🇴​​🇧​​🇦​​🇨​​🇿​ ​🇼​​🇸​​🇿​​🇾​​🇸​​🇹​​🇰​​🇮​​🇪​
+              ​ZOBACZ WSZYSTKIE​
             </Link>
           </div>
 
