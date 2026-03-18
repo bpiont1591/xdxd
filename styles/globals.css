@@ -607,3 +607,116 @@ button { cursor: pointer; }
     grid-template-columns: 1fr;
   }
 }
+
+
+.tag-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.community-stats {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 40px;
+  padding: 0 14px;
+  border-radius: 999px;
+  border: 1px solid var(--stroke);
+  background: rgba(255,255,255,.04);
+  color: #dbe5ff;
+  width: fit-content;
+  max-width: 100%;
+}
+
+.community-stats.compact {
+  min-height: 36px;
+  padding: 0 12px;
+}
+
+.community-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  background: rgba(150, 164, 203, .65);
+  box-shadow: 0 0 0 6px rgba(150, 164, 203, .08);
+  flex: 0 0 10px;
+}
+
+.community-text {
+  color: inherit;
+  font-size: .92rem;
+  white-space: normal;
+}
+
+.community-stats.is-online {
+  border-color: rgba(49,208,170,.28);
+  background: rgba(49,208,170,.1);
+  color: #e7fff8;
+}
+
+.community-stats.is-online .community-dot {
+  background: var(--success);
+  box-shadow: 0 0 0 6px rgba(49,208,170,.14);
+}
+
+.community-stats.is-error {
+  border-color: rgba(255,111,143,.26);
+  background: rgba(255,111,143,.08);
+  color: #ffe2ea;
+}
+
+.community-stats.is-error .community-dot {
+  background: var(--danger);
+  box-shadow: 0 0 0 6px rgba(255,111,143,.12);
+}
+
+.community-stats.is-idle {
+  border-color: rgba(246,181,95,.22);
+  background: rgba(246,181,95,.08);
+  color: #ffe9bf;
+}
+
+.community-stats.is-idle .community-dot {
+  background: var(--warning);
+  box-shadow: 0 0 0 6px rgba(246,181,95,.12);
+}
+
+.detail-left-stacked {
+  align-items: flex-start;
+}
+
+.detail-copy {
+  display: grid;
+  gap: 8px;
+}
+
+.detail-community-stats {
+  margin-top: 2px;
+}
+
+.community-metric-box {
+  position: relative;
+  overflow: hidden;
+}
+
+.community-metric-box::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(49,208,170,.08), rgba(124,115,255,.08));
+  pointer-events: none;
+}
+
+.community-metric-box strong,
+.community-metric-box span {
+  position: relative;
+  z-index: 1;
+}
+
+@media (max-width: 720px) {
+  .community-stats {
+    width: 100%;
+  }
+}

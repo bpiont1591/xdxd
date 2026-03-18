@@ -3,6 +3,7 @@ import DiscordServerIcon, { getDiscordServerIconCandidates } from "../../compone
 import Link from "next/link";
 import { signIn, useSession } from "next-auth/react";
 import BrandLogo from "../../components/BrandLogo";
+import ServerCommunityStats from "../../components/ServerCommunityStats";
 import { useState } from "react";
 
 
@@ -105,7 +106,7 @@ export default function ServerDetail({ server }) {
 
         <section className="server-detail container">
           <div className="detail-hero glass">
-            <div className="detail-left">
+            <div className="detail-left detail-left-stacked">
               <div className="server-avatar xl">
                 {iconUrl ? (
                   <DiscordServerIcon server={server} size={256} />
@@ -114,12 +115,25 @@ export default function ServerDetail({ server }) {
                 )}
               </div>
 
-              <div>
+              <div className="detail-copy">
                 <span className="badge">profil serwera</span>
                 <h1>{server.name}</h1>
                 <p className="muted large">
                   {server.description || "Brak opisu serwera."}
                 </p>
+
+                <ServerCommunityStats
+                  online={server.onlineCount}
+                  total={server.memberCount}
+                  status={
+                    Number.isFinite(Number(server.onlineCount)) || Number.isFinite(Number(server.memberCount))
+                      ? "available"
+                      : server.inviteUrl
+                      ? "idle"
+                      : "invalid"
+                  }
+                  className="detail-community-stats top-gap"
+                />
               </div>
             </div>
 
@@ -159,6 +173,14 @@ export default function ServerDetail({ server }) {
                 <div className="metric-box">
                   <strong>{reportCount}</strong>
                   <span>zgłoszeń</span>
+                </div>
+                <div className="metric-box community-metric-box">
+                  <strong>{Number.isFinite(Number(server.onlineCount)) ? Number(server.onlineCount).toLocaleString("pl-PL") : "--"}</strong>
+                  <span>osób online</span>
+                </div>
+                <div className="metric-box community-metric-box">
+                  <strong>{Number.isFinite(Number(server.memberCount)) ? Number(server.memberCount).toLocaleString("pl-PL") : "--"}</strong>
+                  <span>wszystkich członków</span>
                 </div>
                 <div className="metric-box">
                   <strong>{server.lastBumpAt ? new Date(server.lastBumpAt).toLocaleString() : "brak"}</strong>

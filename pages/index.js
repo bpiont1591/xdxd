@@ -5,6 +5,7 @@ import { useEffect, useMemo, useState } from "react";
 import DiscordServerIcon from "../components/DiscordServerIcon";
 import BrandLogo from "../components/BrandLogo";
 import DiscordGlyph from "../components/DiscordGlyph";
+import ServerCommunityStats from "../components/ServerCommunityStats";
 
 function formatTimeAgo(dateString) {
   if (!dateString) return "Nigdy";
@@ -260,6 +261,20 @@ export default function Home() {
                             {server.serverType === "nsfw" ? "NSFW 🔞" : "Publiczny"}
                           </span>
                         </div>
+
+                        <ServerCommunityStats
+                          online={server.onlineCount}
+                          total={server.memberCount}
+                          status={
+                            Number.isFinite(Number(server.onlineCount)) || Number.isFinite(Number(server.memberCount))
+                              ? "available"
+                              : server.inviteUrl
+                              ? "idle"
+                              : "invalid"
+                          }
+                          compact
+                          className="top-gap"
+                        />
 
                         <div className="tag-list">
                           {server.tags?.length ? (

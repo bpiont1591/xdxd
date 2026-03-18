@@ -1,6 +1,7 @@
 import { prisma } from "../../lib/prisma";
 import { normalizeServer } from "../../lib/storage";
 import { buildPublicServerMeta, filterAndSortServers } from "../../lib/stats";
+import { enrichServersWithInviteStats } from "../../lib/discord-invite-stats";
 
 export default async function handler(req, res) {
   if (req.method !== "GET") {
@@ -37,8 +38,9 @@ export default async function handler(req, res) {
       };
     });
 
-    const filtered = filterAndSortServers(approved, query, category, sort);
-    const meta = buildPublicServerMeta(approved);
+    const enriched = await enrichServersWithInviteStats(approved);
+    const filtered = filterAndSortServers(enriched, query, category, sort);
+    const meta = buildPublicServerMeta(enriched);
 
     return res.status(200).json({
       servers: filtered,
