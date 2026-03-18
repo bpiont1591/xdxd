@@ -1,7 +1,7 @@
 import Head from "next/head";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
-import { signIn, signOut, useSession } from "next-auth/react";
+import { signIn, useSession } from "next-auth/react";
 import DiscordServerIcon from "../components/DiscordServerIcon";
 import BrandLogo from "../components/BrandLogo";
 import DiscordGlyph from "../components/DiscordGlyph";
@@ -194,15 +194,8 @@ export default function Dashboard() {
 
       <main className="dashboard-shell premium dashboard-v10">
         <aside className="sidebar glass dashboard-sidebar slim-sidebar visible-sidebar">
-          <div className="sidebar-header deluxe">
+          <div className="sidebar-header deluxe dashboard-brand-row">
             <BrandLogo compact />
-
-            <button
-              className="btn btn-ghost"
-              onClick={() => signOut({ callbackUrl: "/" })}
-            >
-              Wyloguj
-            </button>
           </div>
 
           <div className="profile-card glass-lite compact-profile">
@@ -337,14 +330,16 @@ export default function Dashboard() {
                 </div>
 
                 <div className="button-row compact-actions">
-                  <a
-                    className="btn btn-primary"
-                    href={botAddUrl}
-                    target="_blank"
-                    rel="noreferrer"
-                  >
-                    Dodaj bota
-                  </a>
+                  {!selectedServer.botInstalled ? (
+                    <a
+                      className="btn btn-primary"
+                      href={botAddUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      Dodaj bota
+                    </a>
+                  ) : null}
                   <Link
                     className="btn btn-ghost"
                     href={`/servers/${selectedServer.id}`}
@@ -410,8 +405,8 @@ export default function Dashboard() {
                       </small>
                     </label>
 
-                    <div className="split-grid">
-                      <label className="field">
+                    <div className="split-grid dashboard-form-split">
+                      <label className="field field-featured">
                         <span>Tagi</span>
                         <input
                           type="text"
@@ -493,7 +488,7 @@ export default function Dashboard() {
                         </div>
                       </label>
 
-                      <label className="field">
+                      <label className="field field-featured">
                         <span>Invite URL</span>
                         <input
                           type="url"
@@ -506,9 +501,13 @@ export default function Dashboard() {
                           }
                           placeholder="https://discord.gg/twoj-link"
                         />
+                        <small className="muted">
+                          Wklej poprawny link zaproszenia do serwera. Będzie
+                          widoczny w katalogu i w podglądzie serwera.
+                        </small>
                       </label>
 
-                      <label className="field">
+                      <label className="field field-featured">
                         <span>Rodzaj serwera</span>
                         <select
                           className="select"
@@ -525,8 +524,8 @@ export default function Dashboard() {
                           <option value="nsfw">NSFW</option>
                         </select>
                         <small className="muted">
-                          Ustaw czy listing ma być zwykły publiczny czy
-                          oznaczony jako NSFW.
+                          Wybierz typ listingu. Ustawienie wpływa na oznaczenia
+                          widoczne w katalogu.
                         </small>
                       </label>
                     </div>
