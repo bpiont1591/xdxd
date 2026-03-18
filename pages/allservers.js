@@ -171,7 +171,7 @@ export default function AllServersPage() {
                             Ostatni: {formatTimeAgo(server.lastBumpAt)}
                           </span>
                           <span
-                            className={`metric ${
+                            className={`status-pill ${
                               server.serverType === "nsfw" ? "danger-text" : ""
                             }`}
                           >
