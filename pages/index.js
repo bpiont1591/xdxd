@@ -254,14 +254,27 @@ export default function Home() {
                       <div className="home-list-copy">
                         <div className="home-list-topline">
                           <h3>{server.name}</h3>
+
                           <span className="metric">
                             Bumpów: {server.bumpCount || 0}
                           </span>
+
                           <span className="metric">
                             ⭐ {server.favoriteCount || 0}
                           </span>
+
                           <span className="metric">
                             Ostatni: {formatTimeAgo(server.lastBumpAt)}
+                          </span>
+
+                          <span
+                            className={`status-pill ${
+                              server.serverType === "nsfw" ? "danger" : "ok"
+                            }`}
+                          >
+                            {server.serverType === "nsfw"
+                              ? "NSFW 🔞"
+                              : "Publiczny"}
                           </span>
                         </div>
 
