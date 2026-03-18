@@ -89,7 +89,7 @@ export default function AllServersPage() {
 
           <div className="toolbar wide allservers-filters">
             <form
-              className="searchbar"
+              className="searchbar searchbar-clean"
               onSubmit={(e) => {
                 e.preventDefault();
                 loadServers();
@@ -101,9 +101,6 @@ export default function AllServersPage() {
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
               />
-              <button className="btn btn-primary" type="submit">
-                Szukaj
-              </button>
             </form>
 
             <div className="select-wrap">
