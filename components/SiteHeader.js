@@ -1,139 +1,186 @@
 import Link from "next/link";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { signIn, signOut, useSession } from "next-auth/react";
-import BrandLogo from "./BrandLogo";
-import DiscordGlyph from "./DiscordGlyph";
 
-function MoreIcon() {
+const ADMIN_DISCORD_ID = "1418289596457812088";
+
+function IconHome() {
   return (
     <svg viewBox="0 0 24 24" aria-hidden="true">
-      <circle cx="5" cy="12" r="1.8" />
-      <circle cx="12" cy="12" r="1.8" />
-      <circle cx="19" cy="12" r="1.8" />
+      <path d="M12 3l9 8h-3v9h-5v-6H11v6H6v-9H3l9-8z" />
     </svg>
   );
 }
 
-export default function SiteHeader({ backHref = null, backLabel = "POWRÓT" }) {
+function IconServers() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M4 5h16v4H4V5zm0 5h16v4H4v-4zm0 5h16v4H4v-4z" />
+    </svg>
+  );
+}
+
+function IconPlus() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M11 5h2v14h-2V5zm-6 6h14v2H5v-2z" />
+    </svg>
+  );
+}
+
+function IconDashboard() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M4 4h7v7H4V4zm9 0h7v4h-7V4zM4 13h4v7H4v-7zm6 0h10v7H10v-7z" />
+    </svg>
+  );
+}
+
+function IconMore() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M6 10a2 2 0 110 4 2 2 0 010-4zm6 0a2 2 0 110 4 2 2 0 010-4zm6 0a2 2 0 110 4 2 2 0 010-4z" />
+    </svg>
+  );
+}
+
+function IconFile() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M6 2h9l5 5v15H6V2zm8 1.5V8h4.5L14 3.5zM8 11h8v2H8v-2zm0 4h8v2H8v-2z" />
+    </svg>
+  );
+}
+
+function IconMail() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M2 5h20v14H2V5zm10 7L4 7v10h16V7l-8 5z" />
+    </svg>
+  );
+}
+
+function IconShield() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M12 2l8 4v5c0 5.5-3.8 9.8-8 11-4.2-1.2-8-5.5-8-11V6l8-4z" />
+    </svg>
+  );
+}
+
+function IconLogout() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M10 4H4v16h6v-2H6V6h4V4zm7.59 7L14 7.41 15.41 6 21.83 12l-6.42 6L14 16.59 17.59 13H9v-2h8.59z" />
+    </svg>
+  );
+}
+
+export default function SiteHeader() {
   const { data: session, status } = useSession();
-  const isModerator = String(session?.user?.id || "") === "1418289596457812088";
   const [hidden, setHidden] = useState(false);
-  const [menuOpen, setMenuOpen] = useState(false);
-  const lastScrollY = useRef(0);
-  const menuRef = useRef(null);
+  const [lastY, setLastY] = useState(0);
+  const [openMore, setOpenMore] = useState(false);
+  const isModerator = String(session?.user?.id || "") === ADMIN_DISCORD_ID;
 
   useEffect(() => {
-    function onScroll() {
-      const currentY = window.scrollY || 0;
-      const goingDown = currentY > lastScrollY.current;
-      const shouldHide = currentY > 120 && goingDown;
-      setHidden(shouldHide);
-      lastScrollY.current = currentY;
-    }
+    const onScroll = () => {
+      const y = window.scrollY;
+      if (y > lastY && y > 140) setHidden(true);
+      else setHidden(false);
+      setLastY(y);
+    };
 
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
-  }, []);
+  }, [lastY]);
 
   useEffect(() => {
-    function onPointerDown(event) {
-      if (!menuRef.current?.contains(event.target)) {
-        setMenuOpen(false);
-      }
-    }
-
-    function onKeyDown(event) {
-      if (event.key === "Escape") setMenuOpen(false);
-    }
-
-    document.addEventListener("mousedown", onPointerDown);
-    document.addEventListener("keydown", onKeyDown);
-    return () => {
-      document.removeEventListener("mousedown", onPointerDown);
-      document.removeEventListener("keydown", onKeyDown);
-    };
+    const close = () => setOpenMore(false);
+    window.addEventListener("click", close);
+    return () => window.removeEventListener("click", close);
   }, []);
 
-  const moreLinks = useMemo(() => {
-    const links = [
-      { href: "/terms", label: "Regulamin" },
-      { href: "/allservers", label: "Wszystkie serwery" },
-    ];
-
-    if (backHref) {
-      links.unshift({ href: backHref, label: backLabel });
-    }
-
-    return links;
-  }, [backHref, backLabel]);
-
   return (
-    <header className={`topbar container site-header-muted ${hidden ? "is-hidden" : ""}`}>
-      <BrandLogo subtitle="LISTA SERWERÓW DISCORD" />
-
-      <div className="topbar-actions site-header-actions">
-        <Link href="/allservers" className="btn btn-ghost btn-soft">
-          Serwery
+    <div className={`site-header-wrap ${hidden ? "is-hidden" : ""}`}>
+      <header className="site-header container">
+        <Link href="/" className="site-header-logo" aria-label="Przejdź na stronę główną">
+          <img src="/allserver-logo.png" alt="disbumply.pl" />
+          <span>disbumply.pl</span>
         </Link>
 
-        <div className={`header-more ${menuOpen ? "is-open" : ""}`} ref={menuRef}>
-          <button
-            type="button"
-            className="btn btn-ghost btn-soft header-more-trigger"
-            onClick={() => setMenuOpen((value) => !value)}
-            aria-expanded={menuOpen}
-            aria-haspopup="menu"
-          >
-            <MoreIcon />
-            <span>Więcej</span>
-          </button>
+        <nav className="site-header-nav" aria-label="Główna nawigacja">
+          <Link href="/" className="site-nav-link">
+            <span className="site-nav-icon"><IconHome /></span>
+            <span>Start</span>
+          </Link>
 
-          <div className="header-more-menu" role="menu">
-            {moreLinks.map((link) => (
-              <Link
-                key={`${link.href}-${link.label}`}
-                href={link.href}
-                className="header-more-link"
-                role="menuitem"
-                onClick={() => setMenuOpen(false)}
-              >
-                {link.label}
-              </Link>
-            ))}
-          </div>
-        </div>
+          <Link href="/allservers" className="site-nav-link">
+            <span className="site-nav-icon"><IconServers /></span>
+            <span>Serwery</span>
+          </Link>
 
-        {status === "authenticated" ? (
-          <>
-            <Link href="/dashboard" className="btn btn-ghost btn-soft">
-              Dashboard
+          {status === "authenticated" ? (
+            <Link href="/dashboard" className="site-nav-link site-nav-link-primary">
+              <span className="site-nav-icon"><IconDashboard /></span>
+              <span>Dashboard</span>
             </Link>
-
-            {isModerator ? (
-              <Link href="/admin" className="btn btn-ghost btn-soft">
-                Moderacja
-              </Link>
-            ) : null}
-
+          ) : (
             <button
               type="button"
-              className="btn btn-ghost btn-soft"
-              onClick={() => signOut({ callbackUrl: "/" })}
+              className="site-nav-link site-nav-link-primary"
+              onClick={() => signIn("discord")}
             >
-              Wyloguj
+              <span className="site-nav-icon"><IconPlus /></span>
+              <span>Zaloguj</span>
             </button>
-          </>
-        ) : (
-          <button
-            type="button"
-            className="btn btn-primary btn-discord btn-soft-primary"
-            onClick={() => signIn("discord")}
-          >
-            <DiscordGlyph />
-            <span>Zaloguj się</span>
-          </button>
-        )}
-      </div>
-    </header>
+          )}
+
+          <div className="site-nav-more" onClick={(e) => e.stopPropagation()}>
+            <button
+              type="button"
+              className="site-nav-link"
+              onClick={() => setOpenMore((v) => !v)}
+            >
+              <span className="site-nav-icon"><IconMore /></span>
+              <span>Więcej</span>
+            </button>
+
+            {openMore ? (
+              <div className="site-nav-dropdown">
+                <Link href="/terms" className="site-dropdown-link">
+                  <span className="site-nav-icon"><IconFile /></span>
+                  <span>Regulamin</span>
+                </Link>
+                <Link href="/privacy" className="site-dropdown-link">
+                  <span className="site-nav-icon"><IconShield /></span>
+                  <span>Prywatność</span>
+                </Link>
+                <a href="mailto:kontakt@disbumply.pl" className="site-dropdown-link">
+                  <span className="site-nav-icon"><IconMail /></span>
+                  <span>Kontakt</span>
+                </a>
+                {isModerator ? (
+                  <Link href="/admin" className="site-dropdown-link">
+                    <span className="site-nav-icon"><IconShield /></span>
+                    <span>Moderacja</span>
+                  </Link>
+                ) : null}
+                {status === "authenticated" ? (
+                  <button
+                    type="button"
+                    className="site-dropdown-link site-dropdown-button"
+                    onClick={() => signOut({ callbackUrl: "/" })}
+                  >
+                    <span className="site-nav-icon"><IconLogout /></span>
+                    <span>Wyloguj</span>
+                  </button>
+                ) : null}
+              </div>
+            ) : null}
+          </div>
+        </nav>
+      </header>
+    </div>
   );
 }

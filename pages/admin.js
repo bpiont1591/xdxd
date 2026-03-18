@@ -2,7 +2,7 @@ import Head from "next/head";
 import Link from "next/link";
 import { Fragment, useEffect, useMemo, useState } from "react";
 import { signIn, signOut, useSession } from "next-auth/react";
-import SiteHeader from "../components/SiteHeader";
+import BrandLogo from "../components/BrandLogo";
 import DiscordGlyph from "../components/DiscordGlyph";
 
 const ADMIN_DISCORD_ID = "1418289596457812088";
@@ -287,7 +287,18 @@ export default function AdminPage() {
         <div className="ambient ambient-a" />
         <div className="ambient ambient-b" />
 
-        <SiteHeader backHref="/" backLabel="STRONA GŁÓWNA" />
+        <header className="topbar container">
+          <BrandLogo />
+
+          <div className="topbar-actions">
+            <button
+              className="btn btn-ghost"
+              onClick={() => signOut({ callbackUrl: "/" })}
+            >
+              Wyloguj Discord
+            </button>
+          </div>
+        </header>
 
         <section className="admin-section container">
           {!authenticated ? (

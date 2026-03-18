@@ -1,6 +1,6 @@
 import Head from "next/head";
 import Link from "next/link";
-import SiteHeader from "../../components/SiteHeader";
+import BrandLogo from "../../components/BrandLogo";
 
 export default function ServersPage() {
   return (
@@ -10,8 +10,8 @@ export default function ServersPage() {
       </Head>
 
       <main className="panel-page">
-        <SiteHeader backHref="/" backLabel="STRONA GŁÓWNA" />
         <div className="panel-only glass">
+          <BrandLogo />
           <h1>Serwery</h1>
           <p className="muted">Ta strona będzie rozwinięta później.</p>
 

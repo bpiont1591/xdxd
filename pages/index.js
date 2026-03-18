@@ -1,9 +1,9 @@
 import Head from "next/head";
 import Link from "next/link";
-import { signIn, useSession } from "next-auth/react";
+import { signIn, signOut, useSession } from "next-auth/react";
 import { useEffect, useMemo, useState } from "react";
 import DiscordServerIcon from "../components/DiscordServerIcon";
-import SiteHeader from "../components/SiteHeader";
+import BrandLogo from "../components/BrandLogo";
 import DiscordGlyph from "../components/DiscordGlyph";
 import ServerCommunityStats from "../components/ServerCommunityStats";
 
@@ -73,6 +73,7 @@ export default function Home() {
     [meta.categories]
   );
 
+  const isModerator = String(session?.user?.id || "") === "1418289596457812088";
 
   return (
     <>
@@ -88,7 +89,38 @@ export default function Home() {
         <div className="ambient ambient-a" />
         <div className="ambient ambient-b" />
 
-        <SiteHeader />
+        <header className="topbar container">
+          <BrandLogo />
+
+          <div className="topbar-actions">
+            {status === "authenticated" ? (
+              <>
+                <Link href="/dashboard" className="btn btn-ghost">
+                DASHBOARD
+                </Link>
+                {isModerator ? (
+                  <Link href="/admin" className="btn btn-ghost">
+                MODERACJA
+                  </Link>
+                ) : null}
+                <button
+                  className="btn btn-ghost"
+                  onClick={() => signOut({ callbackUrl: "/" })}
+                >
+                WYLOGUJ SIĘ
+                </button>
+              </>
+            ) : (
+              <button
+                className="btn btn-primary btn-discord"
+                onClick={() => signIn("discord")}
+              >
+                <DiscordGlyph />
+                <span>​ZALOGUJ SIĘ PRZEZ DISCORD​</span>
+              </button>
+            )}
+          </div>
+        </header>
 
         <section className="home-v9-hero container glass">
           <div className="home-v9-hero-copy compact">

@@ -2,7 +2,7 @@ import Head from "next/head";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import DiscordServerIcon from "../components/DiscordServerIcon";
-import SiteHeader from "../components/SiteHeader";
+import BrandLogo from "../components/BrandLogo";
 import ServerCommunityStats from "../components/ServerCommunityStats";
 
 function formatTimeAgo(dateString) {
@@ -163,7 +163,12 @@ export default function AllServersPage() {
         <div className="ambient ambient-a" />
         <div className="ambient ambient-b" />
 
-        <SiteHeader backHref="/" backLabel="STRONA GŁÓWNA" />
+        <header className="topbar container">
+          <BrandLogo />
+          <Link href="/" className="btn btn-ghost">
+            POWRÓT
+          </Link>
+        </header>
 
         <section className="container panel-card glass allservers-toolbar">
           <div className="section-head compact">
