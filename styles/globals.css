@@ -1770,4 +1770,78 @@ html {
     padding: 16px;
     border-radius: 18px;
   }
+  /* NAVBAR */
+
+.navbar {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  backdrop-filter: blur(12px);
+  background: rgba(5, 8, 22, 0.7);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.navbar-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 14px 16px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* LOGO */
+
+.navbar-logo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  text-decoration: none;
+  color: white;
+  font-weight: 600;
+}
+
+.navbar-logo img {
+  width: 28px;
+  height: 28px;
+}
+
+/* LINKS */
+
+.navbar-links {
+  display: flex;
+  gap: 20px;
+}
+
+.navbar-links a {
+  color: #cbd5ff;
+  text-decoration: none;
+  font-size: 0.95rem;
+  transition: 0.2s;
+}
+
+.navbar-links a:hover {
+  color: #ffffff;
+}
+
+/* BUTTON */
+
+.navbar-actions {
+  display: flex;
+}
+
+.navbar-btn {
+  padding: 8px 14px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #5865f2, #7c3aed);
+  color: white;
+  text-decoration: none;
+  font-size: 0.9rem;
+  transition: 0.2s;
+}
+
+.navbar-btn:hover {
+  opacity: 0.9;
+}
 }
