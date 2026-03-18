@@ -35,6 +35,15 @@ function buildTags(input = "", existing = []) {
   return next.slice(0, MAX_TAGS);
 }
 
+function formatCommunityStats(server) {
+  const online = Number(server?.onlineCount || 0);
+  const total = Number(server?.memberCount || 0);
+
+  if (online > 0 && total > 0) return `${online} online • ${total} razem`;
+  if (total > 0) return `${total} członków`;
+  return "Brak danych o społeczności";
+}
+
 function formatLastBump(value) {
   if (!value) return "Brak bumpa";
   return new Date(value).toLocaleString();
@@ -301,6 +310,10 @@ export default function Dashboard() {
                     <span className="badge">wybrany serwer</span>
                     <h1>{selectedServer.name}</h1>
                     <div className="tag-list top-gap">
+                      <span className="presence-pill presence-pill--wide">
+                        <span className="presence-dot" />
+                        {formatCommunityStats(selectedServer)}
+                      </span>
                       <span
                         className={`status-pill ${
                           selectedServer.botInstalled ? "ok" : "warn"
@@ -374,10 +387,8 @@ export default function Dashboard() {
                   <strong>{formatLastBump(selectedServer.lastBumpAt)}</strong>
                 </article>
                 <article className="overview-card glass">
-                  <span className="overview-label">Invite</span>
-                  <strong>
-                    {selectedServer.inviteUrl ? "Ustawiony" : "Brak"}
-                  </strong>
+                  <span className="overview-label">Społeczność</span>
+                  <strong>{formatCommunityStats(selectedServer)}</strong>
                 </article>
               </div>
 
@@ -471,6 +482,10 @@ export default function Dashboard() {
                         </small>
 
                         <div className="tag-list top-gap">
+                      <span className="presence-pill presence-pill--wide">
+                        <span className="presence-dot" />
+                        {formatCommunityStats(selectedServer)}
+                      </span>
                           {form.tags.length ? (
                             form.tags.map((tag) => (
                               <button
@@ -513,8 +528,9 @@ export default function Dashboard() {
 
                       <label className="field">
                         <span>Rodzaj serwera</span>
+                        <div className="select-wrap dashboard-select-wrap">
                         <select
-                          className="select"
+                          className="select select-dark"
                           value={form.serverType}
                           onChange={(e) =>
                             setForm((prev) => ({
@@ -527,6 +543,7 @@ export default function Dashboard() {
                           <option value="public">Publiczny</option>
                           <option value="nsfw">NSFW</option>
                         </select>
+                        </div>
                         <small className="muted">
                           Ustaw czy listing ma być zwykły publiczny czy
                           oznaczony jako NSFW.
@@ -571,6 +588,10 @@ export default function Dashboard() {
 
                       <div className="directory-card-meta">
                         <h3>{selectedServer.name}</h3>
+                        <span className="presence-pill presence-pill--compact top-gap-small">
+                          <span className="presence-dot" />
+                          {formatCommunityStats(selectedServer)}
+                        </span>
                         <span>
                           {selectedServer.lastBumpAt
                             ? "Aktywny listing"

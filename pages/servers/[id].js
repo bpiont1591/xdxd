@@ -4,6 +4,15 @@ import Link from "next/link";
 import { signIn, useSession } from "next-auth/react";
 import { useState } from "react";
 
+function formatCommunityStats(server) {
+  const online = Number(server?.onlineCount || 0);
+  const total = Number(server?.memberCount || 0);
+
+  if (online > 0 && total > 0) return `${online} online • ${total} razem`;
+  if (total > 0) return `${total} członków`;
+  return "Brak danych o społeczności";
+}
+
 
 export async function getServerSideProps({ params, req }) {
   const proto = req.headers["x-forwarded-proto"] || "http";
@@ -81,9 +90,9 @@ export default function ServerDetail({ server }) {
   return (
     <>
       <Head>
-        <title>{server.name} • DiscordBoard Premium</title>
-        <meta name="description" content={server.description || `Strona serwera ${server.name}`} />
-        <meta property="og:title" content={`${server.name} • DiscordBoard Premium`} />
+        <title>{server.name} • Bumply</title>
+        <meta name="description" content={server.description || `Strona serwera ${server.name}` } />
+        <meta property="og:title" content={`${server.name} • Bumply`} />
         <meta property="og:description" content={server.description || `Dołącz do serwera ${server.name}`} />
         {iconUrl ? <meta property="og:image" content={iconUrl} /> : null}
       </Head>
@@ -94,11 +103,7 @@ export default function ServerDetail({ server }) {
 
         <header className="topbar container">
           <Link href="/" className="brand brand-link">
-            <div className="brand-badge">DB</div>
-            <div>
-              <strong>DiscordBoard Premium</strong>
-              <span>Wróć do strony głównej</span>
-            </div>
+            <img src="/bumply-logo.png" alt="Bumply" className="site-logo" />
           </Link>
         </header>
 
@@ -116,6 +121,12 @@ export default function ServerDetail({ server }) {
               <div>
                 <span className="badge">profil serwera</span>
                 <h1>{server.name}</h1>
+                <div className="tag-list top-gap">
+                  <span className="presence-pill presence-pill--wide">
+                    <span className="presence-dot" />
+                    {formatCommunityStats(server)}
+                  </span>
+                </div>
                 <p className="muted large">
                   {server.description || "Brak opisu serwera."}
                 </p>
@@ -154,6 +165,10 @@ export default function ServerDetail({ server }) {
                 <div className="metric-box">
                   <strong>{favoriteCount}</strong>
                   <span>ulubionych</span>
+                </div>
+                <div className="metric-box">
+                  <strong>{formatCommunityStats(server)}</strong>
+                  <span>społeczność</span>
                 </div>
                 <div className="metric-box">
                   <strong>{reportCount}</strong>

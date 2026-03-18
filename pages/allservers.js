@@ -14,6 +14,15 @@ function formatTimeAgo(dateString) {
   return `${days} dni temu`;
 }
 
+function formatCommunityStats(server) {
+  const online = Number(server?.onlineCount || 0);
+  const total = Number(server?.memberCount || 0);
+
+  if (online > 0 && total > 0) return `${online} online • ${total} razem`;
+  if (total > 0) return `${total} członków`;
+  return "Brak danych o społeczności";
+}
+
 export default function AllServersPage() {
   const [servers, setServers] = useState([]);
   const [meta, setMeta] = useState({ categories: [] });
@@ -88,6 +97,10 @@ export default function AllServersPage() {
           </div>
 
           <div className="toolbar wide allservers-filters">
+            <div className="servers-toolbar-copy">
+              <span className="metric metric-strong">{servers.length} wyników</span>
+              <span className="muted">Lepszy układ, ciemne selecty i czytelniejsze filtrowanie.</span>
+            </div>
             <form
               className="searchbar searchbar-clean"
               onSubmit={(e) => {
@@ -161,6 +174,10 @@ export default function AllServersPage() {
                       <div className="home-list-copy">
                         <div className="home-list-topline">
                           <h3>{server.name}</h3>
+                          <span className="presence-pill">
+                            <span className="presence-dot" />
+                            {formatCommunityStats(server)}
+                          </span>
                           <span className="metric">
                             Bumpów: {server.bumpCount || 0}
                           </span>

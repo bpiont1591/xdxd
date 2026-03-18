@@ -15,6 +15,15 @@ function formatTimeAgo(dateString) {
   return `${days} dni temu`;
 }
 
+function formatCommunityStats(server) {
+  const online = Number(server?.onlineCount || 0);
+  const total = Number(server?.memberCount || 0);
+
+  if (online > 0 && total > 0) return `${online} online • ${total} razem`;
+  if (total > 0) return `${total} członków`;
+  return "Brak danych o społeczności";
+}
+
 export default function Home() {
   const { data: session, status } = useSession();
   const [servers, setServers] = useState([]);
@@ -251,6 +260,11 @@ export default function Home() {
                       <div className="home-list-copy">
                         <div className="home-list-topline">
                           <h3>{server.name}</h3>
+
+                          <span className="presence-pill">
+                            <span className="presence-dot" />
+                            {formatCommunityStats(server)}
+                          </span>
 
                           <span className="metric">
                             Bumpów: {server.bumpCount || 0}
