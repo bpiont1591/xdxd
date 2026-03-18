@@ -76,52 +76,101 @@ function IconLogout() {
   );
 }
 
+function IconMenu() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M4 7h16v2H4V7zm0 5h16v2H4v-2zm0 5h16v2H4v-2z" />
+    </svg>
+  );
+}
+
+function IconClose() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M18.3 5.71L12 12l6.3 6.29-1.41 1.41L10.59 13.41 4.29 19.7 2.88 18.29 9.17 12 2.88 5.71 4.29 4.3l6.3 6.29 6.29-6.3z" />
+    </svg>
+  );
+}
+
 export default function SiteHeader() {
   const { data: session, status } = useSession();
   const [hidden, setHidden] = useState(false);
   const [lastY, setLastY] = useState(0);
   const [openMore, setOpenMore] = useState(false);
+  const [openMobile, setOpenMobile] = useState(false);
   const isModerator = String(session?.user?.id || "") === ADMIN_DISCORD_ID;
 
   useEffect(() => {
     const onScroll = () => {
       const y = window.scrollY;
-      if (y > lastY && y > 140) setHidden(true);
+      if (!openMobile && y > lastY && y > 140) setHidden(true);
       else setHidden(false);
       setLastY(y);
     };
 
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
-  }, [lastY]);
+  }, [lastY, openMobile]);
 
   useEffect(() => {
-    const close = () => setOpenMore(false);
+    const close = () => {
+      setOpenMore(false);
+    };
     window.addEventListener("click", close);
     return () => window.removeEventListener("click", close);
   }, []);
 
+  useEffect(() => {
+    const onResize = () => {
+      if (window.innerWidth > 820) setOpenMobile(false);
+    };
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, []);
+
+  useEffect(() => {
+    document.body.style.overflow = openMobile ? "hidden" : "";
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [openMobile]);
+
+  const closeMenus = () => {
+    setOpenMore(false);
+    setOpenMobile(false);
+  };
+
   return (
     <div className={`site-header-wrap ${hidden ? "is-hidden" : ""}`}>
       <header className="site-header container">
-        <Link href="/" className="site-header-logo" aria-label="Przejdź na stronę główną">
+        <Link href="/" className="site-header-logo" aria-label="Przejdź na stronę główną" onClick={closeMenus}>
           <img src="/allserver-logo.png" alt="disbumply.pl" />
           <span>disbumply.pl</span>
         </Link>
 
-        <nav className="site-header-nav" aria-label="Główna nawigacja">
-          <Link href="/" className="site-nav-link">
+        <button
+          type="button"
+          className="site-mobile-toggle"
+          aria-label={openMobile ? "Zamknij menu" : "Otwórz menu"}
+          aria-expanded={openMobile}
+          onClick={() => setOpenMobile((v) => !v)}
+        >
+          <span className="site-nav-icon">{openMobile ? <IconClose /> : <IconMenu />}</span>
+        </button>
+
+        <nav className={`site-header-nav ${openMobile ? "is-open" : ""}`} aria-label="Główna nawigacja">
+          <Link href="/" className="site-nav-link" onClick={closeMenus}>
             <span className="site-nav-icon"><IconHome /></span>
             <span>Start</span>
           </Link>
 
-          <Link href="/allservers" className="site-nav-link">
+          <Link href="/allservers" className="site-nav-link" onClick={closeMenus}>
             <span className="site-nav-icon"><IconServers /></span>
             <span>Serwery</span>
           </Link>
 
           {status === "authenticated" ? (
-            <Link href="/dashboard" className="site-nav-link site-nav-link-primary">
+            <Link href="/dashboard" className="site-nav-link site-nav-link-primary" onClick={closeMenus}>
               <span className="site-nav-icon"><IconDashboard /></span>
               <span>Dashboard</span>
             </Link>
@@ -129,7 +178,10 @@ export default function SiteHeader() {
             <button
               type="button"
               className="site-nav-link site-nav-link-primary"
-              onClick={() => signIn("discord")}
+              onClick={() => {
+                closeMenus();
+                signIn("discord");
+              }}
             >
               <span className="site-nav-icon"><IconPlus /></span>
               <span>Zaloguj</span>
@@ -148,20 +200,20 @@ export default function SiteHeader() {
 
             {openMore ? (
               <div className="site-nav-dropdown">
-                <Link href="/terms" className="site-dropdown-link">
+                <Link href="/terms" className="site-dropdown-link" onClick={closeMenus}>
                   <span className="site-nav-icon"><IconFile /></span>
                   <span>Regulamin</span>
                 </Link>
-                <Link href="/privacy" className="site-dropdown-link">
+                <Link href="/privacy" className="site-dropdown-link" onClick={closeMenus}>
                   <span className="site-nav-icon"><IconShield /></span>
                   <span>Prywatność</span>
                 </Link>
-                <a href="mailto:kontakt@disbumply.pl" className="site-dropdown-link">
+                <a href="mailto:kontakt@disbumply.pl" className="site-dropdown-link" onClick={closeMenus}>
                   <span className="site-nav-icon"><IconMail /></span>
                   <span>Kontakt</span>
                 </a>
                 {isModerator ? (
-                  <Link href="/admin" className="site-dropdown-link">
+                  <Link href="/admin" className="site-dropdown-link" onClick={closeMenus}>
                     <span className="site-nav-icon"><IconShield /></span>
                     <span>Moderacja</span>
                   </Link>
@@ -170,7 +222,10 @@ export default function SiteHeader() {
                   <button
                     type="button"
                     className="site-dropdown-link site-dropdown-button"
-                    onClick={() => signOut({ callbackUrl: "/" })}
+                    onClick={() => {
+                      closeMenus();
+                      signOut({ callbackUrl: "/" });
+                    }}
                   >
                     <span className="site-nav-icon"><IconLogout /></span>
                     <span>Wyloguj</span>
