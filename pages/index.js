@@ -96,18 +96,18 @@ export default function Home() {
             {status === "authenticated" ? (
               <>
                 <Link href="/dashboard" className="btn btn-ghost">
-                  ​<p>DASHBOARD</p>
+                ​<p>DASHBOARD</p>
                 </Link>
                 {isModerator ? (
                   <Link href="/admin" className="btn btn-ghost">
-                    <p>MODERACJA</p>​
+                <p>MODERACJA</p>​
                   </Link>
                 ) : null}
                 <button
                   className="btn btn-ghost"
                   onClick={() => signOut({ callbackUrl: "/" })}
                 >
-                 <p>WYLOGUJ SIĘ</p> ​
+                <p>WYLOGUJ SIĘ</p> ​
                 </button>
               </>
             ) : (
