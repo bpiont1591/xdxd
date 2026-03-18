@@ -1,38 +1,49 @@
 import Link from "next/link";
+import {
+  FaFacebookF,
+  FaDiscord,
+  FaEnvelope,
+  FaShieldAlt,
+  FaFileContract,
+  FaFolderOpen,
+  FaPlusCircle,
+  FaBullhorn,
+  FaBookOpen,
+} from "react-icons/fa";
 
 const usefulLinks = [
-  { name: "Warunki korzystania", href: "/terms" },
-  { name: "Polityka prywatności", href: "/privacy" },
-  { name: "Wszystkie serwery", href: "/servers" },
-  { name: "Dodaj nowy serwer", href: "/add-server" },
-];
-
-const otherLinks = [
-  { name: "Facebook", href: "#" },
-  { name: "Promuj serwer", href: "/promote" },
+  { name: "Warunki korzystania", href: "/terms", icon: <FaFileContract /> },
+  { name: "Polityka prywatności", href: "/privacy", icon: <FaShieldAlt /> },
+  { name: "Wszystkie serwery", href: "/servers", icon: <FaFolderOpen /> },
+  { name: "Dodaj nowy serwer", href: "/add-server", icon: <FaPlusCircle /> },
 ];
 
 const helpLinks = [
-  { name: "Kontakt", href: "/contact" },
-  { name: "kontakt@disbumply.pl", href: "mailto:kontakt@disbumply.pl" },
-  { name: "Serwer Discord", href: "#" },
-  { name: "Baza wiedzy", href: "/help" },
+  { name: "kontakt@disbumply.pl", href: "mailto:kontakt@disbumply.pl", icon: <FaEnvelope /> },
+  { name: "Serwer Discord", href: "#", icon: <FaDiscord /> },
 ];
 
-function FooterLink({ href, children }) {
+function FooterLink({ href, icon, children }) {
   const isExternal = href.startsWith("http") || href.startsWith("mailto:");
+
+  const content = (
+    <>
+      <span className="footer-link-icon">{icon}</span>
+      <span>{children}</span>
+    </>
+  );
 
   if (isExternal) {
     return (
       <a href={href} className="footer-pill" target="_blank" rel="noreferrer">
-        {children}
+        {content}
       </a>
     );
   }
 
   return (
     <Link href={href} className="footer-pill">
-      {children}
+      {content}
     </Link>
   );
 }
@@ -55,7 +66,7 @@ export default function Footer() {
             <p className="footer-description">
               disbumply.pl to katalog polskich serwerów Discord. Odkrywaj nowe
               społeczności, promuj własny serwer i trafiaj do ludzi, którzy
-              faktycznie szukają aktywnej ekipy, a nie kolejnej martwej listy.
+              faktycznie szukają aktywnej ekipy.
             </p>
 
             <p className="footer-madeby">
@@ -67,7 +78,7 @@ export default function Footer() {
             <h3>Przydatne linki</h3>
             <div className="footer-links">
               {usefulLinks.map((link) => (
-                <FooterLink key={link.name} href={link.href}>
+                <FooterLink key={link.name} href={link.href} icon={link.icon}>
                   {link.name}
                 </FooterLink>
               ))}
@@ -78,7 +89,7 @@ export default function Footer() {
             <h3>Inne</h3>
             <div className="footer-links">
               {otherLinks.map((link) => (
-                <FooterLink key={link.name} href={link.href}>
+                <FooterLink key={link.name} href={link.href} icon={link.icon}>
                   {link.name}
                 </FooterLink>
               ))}
@@ -89,7 +100,7 @@ export default function Footer() {
             <h3>Pomoc</h3>
             <div className="footer-links">
               {helpLinks.map((link) => (
-                <FooterLink key={link.name} href={link.href}>
+                <FooterLink key={link.name} href={link.href} icon={link.icon}>
                   {link.name}
                 </FooterLink>
               ))}
