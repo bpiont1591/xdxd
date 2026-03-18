@@ -78,10 +78,10 @@ export default function Home() {
   return (
     <>
       <Head>
-        <title>Bumply</title>
+        <title>DisBumply.pl</title>
         <meta
           name="description"
-          content="Polski katalog serwerów Discord z wyszukiwarką, kategoriami, ulubionymi i panelem właściciela."
+          content="Polski katalog serwerów Discord"
         />
       </Head>
 
@@ -96,18 +96,18 @@ export default function Home() {
             {status === "authenticated" ? (
               <>
                 <Link href="/dashboard" className="btn btn-ghost">
-                  ​🇩​​🇦​​🇸​​🇭​​🇧​​🇴​​🇦​​🇷​​🇩​
+                  ​<p>DASHBOARD</p>
                 </Link>
                 {isModerator ? (
                   <Link href="/admin" className="btn btn-ghost">
-                    ​🇲​​🇴​​🇩​​🇪​​🇷​​🇦​​🇨​​🇯​​🇦​
+                    <P>MODERACJA</P>​
                   </Link>
                 ) : null}
                 <button
                   className="btn btn-ghost"
                   onClick={() => signOut({ callbackUrl: "/" })}
                 >
-                  ​🇼​​🇾​​🇱​​🇴​​🇬​​🇺​​🇯​
+                 <P>WYLOGUJ SIĘ</P> ​
                 </button>
               </>
             ) : (
