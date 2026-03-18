@@ -6,7 +6,7 @@ export default function ServersPage() {
   return (
     <>
       <Head>
-        <title>Serwery • Bumply</title>
+        <title>Serwery • allserver</title>
       </Head>
 
       <main className="panel-page">

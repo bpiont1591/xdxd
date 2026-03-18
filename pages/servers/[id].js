@@ -83,9 +83,9 @@ export default function ServerDetail({ server }) {
   return (
     <>
       <Head>
-        <title>{server.name} • Bumply</title>
+        <title>{server.name} • allserver</title>
         <meta name="description" content={server.description || `Strona serwera ${server.name}`} />
-        <meta property="og:title" content={`${server.name} • Bumply`} />
+        <meta property="og:title" content={`${server.name} • allserver`} />
         <meta property="og:description" content={server.description || `Dołącz do serwera ${server.name}`} />
         {iconUrl ? <meta property="og:image" content={iconUrl} /> : null}
       </Head>
@@ -95,13 +95,7 @@ export default function ServerDetail({ server }) {
         <div className="ambient ambient-b" />
 
         <header className="topbar container">
-          <Link href="/" className="brand brand-link">
-            <div className="brand-badge">DB</div>
-            <div>
-              <strong>Bumply</strong>
-              <span>Wróć do strony głównej</span>
-            </div>
-          </Link>
+          <BrandLogo subtitle="Wróć do strony głównej" />
         </header>
 
         <section className="server-detail container">

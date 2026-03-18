@@ -138,7 +138,7 @@ export default function AdminPage() {
   return (
     <>
       <Head>
-        <title>Moderacja • Bumply</title>
+        <title>Moderacja • allserver</title>
       </Head>
 
       <main className="site-shell">
