@@ -156,9 +156,6 @@ export default function Dashboard() {
       <main className="panel-page">
         <div className="panel-only glass">
           <h1>Musisz się zalogować</h1>
-          <p className="muted">
-            Bez Discord OAuth nie wiemy jakimi serwerami zarządzasz.
-          </p>
           <button
             className="btn btn-primary btn-discord"
             onClick={() => signIn("discord")}
