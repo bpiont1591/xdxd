@@ -1,6 +1,7 @@
 import "../styles/globals.css";
 import { SessionProvider } from "next-auth/react";
 import Head from "next/head";
+import Footer from "../components/Footer";
 
 export default function App({ Component, pageProps: { session, ...pageProps } }) {
   return (
@@ -8,7 +9,10 @@ export default function App({ Component, pageProps: { session, ...pageProps } })
       <Head>
         <link rel="icon" href="/favicon.ico" />
       </Head>
+
       <Component {...pageProps} />
+
+      <Footer />
     </SessionProvider>
   );
 }
