@@ -147,7 +147,7 @@ export default function AdminPage() {
             <img
               src="/bumply-logo.png"
               alt="Bumply"
-              style={{ height: "150px", width: "auto", display: "block" }}
+              className="site-logo"
             />
           </Link>
 
@@ -221,7 +221,7 @@ export default function AdminPage() {
                         <span className="metric">Bot: {server.botInstalled ? "tak" : "nie"}</span>
                         <span className="metric">Bumpy: {server.bumpCount || 0}</span>
                         <span className="metric">Invite: {server.inviteUrl ? "ustawiony" : "brak"}</span>
-                        <span className={`metric ${server.serverType === "nsfw" ? "danger-text" : ""}`}>Typ: {server.serverType === "nsfw" ? "NSFW" : "Publiczny"}</span>
+                        <span className={`server-type-pill ${server.serverType === "nsfw" ? "nsfw" : "public"}`}>{server.serverType === "nsfw" ? "NSFW 🔞" : "Publiczny"}</span>
                       </div>
 
                       <div className="button-row">

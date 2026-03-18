@@ -91,7 +91,7 @@ export default function Home() {
             <img
               src="/bumply-logo.png"
               alt="Bumply"
-              style={{ height: "200px", width: "auto", display: "block" }}
+              className="site-logo"
             />
           </Link>
 
@@ -142,7 +142,7 @@ export default function Home() {
           </div>
 
           <form
-            className="directory-search home-v9-search"
+            className="directory-search home-v9-search searchbar-clean"
             onSubmit={(e) => {
               e.preventDefault();
               loadServers();
@@ -154,9 +154,6 @@ export default function Home() {
               value={query}
               onChange={(e) => setQuery(e.target.value)}
             />
-            <button className="btn btn-primary" type="submit">
-              Szukaj
-            </button>
           </form>
 
           <div className="home-v9-actions">
@@ -267,14 +264,8 @@ export default function Home() {
                             Ostatni: {formatTimeAgo(server.lastBumpAt)}
                           </span>
 
-                          <span
-                            className={`status-pill ${
-                              server.serverType === "nsfw" ? "danger" : "ok"
-                            }`}
-                          >
-                            {server.serverType === "nsfw"
-                              ? "NSFW 🔞"
-                              : "Publiczny"}
+                          <span className={`server-type-pill ${server.serverType === "nsfw" ? "nsfw" : "public"}`}>
+                            {server.serverType === "nsfw" ? "NSFW 🔞" : "Publiczny"}
                           </span>
                         </div>
 

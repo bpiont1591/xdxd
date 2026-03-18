@@ -196,7 +196,7 @@ export default function Dashboard() {
               <img
                 src="/bumply-logo.png"
                 alt="Bumply"
-                style={{ height: "80px", width: "auto", display: "block" }}
+                className="site-logo site-logo--sidebar"
               />
             </Link>
 
@@ -606,8 +606,8 @@ export default function Dashboard() {
                             ? "Bot online"
                             : "Bot brak"}
                         </span>
-                        <span className="metric">
-                          Typ: {form.serverType === "nsfw" ? "NSFW" : "Publiczny"}
+                        <span className={`server-type-pill ${form.serverType === "nsfw" ? "nsfw" : "public"}`}>
+                          {form.serverType === "nsfw" ? "NSFW 🔞" : "Publiczny"}
                         </span>
                       </div>
                     </div>
