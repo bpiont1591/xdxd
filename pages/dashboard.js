@@ -161,18 +161,18 @@ export default function Dashboard() {
   return (
     <>
       <Head>
-        <title>Dashboard • DiscordBoard Premium</title>
+        <title>Dashboard • Bumply</title>
       </Head>
 
       <main className="dashboard-shell premium dashboard-v10">
         <aside className="sidebar glass dashboard-sidebar slim-sidebar visible-sidebar">
           <div className="sidebar-header deluxe">
             <Link href="/" className="brand brand-link">
-              <div className="brand-badge">DB</div>
-              <div>
-                <strong>DiscordBoard</strong>
-                <span>Strona główna</span>
-              </div>
+              <img
+                src="/bumply-logo.png"
+                alt="Bumply"
+                style={{ height: "56px", width: "auto", display: "block" }}
+              />
             </Link>
 
             <button className="btn btn-ghost" onClick={() => signOut({ callbackUrl: "/" })}>
@@ -248,6 +248,23 @@ export default function Dashboard() {
         </aside>
 
         <section className="content-panel">
+          <div
+            className="glass"
+            style={{
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              padding: "20px",
+              borderRadius: "26px"
+            }}
+          >
+            <img
+              src="/bumply-logo.svg"
+              alt="Bumply"
+              style={{ height: "110px", width: "auto", display: "block" }}
+            />
+          </div>
+
           {selectedServer ? (
             <>
               <div className="dashboard-banner glass compact-banner">
@@ -407,6 +424,7 @@ export default function Dashboard() {
                       <label className="field">
                         <span>Rodzaj serwera</span>
                         <select
+                          className="select"
                           value={form.serverType}
                           onChange={(e) => setForm((prev) => ({ ...prev, serverType: e.target.value === "nsfw" ? "nsfw" : "public" }))}
                         >
