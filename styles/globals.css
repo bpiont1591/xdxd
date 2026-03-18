@@ -1431,110 +1431,64 @@ body {
     gap: 12px;
   }
 }
-
-
-/* global dark controls fix: no white dropdowns, no white detail blocks */
-:root {
-  color-scheme: dark;
+.site-footer {
+  margin-top: 80px;
+  padding: 70px 20px 30px;
+  background: linear-gradient(180deg, #050816 0%, #040611 100%);
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
 }
 
-select,
-option,
-input,
-textarea,
-summary,
-details,
-.admin-panel-pro select,
-.admin-panel-pro option,
-.admin-panel-pro input,
-.admin-panel-pro textarea,
-.admin-panel-pro summary,
-.admin-panel-pro details {
-  color: var(--text) !important;
+.footer-container {
+  max-width: 1280px;
+  margin: 0 auto;
 }
 
-select,
-input,
-textarea,
-.admin-panel-pro select,
-.admin-panel-pro input,
-.admin-panel-pro textarea {
-  background: rgba(255,255,255,.03) !important;
-  border: 1px solid rgba(148,163,184,.14) !important;
+.footer-grid {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr 0.8fr 1fr;
+  gap: 32px;
 }
 
-select,
-.admin-panel-pro select {
-  -webkit-appearance: none;
-  -moz-appearance: none;
-  appearance: none;
+.footer-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 18px;
 }
 
-option,
-optgroup,
-.admin-panel-pro option,
-.admin-panel-pro optgroup {
-  background: #0d1320 !important;
-  color: #e5edf9 !important;
+.footer-image-logo {
+  width: 48px;
+  height: 48px;
+  object-fit: contain;
 }
 
-select:focus,
-input:focus,
-textarea:focus,
-.admin-panel-pro select:focus,
-.admin-panel-pro input:focus,
-.admin-panel-pro textarea:focus {
-  outline: none;
-  background: rgba(255,255,255,.05) !important;
-  border-color: rgba(96,165,250,.36) !important;
-  box-shadow: 0 0 0 3px rgba(59,130,246,.18) !important;
+.footer-description {
+  color: #aab3d3;
+  line-height: 1.7;
 }
 
-summary,
-details,
-.admin-panel-pro summary,
-.admin-panel-pro details,
-.admin-panel-pro .detail-row,
-.admin-panel-pro .detail-row td,
-.admin-panel-pro .detail-panel,
-.admin-panel-pro .detail-block {
-  background: linear-gradient(180deg, rgba(13,18,31,.96), rgba(10,14,24,.93)) !important;
+.footer-links {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
 
-summary {
-  cursor: pointer;
+.footer-pill {
+  padding: 12px 16px;
+  border-radius: 14px;
+  background: rgba(255,255,255,0.04);
+  text-decoration: none;
+  color: #d8def7;
+  transition: 0.2s;
 }
 
-summary::-webkit-details-marker {
-  filter: invert(1);
+.footer-pill:hover {
+  background: rgba(88,101,242,0.15);
+  color: white;
 }
 
-.admin-panel-pro .server-table select,
-.admin-panel-pro .server-table .select,
-.admin-panel-pro .table-actions .btn-ghost,
-.admin-panel-pro .table-actions .btn-disabled {
-  background: rgba(255,255,255,.04) !important;
-  color: var(--text) !important;
-  border-color: rgba(148,163,184,.14) !important;
+.footer-bottom {
+  margin-top: 40px;
+  color: #7f8bb3;
 }
 
-input::placeholder,
-textarea::placeholder,
-.admin-panel-pro input::placeholder,
-.admin-panel-pro textarea::placeholder {
-  color: var(--muted) !important;
-}
-
-input:-webkit-autofill,
-input:-webkit-autofill:hover,
-input:-webkit-autofill:focus,
-textarea:-webkit-autofill,
-textarea:-webkit-autofill:hover,
-textarea:-webkit-autofill:focus,
-select:-webkit-autofill,
-select:-webkit-autofill:hover,
-select:-webkit-autofill:focus {
-  -webkit-text-fill-color: #e5edf9 !important;
-  -webkit-box-shadow: 0 0 0px 1000px #0d1320 inset !important;
-  transition: background-color 9999s ease-in-out 0s;
-}
