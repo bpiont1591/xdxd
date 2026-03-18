@@ -95,7 +95,13 @@ export default function ServerDetail({ server }) {
         <div className="ambient ambient-b" />
 
         <header className="topbar container">
-          <BrandLogo subtitle="Wróć do strony głównej" />
+          <Link href="/" className="brand brand-link">
+            <div className="brand-badge image-mark"><img src="/allserver-logo.png" alt="" /></div>
+            <div>
+              <strong>allserver</strong>
+              <span>Wróć do strony głównej</span>
+            </div>
+          </Link>
         </header>
 
         <section className="server-detail container">

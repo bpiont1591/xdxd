@@ -1,9 +1,9 @@
 import Link from "next/link";
 
-export default function BrandLogo({ href = "/", compact = false, subtitle = "katalog społeczności Discord" }) {
+export default function BrandLogo({ href = "/", compact = false, subtitle = "Lista serwerów i dashboard" }) {
   return (
     <Link href={href} className={`brand brand-link ${compact ? "compact" : ""}`}>
-      <span className="brand-mark" aria-hidden="true">
+      <span className="brand-mark image-mark" aria-hidden="true">
         <img src="/allserver-logo.png" alt="" />
       </span>
       <span className="brand-copy">
