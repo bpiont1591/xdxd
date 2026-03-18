@@ -1,9 +1,8 @@
 import Head from "next/head";
 import DiscordServerIcon, { getDiscordServerIconCandidates } from "../../components/DiscordServerIcon";
-import Link from "next/link";
 import { signIn, useSession } from "next-auth/react";
-import BrandLogo from "../../components/BrandLogo";
 import ServerCommunityStats from "../../components/ServerCommunityStats";
+import SiteHeader from "../../components/SiteHeader";
 import { useState } from "react";
 
 
@@ -94,14 +93,7 @@ export default function ServerDetail({ server }) {
         <div className="ambient ambient-a" />
         <div className="ambient ambient-b" />
 
-        <header className="topbar container">
-          <Link href="/" className="brand brand-link">
-            <div className="brand-badge image-mark"><img src="/allserver-logo.png" alt="" /></div>
-            <div>
-              <strong>​DISCBUMPLY.PL​</strong>
-            </div>
-          </Link>
-        </header>
+        <SiteHeader backHref="/allservers" backLabel="WSZYSTKIE SERWERY" />
 
         <section className="server-detail container">
           <div className="detail-hero glass">
