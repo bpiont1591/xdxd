@@ -163,7 +163,7 @@ export default function Home() {
               </button>
             )}
             <Link href="/allservers" className="btn btn-ghost">
-              Zobacz wszystkie
+              ​🇿​​🇴​​🇧​​🇦​​🇨​​🇿​ ​🇼​​🇸​​🇿​​🇾​​🇸​​🇹​​🇰​​🇮​​🇪​
             </Link>
           </div>
         </section>
@@ -215,7 +215,7 @@ export default function Home() {
               <h2>Najaktywniejsze serwery</h2>
             </div>
             <Link href="/allservers" className="btn btn-ghost">
-              Zobacz wszystkie
+              ​🇿​​🇴​​🇧​​🇦​​🇨​​🇿​ ​🇼​​🇸​​🇿​​🇾​​🇸​​🇹​​🇰​​🇮​​🇪​
             </Link>
           </div>
 
