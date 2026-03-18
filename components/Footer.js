@@ -97,11 +97,11 @@ export default function Footer() {
                 alt="disbumply.pl logo"
                 className="footer-image-logo"
               />
-              <h2>disbumply.pl</h2>
+              <h2>DISBUMPLY.PL</h2>
             </div>
 
             <p className="footer-description">
-              disbumply.pl to katalog polskich serwerów Discord. Odkrywaj nowe
+              DISBUMPLY.PL to katalog polskich serwerów Discord. Odkrywaj nowe
               społeczności i promuj własny serwer.
             </p>
 
