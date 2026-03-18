@@ -1,12 +1,50 @@
 import Head from "next/head";
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { Fragment, useEffect, useMemo, useState } from "react";
 import { signIn, signOut, useSession } from "next-auth/react";
 import BrandLogo from "../components/BrandLogo";
 import DiscordGlyph from "../components/DiscordGlyph";
 
 const ADMIN_DISCORD_ID = "1418289596457812088";
 const PAGE_SIZE = 8;
+
+const STATUS_LABELS = {
+  pending: "Oczekuje",
+  approved: "Zatwierdzony",
+  rejected: "Odrzucony"
+};
+
+const TYPE_LABELS = {
+  public: "Publiczny",
+  nsfw: "NSFW"
+};
+
+function getStatusLabel(status) {
+  return STATUS_LABELS[status] || status;
+}
+
+function getTypeLabel(type) {
+  return TYPE_LABELS[type] || type;
+}
+
+function normalizeTags(tags) {
+  if (Array.isArray(tags)) return tags;
+  if (typeof tags === "string") {
+    return tags.split(",").map((tag) => tag.trim()).filter(Boolean);
+  }
+  return [];
+}
+
+function getReportCount(server) {
+  if (Array.isArray(server?.reports)) return server.reports.length;
+  if (typeof server?.reportCount === "number") return server.reportCount;
+  if (typeof server?._count?.reports === "number") return server._count.reports;
+  return 0;
+}
+
+function getReports(server) {
+  return Array.isArray(server?.reports) ? server.reports : [];
+}
 
 export default function AdminPage() {
   const { data: session, status } = useSession();
@@ -133,7 +171,7 @@ export default function AdminPage() {
         server.name,
         server.description,
         server.inviteUrl,
-        ...(server.tags || [])
+        ...normalizeTags(server.tags)
       ].filter(Boolean).some((value) => String(value).toLowerCase().includes(phrase));
 
       const matchesStatus = statusFilter === "all" || server.moderationStatus === statusFilter;
@@ -204,9 +242,6 @@ export default function AdminPage() {
           <BrandLogo />
 
           <div className="topbar-actions">
-            {authenticated && (
-              <button className="btn btn-ghost" onClick={logoutAdmin}>Wyloguj panel</button>
-            )}
             <button className="btn btn-ghost" onClick={() => signOut({ callbackUrl: "/" })}>
               Wyloguj Discord
             </button>
@@ -251,7 +286,7 @@ export default function AdminPage() {
 
               <div className="admin-stats-grid">
                 <div className="metric-box soft-card"><span>Wszystkie</span><strong>{stats.total}</strong></div>
-                <div className="metric-box soft-card"><span>Pending</span><strong>{stats.pending}</strong></div>
+                <div className="metric-box soft-card"><span>Oczekujące</span><strong>{stats.pending}</strong></div>
                 <div className="metric-box soft-card"><span>Zatwierdzone</span><strong>{stats.approved}</strong></div>
                 <div className="metric-box soft-card"><span>Odrzucone</span><strong>{stats.rejected}</strong></div>
                 <div className="metric-box soft-card"><span>Z botem</span><strong>{stats.withBot}</strong></div>
@@ -274,9 +309,9 @@ export default function AdminPage() {
                     <div className="select-wrap">
                       <select className="select" value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
                         <option value="all">Wszystkie</option>
-                        <option value="pending">Pending</option>
-                        <option value="approved">Approved</option>
-                        <option value="rejected">Rejected</option>
+                        <option value="pending">Oczekuje</option>
+                        <option value="approved">Zatwierdzony</option>
+                        <option value="rejected">Odrzucony</option>
                       </select>
                     </div>
                   </label>
@@ -338,37 +373,42 @@ export default function AdminPage() {
                             <th>Bot</th>
                             <th>Bumpy</th>
                             <th>Invite</th>
+                            <th>Zgłoszenia</th>
                             <th>Akcje</th>
                           </tr>
                         </thead>
                         <tbody>
                           {paginatedServers.map((server) => {
                             const expanded = expandedId === server.id;
+                            const tags = normalizeTags(server.tags);
+                            const reports = getReports(server);
+                            const reportCount = getReportCount(server);
                             return (
-                              <>
-                                <tr key={server.id}>
+                              <Fragment key={server.id}>
+                                <tr>
                                   <td>
                                     <div className="server-cell-main">
                                       <strong>{server.name}</strong>
                                       <span>{server.description || "Brak opisu"}</span>
                                       <div className="tag-list compact-tags">
-                                        {server.tags?.length ? server.tags.slice(0, 4).map((tag) => <span key={tag} className="tag">#{tag}</span>) : <span className="muted">Brak tagów</span>}
+                                        {tags.length ? tags.slice(0, 4).map((tag) => <span key={tag} className="tag">#{tag}</span>) : <span className="muted">Brak tagów</span>}
                                       </div>
                                     </div>
                                   </td>
                                   <td>
                                     <span className={`status-pill ${server.moderationStatus === "approved" ? "ok" : server.moderationStatus === "rejected" ? "danger" : "warn"}`}>
-                                      {server.moderationStatus}
+                                      {getStatusLabel(server.moderationStatus)}
                                     </span>
                                   </td>
                                   <td>
                                     <span className={`server-type-pill ${server.serverType === "nsfw" ? "nsfw" : "public"}`}>
-                                      {server.serverType === "nsfw" ? "NSFW" : "Publiczny"}
+                                      {getTypeLabel(server.serverType)}
                                     </span>
                                   </td>
                                   <td><span className="metric inline-metric">{server.botInstalled ? "Tak" : "Nie"}</span></td>
                                   <td><span className="metric inline-metric">{server.bumpCount || 0}</span></td>
                                   <td><span className="metric inline-metric">{server.inviteUrl ? "Jest" : "Brak"}</span></td>
+                                  <td><span className="metric inline-metric">{reportCount}</span></td>
                                   <td>
                                     <div className="table-actions">
                                       <button className="btn btn-primary btn-sm" onClick={() => updateServer(server.id, { moderationStatus: "approved" })}>Zatwierdź</button>
@@ -380,7 +420,7 @@ export default function AdminPage() {
                                 </tr>
                                 {expanded && (
                                   <tr className="detail-row" key={`${server.id}-details`}>
-                                    <td colSpan={7}>
+                                    <td colSpan={8}>
                                       <div className="detail-panel">
                                         <div className="detail-grid detail-grid-pro">
                                           <div className="detail-block">
@@ -394,14 +434,40 @@ export default function AdminPage() {
                                           <div className="detail-block">
                                             <span className="detail-label">Tagi</span>
                                             <div className="tag-list">
-                                              {server.tags?.length ? server.tags.map((tag) => <span key={tag} className="tag">#{tag}</span>) : <span className="muted">Brak tagów</span>}
+                                              {tags.length ? tags.map((tag) => <span key={tag} className="tag">#{tag}</span>) : <span className="muted">Brak tagów</span>}
                                             </div>
+                                          </div>
+                                          <div className="detail-block detail-block-wide">
+                                            <span className="detail-label">Zgłoszenia serwera</span>
+                                            {reportCount > 0 ? (
+                                              <div className="reports-stack">
+                                                <div className="reports-summary">Łącznie zgłoszeń: <strong>{reportCount}</strong></div>
+                                                {reports.length ? (
+                                                  <div className="reports-list">
+                                                    {reports.map((report, index) => (
+                                                      <div key={report.id || index} className="report-item">
+                                                        <div className="report-item-top">
+                                                          <strong>Zgłoszenie #{index + 1}</strong>
+                                                          <span className="tiny-badge">{report.createdAt ? new Date(report.createdAt).toLocaleString("pl-PL") : "Brak daty"}</span>
+                                                        </div>
+                                                        <p>{report.reason || "Brak podanego powodu."}</p>
+                                                        {report.userDiscordId ? <span className="muted small">Autor: {report.userDiscordId}</span> : null}
+                                                      </div>
+                                                    ))}
+                                                  </div>
+                                                ) : (
+                                                  <p className="muted">Licznik zgłoszeń jest dostępny, ale API nie zwróciło pełnej listy treści zgłoszeń.</p>
+                                                )}
+                                              </div>
+                                            ) : (
+                                              <p>Brak zgłoszeń dla tego serwera.</p>
+                                            )}
                                           </div>
                                           <div className="detail-block">
                                             <span className="detail-label">Moderacja</span>
                                             <div className="button-row card-actions">
                                               <button className="btn btn-primary" onClick={() => updateServer(server.id, { moderationStatus: "approved" })}>Zatwierdź</button>
-                                              <button className="btn btn-ghost" onClick={() => updateServer(server.id, { moderationStatus: "pending" })}>Pending</button>
+                                              <button className="btn btn-ghost" onClick={() => updateServer(server.id, { moderationStatus: "pending" })}>Ustaw oczekuje</button>
                                               <button className="btn btn-danger" onClick={() => updateServer(server.id, { moderationStatus: "rejected" })}>Odrzuć</button>
                                               <Link className="btn btn-ghost" href={`/servers/${server.id}`}>Podgląd</Link>
                                             </div>
@@ -418,7 +484,7 @@ export default function AdminPage() {
                                     </td>
                                   </tr>
                                 )}
-                              </>
+                              </Fragment>
                             );
                           })}
                         </tbody>
@@ -431,7 +497,7 @@ export default function AdminPage() {
                     <span className="metric">Strona {currentPage} / {totalPages}</span>
                     <button className="btn btn-ghost" disabled={currentPage >= totalPages} onClick={() => setPage((prev) => Math.min(totalPages, prev + 1))}>Następna</button>
                   </div>
-                </>
+                </Fragment>
               )}
 
               {notice ? <div className="notice top-gap">{notice}</div> : null}
@@ -439,6 +505,6 @@ export default function AdminPage() {
           )}
         </section>
       </main>
-    </>
+    </Fragment>
   );
 }

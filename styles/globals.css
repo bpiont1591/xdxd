@@ -1196,3 +1196,149 @@ body {
     justify-content: space-between;
   }
 }
+
+
+/* admin dark refinements */
+:root {
+  --bg: #070b14;
+  --bg-soft: #0d1320;
+  --panel: rgba(10, 15, 26, 0.94);
+  --panel-2: rgba(14, 20, 34, 0.98);
+  --stroke: rgba(148, 163, 184, 0.14);
+  --stroke-strong: rgba(96, 165, 250, 0.36);
+  --text: #e5edf9;
+  --muted: #93a4bd;
+  --shadow: 0 30px 80px rgba(0, 0, 0, .42);
+}
+
+body {
+  color: var(--text);
+  background:
+    radial-gradient(circle at top right, rgba(59,130,246,.16), transparent 0 24%),
+    radial-gradient(circle at bottom left, rgba(99,102,241,.14), transparent 0 24%),
+    linear-gradient(180deg, #060913 0%, #090d18 38%, #0b1020 100%);
+}
+
+.glass, .glass-lite, .panel-card, .panel-only, .state-card, .sidebar, .detail-hero, .home-list-card, .moderation-card, .profile-card, .soft-card, .toolbar-panel, .table-shell, .detail-panel, .notice {
+  background: linear-gradient(180deg, rgba(13,18,31,.96), rgba(10,14,24,.93));
+  border-color: rgba(148, 163, 184, 0.12);
+  color: var(--text);
+  box-shadow: var(--shadow);
+}
+
+.brand-copy strong, .btn-ghost, .btn-disabled, .select, .badge, .metric, .inline-metric, .tiny-badge, .tag, .field-label, .server-cell-main strong, .detail-label, .reports-summary strong {
+  color: var(--text);
+}
+
+.brand-copy span, .muted, .small, .server-cell-main span, .reports-summary, .report-item p, .report-item .small, .table-scroll table td, .table-scroll table th {
+  color: var(--muted);
+}
+
+.btn-ghost, .btn-disabled, .select, .directory-search input, .searchbar-clean input, .field input, .field textarea {
+  background: rgba(255,255,255,.03);
+  color: var(--text);
+  border-color: rgba(148, 163, 184, .14);
+}
+
+.badge, .metric, .tag, .tiny-badge, .status-pill, .server-type-pill {
+  background: rgba(255,255,255,.04);
+  border-color: rgba(148,163,184,.14);
+}
+
+.tag { background: rgba(59,130,246,.12); }
+.brand-mark, .brand-badge {
+  color: white;
+  background: linear-gradient(180deg, rgba(31,41,55,.98), rgba(15,23,42,.95));
+  border-color: rgba(148,163,184,.18);
+}
+
+.panel-only, .panel-card {
+  border-radius: 28px;
+}
+
+.server-table {
+  border-collapse: separate;
+  border-spacing: 0 10px;
+}
+.server-table thead th {
+  background: transparent;
+  color: #b7c4d8;
+  font-size: .8rem;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  padding-bottom: 6px;
+}
+.server-table tbody tr:not(.detail-row) {
+  background: rgba(255,255,255,.025);
+}
+.server-table tbody tr:not(.detail-row) td {
+  background: rgba(255,255,255,.025);
+  border-top: 1px solid rgba(148,163,184,.08);
+  border-bottom: 1px solid rgba(148,163,184,.08);
+  padding-top: 16px;
+  padding-bottom: 16px;
+}
+.server-table tbody tr:not(.detail-row) td:first-child {
+  border-left: 1px solid rgba(148,163,184,.08);
+  border-top-left-radius: 16px;
+  border-bottom-left-radius: 16px;
+}
+.server-table tbody tr:not(.detail-row) td:last-child {
+  border-right: 1px solid rgba(148,163,184,.08);
+  border-top-right-radius: 16px;
+  border-bottom-right-radius: 16px;
+}
+.detail-row td { padding-top: 2px; }
+
+.table-actions, .card-actions, .toolbar-row, .topbar-actions, .button-row {
+  gap: 12px;
+}
+
+.admin-stats-grid {
+  gap: 14px;
+  margin-bottom: 18px;
+}
+.metric-box {
+  padding: 18px 20px;
+  border-radius: 20px;
+}
+.metric-box span { color: var(--muted); }
+.metric-box strong { color: var(--text); font-size: 1.55rem; }
+
+.detail-grid-pro {
+  gap: 18px;
+}
+.detail-block {
+  background: rgba(255,255,255,.02);
+  border: 1px solid rgba(148,163,184,.08);
+  border-radius: 18px;
+  padding: 16px;
+}
+.reports-stack, .reports-list {
+  display: grid;
+  gap: 12px;
+}
+.report-item {
+  border: 1px solid rgba(148,163,184,.1);
+  background: rgba(255,255,255,.025);
+  border-radius: 16px;
+  padding: 14px 15px;
+}
+.report-item-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+.break-anywhere { word-break: break-word; overflow-wrap: anywhere; }
+.status-pill.ok { background: rgba(52,211,153,.12); color: #8bf0c7; }
+.status-pill.warn { background: rgba(245,158,11,.14); color: #f8c768; }
+.status-pill.danger { background: rgba(244,63,94,.14); color: #ff9caf; }
+.server-type-pill.public { background: rgba(59,130,246,.12); color: #93c5fd; }
+.server-type-pill.nsfw { background: rgba(236,72,153,.12); color: #f9a8d4; }
+
+@media (max-width: 900px) {
+  .server-table { border-spacing: 0 8px; }
+  .report-item-top { align-items: flex-start; flex-direction: column; }
+}
