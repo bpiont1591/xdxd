@@ -138,7 +138,7 @@ export default function AdminPage() {
   return (
     <>
       <Head>
-        <title>Moderacja • Bumply</title>
+        <title>Panel Moderów DISCBUMPLY.PL</title>
       </Head>
 
       <main className="site-shell">
@@ -153,7 +153,7 @@ export default function AdminPage() {
               <button className="btn btn-ghost" onClick={logoutAdmin}>Wyloguj admina</button>
             )}
             <button className="btn btn-ghost" onClick={() => signOut({ callbackUrl: "/" })}>
-              Wyloguj Discord
+              WYLOGUJ DISCORD
             </button>
           </div>
         </header>

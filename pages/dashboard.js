@@ -164,7 +164,7 @@ export default function Dashboard() {
             onClick={() => signIn("discord")}
           >
             <DiscordGlyph />
-            <span>Zaloguj przez Discord</span>
+            <span>ZALOGUJ SIĘ PRZEZ DISCORD</span>
           </button>
         </div>
       </main>
@@ -189,7 +189,7 @@ export default function Dashboard() {
   return (
     <>
       <Head>
-        <title>Dashboard • Bumply</title>
+        <title>Panel DISCBUMPLY.PL</title>
       </Head>
 
       <main className="dashboard-shell premium dashboard-v10">

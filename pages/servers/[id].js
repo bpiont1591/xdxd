@@ -83,9 +83,9 @@ export default function ServerDetail({ server }) {
   return (
     <>
       <Head>
-        <title>{server.name} • Bumply</title>
+        <title>{server.name} DISCBUMPLY.PL</title>
         <meta name="description" content={server.description || `Strona serwera ${server.name}`} />
-        <meta property="og:title" content={`${server.name} • Bumply`} />
+        <meta property="og:title" content={`${server.name} DISCBUMPLY`} />
         <meta property="og:description" content={server.description || `Dołącz do serwera ${server.name}`} />
         {iconUrl ? <meta property="og:image" content={iconUrl} /> : null}
       </Head>
@@ -98,7 +98,7 @@ export default function ServerDetail({ server }) {
           <Link href="/" className="brand brand-link">
             <div className="brand-badge image-mark"><img src="/allserver-logo.png" alt="" /></div>
             <div>
-              <strong>​🇧​​🇺​​🇲​​🇵​​🇱​​🇾​</strong>
+              <strong>​DISCBUMPLY.PL​</strong>
             </div>
           </Link>
         </header>

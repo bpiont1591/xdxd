@@ -152,7 +152,7 @@ export default function AllServersPage() {
   return (
     <>
       <Head>
-        <title>Wszystkie serwery • Bumply</title>
+        <title>Wszystkie serwery DISCBUMPLY.PL</title>
         <meta
           name="description"
           content="Pełna lista serwerów Discord w katalogu."
@@ -166,7 +166,7 @@ export default function AllServersPage() {
         <header className="topbar container">
           <BrandLogo />
           <Link href="/" className="btn btn-ghost">
-            Powrót
+            POWRÓT
           </Link>
         </header>
 
