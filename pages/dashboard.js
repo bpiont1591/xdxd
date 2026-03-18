@@ -171,7 +171,7 @@ export default function Dashboard() {
               <img
                 src="/bumply-logo.png"
                 alt="Bumply"
-                style={{ height: "56px", width: "auto", display: "block" }}
+                style={{ height: "80px", width: "auto", display: "block" }}
               />
             </Link>
 
@@ -246,24 +246,6 @@ export default function Dashboard() {
             )}
           </div>
         </aside>
-
-        <section className="content-panel">
-          <div
-            className="glass"
-            style={{
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-              padding: "20px",
-              borderRadius: "26px"
-            }}
-          >
-            <img
-              src="/bumply-logo.svg"
-              alt="Bumply"
-              style={{ height: "110px", width: "auto", display: "block" }}
-            />
-          </div>
 
           {selectedServer ? (
             <>
