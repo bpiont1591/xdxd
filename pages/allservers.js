@@ -70,7 +70,7 @@ export default function AllServersPage() {
             <img
               src="/bumply-logo.png"
               alt="Bumply"
-              style={{ height: "150px", width: "auto", display: "block" }}
+              style={{ height: "64px", width: "auto", display: "block" }}
             />
           </Link>
 
@@ -172,6 +172,15 @@ export default function AllServersPage() {
                           </span>
                           <span className="metric">
                             Ostatni: {formatTimeAgo(server.lastBumpAt)}
+                          </span>
+                          <span
+                            className={`metric ${
+                              server.serverType === "nsfw" ? "danger-text" : ""
+                            }`}
+                          >
+                            {server.serverType === "nsfw"
+                              ? "NSFW 🔞"
+                              : "Publiczny"}
                           </span>
                         </div>
 
