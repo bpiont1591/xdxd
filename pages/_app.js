@@ -1,6 +1,4 @@
 import "../styles/globals.css";
-import "../styles/footer.css";
-import "../styles/terms.css";
 import { SessionProvider } from "next-auth/react";
 import Head from "next/head";
 import Navbar from "../components/Navbar";
