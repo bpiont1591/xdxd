@@ -4,6 +4,7 @@ import { signIn, signOut, useSession } from "next-auth/react";
 import { useEffect, useMemo, useState } from "react";
 import DiscordServerIcon from "../components/DiscordServerIcon";
 import ServerCommunityStats from "../components/ServerCommunityStats";
+import DiscordBrandIcon from "../components/DiscordBrandIcon";
 
 function formatTimeAgo(dateString) {
   if (!dateString) return "Nigdy";
@@ -116,10 +117,11 @@ export default function Home() {
               </>
             ) : (
               <button
-                className="btn btn-primary"
+                className="btn btn-primary btn-discord"
                 onClick={() => signIn("discord")}
               >
-                Zaloguj przez Discord
+                <DiscordBrandIcon />
+                <span>Zaloguj przez Discord</span>
               </button>
             )}
           </div>
@@ -128,11 +130,7 @@ export default function Home() {
         <section className="home-v9-hero container glass compact-hero-shell">
           <div className="home-v9-hero-copy compact-hero-copy">
             <span className="badge">katalog serwerów</span>
-            <h1>Odkrywaj aktywne serwery Discord</h1>
-            <p>
-              Szybkie wyszukiwanie, zwarte kategorie i czytelne listingi bez
-              napompowanego UI, bo to już i tak było wystarczająco męczące.
-            </p>
+            <h1>Wyszukiwarka serwerów Discord</h1>
 
             <div className="hero-mini-stats compact-stat-row">
               <span>{meta.totalServers} serwerów</span>

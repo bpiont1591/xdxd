@@ -2,6 +2,7 @@ import Head from "next/head";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { signIn, signOut, useSession } from "next-auth/react";
+import DiscordBrandIcon from "../components/DiscordBrandIcon";
 
 export default function AdminPage() {
   const { data: session, status } = useSession();
@@ -106,8 +107,9 @@ export default function AdminPage() {
           <span className="badge">moderacja</span>
           <h1>Zaloguj się przez Discord</h1>
           <p className="muted">Panel moderacji jest dostępny tylko dla wskazanego konta Discord.</p>
-          <button className="btn btn-primary" onClick={() => signIn("discord")}>
-            Zaloguj przez Discord
+          <button className="btn btn-primary btn-discord" onClick={() => signIn("discord")}>
+            <DiscordBrandIcon />
+            <span>Zaloguj przez Discord</span>
           </button>
         </div>
       </main>

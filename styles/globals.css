@@ -2914,3 +2914,175 @@ body {
     width: 100%;
   }
 }
+
+
+/* ===== Final alignment + compact polish ===== */
+.topbar .brand-link {
+  display: inline-flex;
+  align-items: center;
+}
+
+.site-logo {
+  height: 36px !important;
+  width: auto !important;
+}
+
+.site-logo--sidebar {
+  height: 32px !important;
+}
+
+.btn-discord {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.discord-brand-icon {
+  width: 18px;
+  height: 18px;
+  flex: 0 0 18px;
+}
+
+.compact-hero-shell {
+  padding: 22px 24px !important;
+  gap: 18px !important;
+}
+
+.compact-hero-copy {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 14px;
+  max-width: 100%;
+}
+
+.home-v9-hero-copy h1 {
+  margin: 0 !important;
+  font-size: clamp(2rem, 4vw, 3rem) !important;
+  line-height: 1.02 !important;
+}
+
+.home-v9-search,
+.hero-search-inline {
+  width: 100%;
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: stretch;
+  gap: 10px;
+}
+
+.hero-search-inline input,
+.allservers-search-row input {
+  width: 100% !important;
+}
+
+.home-v9-actions,
+.compact-hero-actions {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  gap: 10px;
+}
+
+.home-list,
+.skeleton-list {
+  display: grid;
+  gap: 12px;
+}
+
+.home-list-card {
+  width: 100%;
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: start !important;
+  justify-items: stretch !important;
+  gap: 14px;
+  padding: 16px 18px !important;
+}
+
+.home-list-main {
+  display: flex !important;
+  align-items: flex-start !important;
+  justify-content: flex-start !important;
+  text-align: left !important;
+  width: 100%;
+  min-width: 0;
+  gap: 14px;
+}
+
+.home-list-copy {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: flex-start !important;
+  justify-content: flex-start !important;
+  text-align: left !important;
+  width: 100%;
+  min-width: 0;
+  gap: 10px;
+}
+
+.home-list-copy > * {
+  width: 100%;
+}
+
+.home-list-topline,
+.tag-list,
+.server-description,
+.community-stats {
+  text-align: left !important;
+  justify-content: flex-start !important;
+  align-self: flex-start !important;
+}
+
+.home-list-topline {
+  display: flex !important;
+  flex-wrap: wrap;
+  align-items: center !important;
+  gap: 8px;
+}
+
+.home-list-topline h3 {
+  margin: 0 6px 0 0 !important;
+}
+
+.server-avatar,
+.server-avatar.small,
+.server-avatar.xl {
+  display: grid !important;
+  place-items: center;
+  align-self: flex-start;
+}
+
+.home-list-actions {
+  display: flex !important;
+  flex-direction: row;
+  align-items: center !important;
+  justify-content: flex-end !important;
+  align-self: center;
+  gap: 10px;
+  margin-left: auto;
+}
+
+.searchbar-clean input,
+.directory-search input,
+.select.select-dark,
+.btn,
+.tag,
+.metric,
+.server-type-pill,
+.community-stats {
+  border-radius: 14px;
+}
+
+@media (max-width: 980px) {
+  .home-list-card {
+    grid-template-columns: 1fr;
+  }
+
+  .home-list-actions {
+    justify-content: flex-start !important;
+    margin-left: 0;
+    width: 100%;
+  }
+}

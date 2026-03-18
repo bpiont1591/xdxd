@@ -2,6 +2,7 @@ import Head from "next/head";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { signIn, signOut, useSession } from "next-auth/react";
+import DiscordBrandIcon from "../components/DiscordBrandIcon";
 import DiscordServerIcon from "../components/DiscordServerIcon";
 import ServerCommunityStats from "../components/ServerCommunityStats";
 import { getInviteValidation } from "../lib/discord-invite";
@@ -220,10 +221,11 @@ export default function Dashboard() {
             Bez Discord OAuth nie wiemy jakimi serwerami zarządzasz.
           </p>
           <button
-            className="btn btn-primary"
+            className="btn btn-primary btn-discord"
             onClick={() => signIn("discord")}
           >
-            Zaloguj przez Discord
+            <DiscordBrandIcon />
+            <span>Zaloguj przez Discord</span>
           </button>
         </div>
       </main>
