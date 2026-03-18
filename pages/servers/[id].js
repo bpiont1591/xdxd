@@ -3,15 +3,7 @@ import DiscordServerIcon, { getDiscordServerIconCandidates } from "../../compone
 import Link from "next/link";
 import { signIn, useSession } from "next-auth/react";
 import { useState } from "react";
-
-function formatCommunityStats(server) {
-  const online = Number(server?.onlineCount || 0);
-  const total = Number(server?.memberCount || 0);
-
-  if (online > 0 && total > 0) return `${online} online • ${total} razem`;
-  if (total > 0) return `${total} członków`;
-  return "Brak danych o społeczności";
-}
+import ServerCommunityStats from "../../components/ServerCommunityStats";
 
 
 export async function getServerSideProps({ params, req }) {
@@ -91,7 +83,7 @@ export default function ServerDetail({ server }) {
     <>
       <Head>
         <title>{server.name} • Bumply</title>
-        <meta name="description" content={server.description || `Strona serwera ${server.name}` } />
+        <meta name="description" content={server.description || `Strona serwera ${server.name}`} />
         <meta property="og:title" content={`${server.name} • Bumply`} />
         <meta property="og:description" content={server.description || `Dołącz do serwera ${server.name}`} />
         {iconUrl ? <meta property="og:image" content={iconUrl} /> : null}
@@ -103,7 +95,7 @@ export default function ServerDetail({ server }) {
 
         <header className="topbar container">
           <Link href="/" className="brand brand-link">
-            <img src="/bumply-logo.png" alt="Bumply" className="site-logo" />
+<img src="/bumply-logo.png" alt="Bumply" className="site-logo" />
           </Link>
         </header>
 
@@ -121,12 +113,12 @@ export default function ServerDetail({ server }) {
               <div>
                 <span className="badge">profil serwera</span>
                 <h1>{server.name}</h1>
-                <div className="tag-list top-gap">
-                  <span className="presence-pill presence-pill--wide">
-                    <span className="presence-dot" />
-                    {formatCommunityStats(server)}
-                  </span>
-                </div>
+                <ServerCommunityStats
+                  online={server.communityOnline}
+                  total={server.communityTotal}
+                  status={server.communityStatus}
+                  className="top-gap-sm"
+                />
                 <p className="muted large">
                   {server.description || "Brak opisu serwera."}
                 </p>
@@ -167,16 +159,20 @@ export default function ServerDetail({ server }) {
                   <span>ulubionych</span>
                 </div>
                 <div className="metric-box">
-                  <strong>{formatCommunityStats(server)}</strong>
-                  <span>społeczność</span>
-                </div>
-                <div className="metric-box">
                   <strong>{reportCount}</strong>
                   <span>zgłoszeń</span>
                 </div>
                 <div className="metric-box">
                   <strong>{server.lastBumpAt ? new Date(server.lastBumpAt).toLocaleString() : "brak"}</strong>
                   <span>ostatni bump</span>
+                </div>
+                <div className="metric-box">
+                  <strong>{Number.isFinite(Number(server.communityOnline)) ? server.communityOnline : "--"}</strong>
+                  <span>online teraz</span>
+                </div>
+                <div className="metric-box">
+                  <strong>{Number.isFinite(Number(server.communityTotal)) ? server.communityTotal : "--"}</strong>
+                  <span>członków razem</span>
                 </div>
               </div>
             </div>

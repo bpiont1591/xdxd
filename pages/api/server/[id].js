@@ -1,6 +1,6 @@
 import { prisma } from "../../../lib/prisma";
 import { normalizeServer } from "../../../lib/storage";
-import { fetchInviteStats } from "../../../lib/discord-invite-stats";
+import { attachInviteStats } from "../../../lib/discord-invite";
 
 export default async function handler(req, res) {
   if (req.method !== "GET") {
@@ -29,14 +29,11 @@ export default async function handler(req, res) {
     return res.status(404).json({ error: "Nie znaleziono serwera" });
   }
 
-  const inviteStats = await fetchInviteStats(server.inviteUrl);
-
   return res.status(200).json({
-    server: {
+    server: await attachInviteStats({
       ...server,
-      ...inviteStats,
       favoriteCount: row.favorites.length,
       reportCount: row.reports.length
-    }
+    })
   });
 }

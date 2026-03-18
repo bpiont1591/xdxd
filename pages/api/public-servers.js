@@ -1,7 +1,7 @@
 import { prisma } from "../../lib/prisma";
 import { normalizeServer } from "../../lib/storage";
 import { buildPublicServerMeta, filterAndSortServers } from "../../lib/stats";
-import { enrichServersWithInviteStats } from "../../lib/discord-invite-stats";
+import { attachInviteStatsToServers } from "../../lib/discord-invite";
 
 export default async function handler(req, res) {
   if (req.method !== "GET") {
@@ -12,6 +12,7 @@ export default async function handler(req, res) {
     const query = String(req.query.query || "");
     const category = String(req.query.category || "all");
     const sort = String(req.query.sort || "recent");
+    const activeOnly = String(req.query.activeOnly || "false") === "true";
 
     const rows = await prisma.server.findMany({
       where: {
@@ -38,9 +39,9 @@ export default async function handler(req, res) {
       };
     });
 
-    const enrichedApproved = await enrichServersWithInviteStats(approved);
-    const filtered = filterAndSortServers(enrichedApproved, query, category, sort);
-    const meta = buildPublicServerMeta(enrichedApproved);
+    const enriched = await attachInviteStatsToServers(approved);
+    const filtered = filterAndSortServers(enriched, query, category, sort, activeOnly);
+    const meta = buildPublicServerMeta(enriched);
 
     return res.status(200).json({
       servers: filtered,

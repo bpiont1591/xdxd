@@ -3,6 +3,8 @@ import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { signIn, signOut, useSession } from "next-auth/react";
 import DiscordServerIcon from "../components/DiscordServerIcon";
+import ServerCommunityStats from "../components/ServerCommunityStats";
+import { getInviteValidation } from "../lib/discord-invite";
 
 const defaultForm = {
   description: "",
@@ -35,15 +37,6 @@ function buildTags(input = "", existing = []) {
   return next.slice(0, MAX_TAGS);
 }
 
-function formatCommunityStats(server) {
-  const online = Number(server?.onlineCount || 0);
-  const total = Number(server?.memberCount || 0);
-
-  if (online > 0 && total > 0) return `${online} online • ${total} razem`;
-  if (total > 0) return `${total} członków`;
-  return "Brak danych o społeczności";
-}
-
 function formatLastBump(value) {
   if (!value) return "Brak bumpa";
   return new Date(value).toLocaleString();
@@ -57,6 +50,7 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [notice, setNotice] = useState("");
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
 
   async function loadServers() {
     setLoading(true);
@@ -96,21 +90,76 @@ export default function Dashboard() {
     [servers, selectedId]
   );
 
+  const draftKey = selectedId ? `bumply-dashboard-draft:${selectedId}` : "";
+  const inviteValidation = getInviteValidation(form.inviteUrl);
+
   useEffect(() => {
     if (selectedServer) {
+      let draft = null;
+      if (typeof window !== "undefined") {
+        try {
+          draft = JSON.parse(localStorage.getItem(`bumply-dashboard-draft:${selectedServer.id}`) || "null");
+        } catch {
+          draft = null;
+        }
+      }
+
       setForm({
-        description: selectedServer.description || "",
-        tags: Array.isArray(selectedServer.tags)
+        description: draft?.description ?? selectedServer.description ?? "",
+        tags: Array.isArray(draft?.tags)
+          ? draft.tags.slice(0, MAX_TAGS)
+          : Array.isArray(selectedServer.tags)
           ? selectedServer.tags.slice(0, MAX_TAGS)
           : [],
         tagInput: "",
-        inviteUrl: selectedServer.inviteUrl || "",
-        serverType: selectedServer.serverType === "nsfw" ? "nsfw" : "public",
+        inviteUrl: draft?.inviteUrl ?? selectedServer.inviteUrl ?? "",
+        serverType: (draft?.serverType || selectedServer.serverType) === "nsfw" ? "nsfw" : "public",
       });
+      setHasUnsavedChanges(Boolean(draft));
     } else {
       setForm(defaultForm);
+      setHasUnsavedChanges(false);
     }
   }, [selectedServer]);
+
+  useEffect(() => {
+    if (!draftKey || !selectedServer) return;
+    if (typeof window === "undefined") return;
+
+    const cleanSelected = {
+      description: selectedServer.description || "",
+      tags: Array.isArray(selectedServer.tags) ? selectedServer.tags.slice(0, MAX_TAGS) : [],
+      inviteUrl: selectedServer.inviteUrl || "",
+      serverType: selectedServer.serverType === "nsfw" ? "nsfw" : "public",
+    };
+
+    const cleanForm = {
+      description: form.description || "",
+      tags: Array.isArray(form.tags) ? form.tags.slice(0, MAX_TAGS) : [],
+      inviteUrl: form.inviteUrl || "",
+      serverType: form.serverType === "nsfw" ? "nsfw" : "public",
+    };
+
+    const changed = JSON.stringify(cleanSelected) !== JSON.stringify(cleanForm);
+    setHasUnsavedChanges(changed);
+
+    if (changed) {
+      localStorage.setItem(draftKey, JSON.stringify(cleanForm));
+    } else {
+      localStorage.removeItem(draftKey);
+    }
+  }, [draftKey, form, selectedServer]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const handler = (event) => {
+      if (!hasUnsavedChanges) return;
+      event.preventDefault();
+      event.returnValue = "Masz niezapisane zmiany.";
+    };
+    window.addEventListener("beforeunload", handler);
+    return () => window.removeEventListener("beforeunload", handler);
+  }, [hasUnsavedChanges]);
 
   async function saveServer(e) {
     e.preventDefault();
@@ -143,6 +192,10 @@ export default function Dashboard() {
       );
       setForm((prev) => ({ ...prev, tags: finalTags, tagInput: "" }));
       setNotice("Zapisano zmiany.");
+      setHasUnsavedChanges(false);
+      if (typeof window !== "undefined" && draftKey) {
+        localStorage.removeItem(draftKey);
+      }
     } catch (err) {
       setNotice(err.message || "Błąd zapisu");
     } finally {
@@ -247,7 +300,13 @@ export default function Dashboard() {
 
             {loading ? (
               <div className="server-list">
-                <div className="server-item active">Ładowanie serwerów...</div>
+                <div className="server-item active skeleton-server-item">
+                  <div className="skeleton-avatar small" />
+                  <div className="skeleton-copy">
+                    <div className="skeleton-line" />
+                    <div className="skeleton-line short" />
+                  </div>
+                </div>
               </div>
             ) : servers.length === 0 ? (
               <div className="empty-box">
@@ -310,10 +369,6 @@ export default function Dashboard() {
                     <span className="badge">wybrany serwer</span>
                     <h1>{selectedServer.name}</h1>
                     <div className="tag-list top-gap">
-                      <span className="presence-pill presence-pill--wide">
-                        <span className="presence-dot" />
-                        {formatCommunityStats(selectedServer)}
-                      </span>
                       <span
                         className={`status-pill ${
                           selectedServer.botInstalled ? "ok" : "warn"
@@ -349,6 +404,13 @@ export default function Dashboard() {
                         {selectedServer.permissionLabel}
                       </span>
                     </div>
+
+                    <ServerCommunityStats
+                      online={selectedServer.communityOnline}
+                      total={selectedServer.communityTotal}
+                      status={selectedServer.communityStatus}
+                      className="top-gap-sm"
+                    />
                   </div>
                 </div>
 
@@ -387,8 +449,14 @@ export default function Dashboard() {
                   <strong>{formatLastBump(selectedServer.lastBumpAt)}</strong>
                 </article>
                 <article className="overview-card glass">
-                  <span className="overview-label">Społeczność</span>
-                  <strong>{formatCommunityStats(selectedServer)}</strong>
+                  <span className="overview-label">Invite</span>
+                  <strong>
+                    {selectedServer.inviteUrl ? "Ustawiony" : "Brak"}
+                  </strong>
+                </article>
+                <article className="overview-card glass">
+                  <span className="overview-label">Wersja robocza</span>
+                  <strong>{hasUnsavedChanges ? "Niezapisana" : "Czysta"}</strong>
                 </article>
               </div>
 
@@ -482,10 +550,6 @@ export default function Dashboard() {
                         </small>
 
                         <div className="tag-list top-gap">
-                      <span className="presence-pill presence-pill--wide">
-                        <span className="presence-dot" />
-                        {formatCommunityStats(selectedServer)}
-                      </span>
                           {form.tags.length ? (
                             form.tags.map((tag) => (
                               <button
@@ -524,13 +588,15 @@ export default function Dashboard() {
                           }
                           placeholder="https://discord.gg/twoj-link"
                         />
+                        <small className={`inline-validation ${inviteValidation.state}`}>
+                          {inviteValidation.message}
+                        </small>
                       </label>
 
                       <label className="field">
                         <span>Rodzaj serwera</span>
-                        <div className="select-wrap dashboard-select-wrap">
                         <select
-                          className="select select-dark"
+                          className="select"
                           value={form.serverType}
                           onChange={(e) =>
                             setForm((prev) => ({
@@ -543,7 +609,6 @@ export default function Dashboard() {
                           <option value="public">Publiczny</option>
                           <option value="nsfw">NSFW</option>
                         </select>
-                        </div>
                         <small className="muted">
                           Ustaw czy listing ma być zwykły publiczny czy
                           oznaczony jako NSFW.
@@ -555,9 +620,32 @@ export default function Dashboard() {
                       <button
                         className="btn btn-primary"
                         type="submit"
-                        disabled={saving}
+                        disabled={saving || inviteValidation.state === "invalid"}
                       >
                         {saving ? "Zapisywanie..." : "Zapisz zmiany"}
+                      </button>
+                      <button
+                        className="btn btn-ghost"
+                        type="button"
+                        onClick={() => {
+                          if (!selectedServer) return;
+                          setForm({
+                            description: selectedServer.description || "",
+                            tags: Array.isArray(selectedServer.tags)
+                              ? selectedServer.tags.slice(0, MAX_TAGS)
+                              : [],
+                            tagInput: "",
+                            inviteUrl: selectedServer.inviteUrl || "",
+                            serverType: selectedServer.serverType === "nsfw" ? "nsfw" : "public",
+                          });
+                          setNotice("Przywrócono ostatni zapisany stan.");
+                          if (typeof window !== "undefined" && draftKey) {
+                            localStorage.removeItem(draftKey);
+                          }
+                          setHasUnsavedChanges(false);
+                        }}
+                      >
+                        Cofnij zmiany
                       </button>
                     </div>
                   </form>
@@ -588,10 +676,6 @@ export default function Dashboard() {
 
                       <div className="directory-card-meta">
                         <h3>{selectedServer.name}</h3>
-                        <span className="presence-pill presence-pill--compact top-gap-small">
-                          <span className="presence-dot" />
-                          {formatCommunityStats(selectedServer)}
-                        </span>
                         <span>
                           {selectedServer.lastBumpAt
                             ? "Aktywny listing"
@@ -599,6 +683,13 @@ export default function Dashboard() {
                         </span>
                       </div>
                     </div>
+
+                    <ServerCommunityStats
+                      online={selectedServer.communityOnline}
+                      total={selectedServer.communityTotal}
+                      status={selectedServer.communityStatus}
+                      className="top-gap-sm"
+                    />
 
                     <div className="tag-list">
                       {form.tags.length ? (

@@ -3,6 +3,7 @@ import Link from "next/link";
 import { signIn, signOut, useSession } from "next-auth/react";
 import { useEffect, useMemo, useState } from "react";
 import DiscordServerIcon from "../components/DiscordServerIcon";
+import ServerCommunityStats from "../components/ServerCommunityStats";
 
 function formatTimeAgo(dateString) {
   if (!dateString) return "Nigdy";
@@ -13,15 +14,6 @@ function formatTimeAgo(dateString) {
   if (hours < 24) return `${hours} godz. temu`;
   const days = Math.floor(hours / 24);
   return `${days} dni temu`;
-}
-
-function formatCommunityStats(server) {
-  const online = Number(server?.onlineCount || 0);
-  const total = Number(server?.memberCount || 0);
-
-  if (online > 0 && total > 0) return `${online} online • ${total} razem`;
-  if (total > 0) return `${total} członków`;
-  return "Brak danych o społeczności";
 }
 
 export default function Home() {
@@ -237,7 +229,18 @@ export default function Home() {
           </div>
 
           {loading ? (
-            <div className="state-card glass">Ładowanie serwerów...</div>
+            <div className="home-list skeleton-list">
+              {Array.from({ length: 3 }).map((_, index) => (
+                <div key={index} className="home-list-card glass skeleton-card">
+                  <div className="skeleton-avatar" />
+                  <div className="skeleton-copy">
+                    <div className="skeleton-line wide" />
+                    <div className="skeleton-line" />
+                    <div className="skeleton-line short" />
+                  </div>
+                </div>
+              ))}
+            </div>
           ) : servers.length === 0 ? (
             <div className="state-card glass">
               <h3>Brak wyników</h3>
@@ -261,11 +264,6 @@ export default function Home() {
                         <div className="home-list-topline">
                           <h3>{server.name}</h3>
 
-                          <span className="presence-pill">
-                            <span className="presence-dot" />
-                            {formatCommunityStats(server)}
-                          </span>
-
                           <span className="metric">
                             Bumpów: {server.bumpCount || 0}
                           </span>
@@ -282,6 +280,13 @@ export default function Home() {
                             {server.serverType === "nsfw" ? "NSFW 🔞" : "Publiczny"}
                           </span>
                         </div>
+
+                        <ServerCommunityStats
+                          online={server.communityOnline}
+                          total={server.communityTotal}
+                          status={server.communityStatus}
+                          className="top-gap-sm"
+                        />
 
                         <div className="tag-list">
                           {server.tags?.length ? (

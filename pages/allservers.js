@@ -2,6 +2,7 @@ import Head from "next/head";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import DiscordServerIcon from "../components/DiscordServerIcon";
+import ServerCommunityStats from "../components/ServerCommunityStats";
 
 function formatTimeAgo(dateString) {
   if (!dateString) return "Nigdy";
@@ -14,15 +15,6 @@ function formatTimeAgo(dateString) {
   return `${days} dni temu`;
 }
 
-function formatCommunityStats(server) {
-  const online = Number(server?.onlineCount || 0);
-  const total = Number(server?.memberCount || 0);
-
-  if (online > 0 && total > 0) return `${online} online • ${total} razem`;
-  if (total > 0) return `${total} członków`;
-  return "Brak danych o społeczności";
-}
-
 export default function AllServersPage() {
   const [servers, setServers] = useState([]);
   const [meta, setMeta] = useState({ categories: [] });
@@ -30,11 +22,13 @@ export default function AllServersPage() {
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState("all");
   const [sort, setSort] = useState("top");
+  const [activeOnly, setActiveOnly] = useState(false);
 
   async function loadServers(next = {}) {
     const q = next.query ?? query;
     const c = next.category ?? category;
     const s = next.sort ?? sort;
+    const onlyActive = next.activeOnly ?? activeOnly;
 
     setLoading(true);
     try {
@@ -42,6 +36,7 @@ export default function AllServersPage() {
         query: q,
         category: c,
         sort: s,
+        activeOnly: String(Boolean(onlyActive)),
       });
 
       const res = await fetch(`/api/public-servers?${params.toString()}`);
@@ -97,10 +92,6 @@ export default function AllServersPage() {
           </div>
 
           <div className="toolbar wide allservers-filters">
-            <div className="servers-toolbar-copy">
-              <span className="metric metric-strong">{servers.length} wyników</span>
-              <span className="muted">Lepszy układ, ciemne selecty i czytelniejsze filtrowanie.</span>
-            </div>
             <form
               className="searchbar searchbar-clean"
               onSubmit={(e) => {
@@ -146,15 +137,39 @@ export default function AllServersPage() {
                 <option value="top">Top bumpy</option>
                 <option value="favorites">Najwięcej ulubionych</option>
                 <option value="recent">Najnowsze</option>
+                <option value="online">Najwięcej online</option>
+                <option value="members">Najwięcej członków</option>
                 <option value="name">Nazwa A-Z</option>
               </select>
             </div>
+            <label className="checkbox-filter">
+              <input
+                type="checkbox"
+                checked={activeOnly}
+                onChange={(e) => {
+                  setActiveOnly(e.target.checked);
+                  loadServers({ activeOnly: e.target.checked });
+                }}
+              />
+              <span>Tylko z aktywną społecznością</span>
+            </label>
           </div>
         </section>
 
         <section className="servers-section container">
           {loading ? (
-            <div className="state-card glass">Ładowanie serwerów...</div>
+            <div className="home-list skeleton-list">
+              {Array.from({ length: 4 }).map((_, index) => (
+                <div key={index} className="home-list-card glass skeleton-card">
+                  <div className="skeleton-avatar" />
+                  <div className="skeleton-copy">
+                    <div className="skeleton-line wide" />
+                    <div className="skeleton-line" />
+                    <div className="skeleton-line short" />
+                  </div>
+                </div>
+              ))}
+            </div>
           ) : servers.length === 0 ? (
             <div className="state-card glass">Brak wyników.</div>
           ) : (
@@ -174,10 +189,6 @@ export default function AllServersPage() {
                       <div className="home-list-copy">
                         <div className="home-list-topline">
                           <h3>{server.name}</h3>
-                          <span className="presence-pill">
-                            <span className="presence-dot" />
-                            {formatCommunityStats(server)}
-                          </span>
                           <span className="metric">
                             Bumpów: {server.bumpCount || 0}
                           </span>
@@ -191,6 +202,13 @@ export default function AllServersPage() {
                             {server.serverType === "nsfw" ? "NSFW 🔞" : "Publiczny"}
                           </span>
                         </div>
+
+                        <ServerCommunityStats
+                          online={server.communityOnline}
+                          total={server.communityTotal}
+                          status={server.communityStatus}
+                          className="top-gap-sm"
+                        />
 
                         <div className="tag-list">
                           {server.tags?.length ? (
