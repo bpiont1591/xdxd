@@ -1342,3 +1342,92 @@ body {
   .server-table { border-spacing: 0 8px; }
   .report-item-top { align-items: flex-start; flex-direction: column; }
 }
+
+
+/* admin fixes: zero white blocks + reports table */
+.admin-panel-pro,
+.admin-panel-pro .soft-card,
+.admin-panel-pro .toolbar-panel,
+.admin-panel-pro .table-shell,
+.admin-panel-pro .metric-box,
+.admin-panel-pro .detail-panel,
+.admin-panel-pro .detail-block,
+.admin-panel-pro .report-item {
+  background: linear-gradient(180deg, rgba(13,18,31,.96), rgba(10,14,24,.93));
+  color: var(--text);
+}
+
+.admin-panel-pro .metric-box,
+.admin-panel-pro .detail-block,
+.admin-panel-pro .report-item,
+.admin-panel-pro .toolbar-panel,
+.admin-panel-pro .table-shell {
+  border-color: rgba(148,163,184,.1);
+}
+
+.admin-panel-pro .server-table thead th {
+  background: rgba(255,255,255,.02);
+}
+
+.admin-panel-pro .server-table tbody tr:hover td,
+.admin-panel-pro .server-table tbody tr:not(.detail-row):hover td {
+  background: rgba(255,255,255,.05);
+}
+
+.admin-panel-pro .detail-row td {
+  background: rgba(7,11,20,.96) !important;
+}
+
+.admin-panel-pro .detail-block p,
+.admin-panel-pro .reports-table td,
+.admin-panel-pro .reports-table th {
+  color: var(--text);
+}
+
+.reports-table-wrap {
+  display: block;
+  width: 100%;
+  overflow-x: auto;
+}
+
+.reports-table-detail {
+  width: 100%;
+  min-width: 640px;
+  border-collapse: separate;
+  border-spacing: 0;
+  border: 1px solid rgba(148,163,184,.1);
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+.reports-table-detail thead th {
+  background: rgba(255,255,255,.03);
+  color: #cbd5e1;
+  text-align: left;
+  padding: 12px 14px;
+  font-size: .8rem;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+}
+
+.reports-table-detail tbody td {
+  background: rgba(255,255,255,.02);
+  border-top: 1px solid rgba(148,163,184,.08);
+  padding: 12px 14px;
+  vertical-align: top;
+}
+
+.reports-cards {
+  display: none;
+}
+
+@media (max-width: 900px) {
+  .reports-table-detail {
+    display: none;
+  }
+
+  .reports-cards {
+    display: grid;
+    gap: 12px;
+  }
+}

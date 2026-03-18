@@ -35,15 +35,46 @@ function normalizeTags(tags) {
   return [];
 }
 
-function getReportCount(server) {
-  if (Array.isArray(server?.reports)) return server.reports.length;
-  if (typeof server?.reportCount === "number") return server.reportCount;
-  if (typeof server?._count?.reports === "number") return server._count.reports;
-  return 0;
+function parsePossibleCount(value) {
+  if (typeof value === "number" && Number.isFinite(value)) return value;
+  if (typeof value === "string") {
+    const parsed = Number(value);
+    if (Number.isFinite(parsed)) return parsed;
+  }
+  return null;
 }
 
 function getReports(server) {
-  return Array.isArray(server?.reports) ? server.reports : [];
+  const possibleReports = [
+    server?.reports,
+    server?.reportList,
+    server?.reportItems,
+    server?.latestReports,
+    server?.data?.reports
+  ];
+
+  const reports = possibleReports.find(Array.isArray);
+  return Array.isArray(reports) ? reports : [];
+}
+
+function getReportCount(server) {
+  const reports = getReports(server);
+  const rawCandidates = [
+    server?.reportCount,
+    server?.reportsCount,
+    server?.totalReports,
+    server?.report_count,
+    server?._count?.reports,
+    server?.counts?.reports,
+    server?.stats?.reports,
+    server?.data?.reportCount
+  ];
+
+  const numericCount = rawCandidates
+    .map(parsePossibleCount)
+    .find((value) => value !== null);
+
+  return Math.max(reports.length, numericCount ?? 0);
 }
 
 export default function AdminPage() {
@@ -444,6 +475,7 @@ export default function AdminPage() {
                             const tags = normalizeTags(server.tags);
                             const reports = getReports(server);
                             const reportCount = getReportCount(server);
+                            const hasReports = reportCount > 0 || reports.length > 0;
 
                             return (
                               <Fragment key={server.id}>
@@ -574,7 +606,7 @@ export default function AdminPage() {
                                             <span className="detail-label">
                                               Zgłoszenia serwera
                                             </span>
-                                            {reportCount > 0 ? (
+                                            {hasReports ? (
                                               <div className="reports-stack">
                                                 <div className="reports-summary">
                                                   Łącznie zgłoszeń:{" "}
@@ -583,42 +615,60 @@ export default function AdminPage() {
 
                                                 {reports.length ? (
                                                   <div className="reports-list">
-                                                    {reports.map((report, index) => (
-                                                      <div
-                                                        key={report.id || index}
-                                                        className="report-item"
-                                                      >
-                                                        <div className="report-item-top">
-                                                          <strong>
-                                                            Zgłoszenie #{index + 1}
-                                                          </strong>
-                                                          <span className="tiny-badge">
-                                                            {report.createdAt
-                                                              ? new Date(
-                                                                  report.createdAt
-                                                                ).toLocaleString(
-                                                                  "pl-PL"
-                                                                )
-                                                              : "Brak daty"}
+                                                    <div className="reports-table-wrap">
+                                                      <table className="reports-table reports-table-detail">
+                                                        <thead>
+                                                          <tr>
+                                                            <th>#</th>
+                                                            <th>Powód</th>
+                                                            <th>Autor</th>
+                                                            <th>Data</th>
+                                                          </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                          {reports.map((report, index) => (
+                                                            <tr key={report.id || index}>
+                                                              <td>{index + 1}</td>
+                                                              <td>{report.reason || "Brak podanego powodu."}</td>
+                                                              <td>{report.userDiscordId || "Brak danych"}</td>
+                                                              <td>
+                                                                {report.createdAt
+                                                                  ? new Date(report.createdAt).toLocaleString("pl-PL")
+                                                                  : "Brak daty"}
+                                                              </td>
+                                                            </tr>
+                                                          ))}
+                                                        </tbody>
+                                                      </table>
+                                                    </div>
+
+                                                    <div className="reports-cards">
+                                                      {reports.map((report, index) => (
+                                                        <div
+                                                          key={`${report.id || index}-card`}
+                                                          className="report-item"
+                                                        >
+                                                          <div className="report-item-top">
+                                                            <strong>Zgłoszenie #{index + 1}</strong>
+                                                            <span className="tiny-badge">
+                                                              {report.createdAt
+                                                                ? new Date(report.createdAt).toLocaleString("pl-PL")
+                                                                : "Brak daty"}
+                                                            </span>
+                                                          </div>
+                                                          <p>
+                                                            {report.reason || "Brak podanego powodu."}
+                                                          </p>
+                                                          <span className="muted small">
+                                                            Autor: {report.userDiscordId || "Brak danych"}
                                                           </span>
                                                         </div>
-                                                        <p>
-                                                          {report.reason ||
-                                                            "Brak podanego powodu."}
-                                                        </p>
-                                                        {report.userDiscordId ? (
-                                                          <span className="muted small">
-                                                            Autor:{" "}
-                                                            {report.userDiscordId}
-                                                          </span>
-                                                        ) : null}
-                                                      </div>
-                                                    ))}
+                                                      ))}
+                                                    </div>
                                                   </div>
                                                 ) : (
                                                   <p className="muted">
-                                                    Licznik zgłoszeń jest dostępny,
-                                                    ale API nie zwróciło pełnej listy
+                                                    Licznik zgłoszeń jest dostępny, ale API nie zwróciło pełnej listy
                                                     treści zgłoszeń.
                                                   </p>
                                                 )}
