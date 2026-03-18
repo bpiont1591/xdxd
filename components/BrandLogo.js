@@ -7,7 +7,7 @@ export default function BrandLogo({ href = "/", compact = false, subtitle = "​
         <img src="/allserver-logo.png" alt="" />
       </span>
       <span className="brand-copy">
-        <strong>​DISCBUMPLY.PL</strong>
+        <strong>DISBUMPLY.PL</strong>
         {subtitle ? <span>{subtitle}</span> : null}
       </span>
     </Link>

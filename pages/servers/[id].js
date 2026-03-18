@@ -83,7 +83,7 @@ export default function ServerDetail({ server }) {
   return (
     <>
       <Head>
-        <title>{server.name} DISCBUMPLY.PL</title>
+        <title>{server.name} DISBUMPLY.PL</title>
         <meta name="description" content={server.description || `Strona serwera ${server.name}`} />
         <meta property="og:title" content={`${server.name} DISCBUMPLY`} />
         <meta property="og:description" content={server.description || `Dołącz do serwera ${server.name}`} />

@@ -189,7 +189,7 @@ export default function Dashboard() {
   return (
     <>
       <Head>
-        <title>Panel DISCBUMPLY.PL</title>
+        <title>Panel DISBUMPLY.PL</title>
       </Head>
 
       <main className="dashboard-shell premium dashboard-v10">

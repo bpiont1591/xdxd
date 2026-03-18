@@ -138,7 +138,7 @@ export default function AdminPage() {
   return (
     <>
       <Head>
-        <title>Panel Moderów DISCBUMPLY.PL</title>
+        <title>Panel Moderów DISBUMPLY.PL</title>
       </Head>
 
       <main className="site-shell">

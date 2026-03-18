@@ -152,7 +152,7 @@ export default function AllServersPage() {
   return (
     <>
       <Head>
-        <title>Wszystkie serwery DISCBUMPLY.PL</title>
+        <title>Wszystkie serwery DISBUMPLY.PL</title>
         <meta
           name="description"
           content="Pełna lista serwerów Discord w katalogu."

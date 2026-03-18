@@ -78,7 +78,7 @@ export default function Home() {
   return (
     <>
       <Head>
-        <title>DISBUMPLY - Publiczna lista serwerów Discord</title>
+        <title>DISBUMPLY.PL - Publiczna lista serwerów Discord</title>
         <meta
           name="description"
           content="Polski katalog serwerów Discord"
