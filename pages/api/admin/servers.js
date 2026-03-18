@@ -20,14 +20,11 @@ function safeJsonParse(value, fallback = {}) {
 
 function mapServerForAdmin(row) {
   const normalized = normalizeServer(row);
-
   const reports = Array.isArray(row.reports) ? row.reports : [];
   const reportCount =
-    typeof row.reportCount === "number"
-      ? row.reportCount
-      : typeof row?._count?.reports === "number"
-        ? row._count.reports
-        : reports.length;
+    typeof row?._count?.reports === "number"
+      ? row._count.reports
+      : reports.length;
 
   return {
     ...normalized,
@@ -39,11 +36,8 @@ function mapServerForAdmin(row) {
     reports: reports.map((report) => ({
       id: report.id,
       reason: report.reason || "",
-      details: report.details || "",
-      status: report.status || "pending",
-      reporterDiscordId: report.reporterDiscordId || null,
-      createdAt: report.createdAt || null,
-      updatedAt: report.updatedAt || null
+      userDiscordId: report.userDiscordId || null,
+      createdAt: report.createdAt || null
     }))
   };
 }
@@ -84,11 +78,8 @@ export default async function handler(req, res) {
           select: {
             id: true,
             reason: true,
-            details: true,
-            status: true,
-            reporterDiscordId: true,
-            createdAt: true,
-            updatedAt: true
+            userDiscordId: true,
+            createdAt: true
           }
         }
       },
@@ -148,11 +139,8 @@ export default async function handler(req, res) {
           select: {
             id: true,
             reason: true,
-            details: true,
-            status: true,
-            reporterDiscordId: true,
-            createdAt: true,
-            updatedAt: true
+            userDiscordId: true,
+            createdAt: true
           }
         }
       }
