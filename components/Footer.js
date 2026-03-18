@@ -42,7 +42,7 @@ export default function Footer() {
     <footer className="site-footer">
       <div className="footer-container">
         <div className="footer-grid">
-          <div>
+          <div className="footer-brand-column">
             <div className="footer-brand">
               <img
                 src="/allserver-logo.png"
