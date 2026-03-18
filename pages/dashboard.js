@@ -15,7 +15,7 @@ const defaultForm = {
 };
 
 const MAX_TAGS = 5;
-const MAX_DESCRIPTION = 400;
+const MAX_DESCRIPTION = 450;
 
 function normalizeTag(value) {
   return String(value || "")

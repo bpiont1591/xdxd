@@ -287,7 +287,7 @@ export default function Home() {
                           )}
                         </div>
 
-                        <p className="server-description clamp-3">
+                        <p className="server-description clamp-5">
                           {server.description || "Brak opisu serwera."}
                         </p>
                       </div>
