@@ -73,7 +73,7 @@ export default async function handler(req, res) {
     }
 
     const body = req.body || {};
-    const description = String(body.description || "").trim().slice(0, 250);
+    const description = String(body.description || "").trim().slice(0, 450);
     const rawTags = Array.isArray(body.tags) ? body.tags : String(body.tags || "").split(",");
     const tags = rawTags
       .map((tag) => String(tag || "").trim().toLowerCase().replace(/^#+/, "").replace(/\s+/g, "-"))
