@@ -13,6 +13,9 @@ export default async function handler(req, res) {
     const category = String(req.query.category || "all");
     const sort = String(req.query.sort || "recent");
 
+    const page = Math.max(1, Number(req.query.page || 1));
+    const limit = Math.max(1, Math.min(100, Number(req.query.limit || 20)));
+
     const rows = await prisma.server.findMany({
       where: {
         botInstalled: true,
@@ -40,11 +43,25 @@ export default async function handler(req, res) {
 
     const enriched = await enrichServersWithInviteStats(approved);
     const filtered = filterAndSortServers(enriched, query, category, sort);
-    const meta = buildPublicServerMeta(enriched);
+
+    const total = filtered.length;
+    const totalPages = Math.max(1, Math.ceil(total / limit));
+    const safePage = Math.min(page, totalPages);
+    const start = (safePage - 1) * limit;
+    const end = start + limit;
+    const paginated = filtered.slice(start, end);
+
+    const baseMeta = buildPublicServerMeta(enriched);
 
     return res.status(200).json({
-      servers: filtered,
-      meta
+      servers: paginated,
+      meta: {
+        ...baseMeta,
+        page: safePage,
+        limit,
+        total,
+        totalPages
+      }
     });
   } catch (error) {
     console.error("GET /api/public-servers error:", error);
