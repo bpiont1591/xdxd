@@ -256,7 +256,7 @@ export default function Dashboard() {
           <div className="sidebar-header deluxe">
             <Link href="/" className="brand brand-link">
               <img
-                src="/bumply-logo.png"
+                src="/bumply-logo.svg"
                 alt="Bumply"
                 className="site-logo site-logo--sidebar"
               />

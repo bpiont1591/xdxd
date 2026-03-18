@@ -145,7 +145,7 @@ export default function AdminPage() {
         <header className="topbar container">
           <Link href="/" className="brand brand-link">
             <img
-              src="/bumply-logo.png"
+              src="/bumply-logo.svg"
               alt="Bumply"
               className="site-logo"
             />
