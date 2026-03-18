@@ -211,9 +211,8 @@ export default function Home() {
         <section id="listing" className="servers-section container">
           <div className="section-head">
             <div>
-              <span className="badge">strona główna</span>
+              <span className="badge">Strona Główna</span>
               <h2>Najaktywniejsze serwery</h2>
-              <p>Maksymalnie 12 pozycji na stronie głównej.</p>
             </div>
             <Link href="/allservers" className="btn btn-ghost">
               Zobacz wszystkie
