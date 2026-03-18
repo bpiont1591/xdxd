@@ -1535,11 +1535,19 @@ body {
 }
 
 .footer-link-icon {
-  display: inline-flex;
+  display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 0.95rem;
+  width: 16px;
+  height: 16px;
   min-width: 16px;
+}
+
+.footer-link-icon svg {
+  width: 16px;
+  height: 16px;
+  fill: #ffffff;
+  opacity: 0.9;
 }
 
 .footer-bottom {
@@ -1549,6 +1557,7 @@ body {
   color: #7f8bb3;
   font-size: 0.85rem;
 }
+
 @media (max-width: 1100px) {
   .footer-grid {
     grid-template-columns: 1fr 1fr;
@@ -1573,18 +1582,4 @@ body {
   .footer-pill {
     padding: 10px 12px;
   }
-  .footer-link-icon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 16px;
-  height: 16px;
-}
-
-.footer-link-icon svg {
-  width: 16px;
-  height: 16px;
-  fill: white;
-  opacity: 0.9;
-}
 }
