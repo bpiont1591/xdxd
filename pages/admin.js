@@ -1,9 +1,12 @@
 import Head from "next/head";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { signIn, signOut, useSession } from "next-auth/react";
 import BrandLogo from "../components/BrandLogo";
 import DiscordGlyph from "../components/DiscordGlyph";
+
+const ADMIN_DISCORD_ID = "1418289596457812088";
+const PAGE_SIZE = 8;
 
 export default function AdminPage() {
   const { data: session, status } = useSession();
@@ -12,6 +15,12 @@ export default function AdminPage() {
   const [servers, setServers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [notice, setNotice] = useState("");
+  const [query, setQuery] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [typeFilter, setTypeFilter] = useState("all");
+  const [botFilter, setBotFilter] = useState("all");
+  const [page, setPage] = useState(1);
+  const [expandedId, setExpandedId] = useState(null);
 
   async function checkSession() {
     const res = await fetch("/api/admin/session");
@@ -25,8 +34,12 @@ export default function AdminPage() {
     try {
       const res = await fetch("/api/admin/servers");
       const data = await res.json();
-      if (res.ok) setServers(data.servers || []);
-      else setNotice(data.error || "Nie udało się pobrać listy");
+      if (res.ok) {
+        setServers(data.servers || []);
+        setNotice("");
+      } else {
+        setNotice(data.error || "Nie udało się pobrać listy");
+      }
     } finally {
       setLoading(false);
     }
@@ -42,6 +55,10 @@ export default function AdminPage() {
       setLoading(false);
     }
   }, [status]);
+
+  useEffect(() => {
+    setPage(1);
+  }, [query, statusFilter, typeFilter, botFilter]);
 
   async function login(e) {
     e.preventDefault();
@@ -79,7 +96,7 @@ export default function AdminPage() {
       body: JSON.stringify({
         id,
         moderationStatus: payload.moderationStatus || current?.moderationStatus || "pending",
-        moderationNote: "",
+        moderationNote: payload.moderationNote ?? current?.moderationNote ?? "",
         serverType: payload.serverType || current?.serverType || "public"
       })
     });
@@ -92,6 +109,44 @@ export default function AdminPage() {
 
     setServers((prev) => prev.map((server) => (server.id === id ? data.server : server)));
   }
+
+  const stats = useMemo(() => {
+    const approved = servers.filter((server) => server.moderationStatus === "approved").length;
+    const pending = servers.filter((server) => server.moderationStatus === "pending").length;
+    const rejected = servers.filter((server) => server.moderationStatus === "rejected").length;
+    const withBot = servers.filter((server) => server.botInstalled).length;
+
+    return {
+      total: servers.length,
+      approved,
+      pending,
+      rejected,
+      withBot
+    };
+  }, [servers]);
+
+  const filteredServers = useMemo(() => {
+    const phrase = query.trim().toLowerCase();
+
+    return servers.filter((server) => {
+      const matchesQuery = !phrase || [
+        server.name,
+        server.description,
+        server.inviteUrl,
+        ...(server.tags || [])
+      ].filter(Boolean).some((value) => String(value).toLowerCase().includes(phrase));
+
+      const matchesStatus = statusFilter === "all" || server.moderationStatus === statusFilter;
+      const matchesType = typeFilter === "all" || server.serverType === typeFilter;
+      const matchesBot = botFilter === "all" || (botFilter === "withBot" ? server.botInstalled : !server.botInstalled);
+
+      return matchesQuery && matchesStatus && matchesType && matchesBot;
+    });
+  }, [servers, query, statusFilter, typeFilter, botFilter]);
+
+  const totalPages = Math.max(1, Math.ceil(filteredServers.length / PAGE_SIZE));
+  const currentPage = Math.min(page, totalPages);
+  const paginatedServers = filteredServers.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
 
   if (status === "loading") {
     return (
@@ -117,7 +172,7 @@ export default function AdminPage() {
     );
   }
 
-  if (String(session?.user?.id || "") !== "1418289596457812088") {
+  if (String(session?.user?.id || "") !== ADMIN_DISCORD_ID) {
     return (
       <main className="panel-page">
         <div className="panel-only glass">
@@ -150,10 +205,10 @@ export default function AdminPage() {
 
           <div className="topbar-actions">
             {authenticated && (
-              <button className="btn btn-ghost" onClick={logoutAdmin}>Wyloguj admina</button>
+              <button className="btn btn-ghost" onClick={logoutAdmin}>Wyloguj panel</button>
             )}
             <button className="btn btn-ghost" onClick={() => signOut({ callbackUrl: "/" })}>
-              WYLOGUJ DISCORD
+              Wyloguj Discord
             </button>
           </div>
         </header>
@@ -184,58 +239,199 @@ export default function AdminPage() {
               {notice ? <div className="notice">{notice}</div> : null}
             </div>
           ) : (
-            <div className="panel-card glass">
-              <div className="section-head">
+            <div className="panel-card glass admin-panel-pro">
+              <div className="section-head section-head-pro">
                 <div>
                   <span className="badge">moderacja</span>
-                  <h2>Wybrane serwery do decyzji</h2>
-                  <p>Widzisz tylko serwery wybrane i zapisane przez użytkowników. Zatwierdzone serwery pokażą się publicznie po bumpie i aktywnym bocie.</p>
+                  <h2>Panel serwerów</h2>
+                  <p>Masz wyszukiwarkę, filtry i czytelny podgląd zgłoszeń. Wreszcie da się to ogarnąć bez walki z interfejsem.</p>
                 </div>
                 <button className="btn btn-ghost" onClick={loadServers}>Odśwież</button>
               </div>
 
+              <div className="admin-stats-grid">
+                <div className="metric-box soft-card"><span>Wszystkie</span><strong>{stats.total}</strong></div>
+                <div className="metric-box soft-card"><span>Pending</span><strong>{stats.pending}</strong></div>
+                <div className="metric-box soft-card"><span>Zatwierdzone</span><strong>{stats.approved}</strong></div>
+                <div className="metric-box soft-card"><span>Odrzucone</span><strong>{stats.rejected}</strong></div>
+                <div className="metric-box soft-card"><span>Z botem</span><strong>{stats.withBot}</strong></div>
+              </div>
+
+              <div className="toolbar-panel soft-card">
+                <div className="toolbar-row toolbar-grid-admin">
+                  <label className="searchbar-clean searchbar-block">
+                    <span className="field-label">Szukaj serwera</span>
+                    <input
+                      type="text"
+                      value={query}
+                      onChange={(e) => setQuery(e.target.value)}
+                      placeholder="Nazwa, opis, tag, invite URL..."
+                    />
+                  </label>
+
+                  <label className="field compact-field">
+                    <span className="field-label">Status</span>
+                    <div className="select-wrap">
+                      <select className="select" value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
+                        <option value="all">Wszystkie</option>
+                        <option value="pending">Pending</option>
+                        <option value="approved">Approved</option>
+                        <option value="rejected">Rejected</option>
+                      </select>
+                    </div>
+                  </label>
+
+                  <label className="field compact-field">
+                    <span className="field-label">Typ serwera</span>
+                    <div className="select-wrap">
+                      <select className="select" value={typeFilter} onChange={(e) => setTypeFilter(e.target.value)}>
+                        <option value="all">Wszystkie</option>
+                        <option value="public">Publiczny</option>
+                        <option value="nsfw">NSFW</option>
+                      </select>
+                    </div>
+                  </label>
+
+                  <label className="field compact-field">
+                    <span className="field-label">Bot</span>
+                    <div className="select-wrap">
+                      <select className="select" value={botFilter} onChange={(e) => setBotFilter(e.target.value)}>
+                        <option value="all">Dowolnie</option>
+                        <option value="withBot">Z botem</option>
+                        <option value="withoutBot">Bez bota</option>
+                      </select>
+                    </div>
+                  </label>
+                </div>
+
+                <div className="toolbar-row toolbar-summary">
+                  <span className="muted">Wyniki: <strong>{filteredServers.length}</strong></span>
+                  <button
+                    type="button"
+                    className="btn btn-ghost"
+                    onClick={() => {
+                      setQuery("");
+                      setStatusFilter("all");
+                      setTypeFilter("all");
+                      setBotFilter("all");
+                    }}
+                  >
+                    Reset filtrów
+                  </button>
+                </div>
+              </div>
+
               {loading ? (
                 <div className="state-card glass">Ładowanie serwerów...</div>
+              ) : !filteredServers.length ? (
+                <div className="state-card glass">Brak serwerów pasujących do filtrów.</div>
               ) : (
-                <div className="moderation-list">
-                  {servers.map((server) => (
-                    <div key={server.id} className="moderation-card">
-                      <div className="moderation-head">
-                        <div>
-                          <h3>{server.name}</h3>
-                          <p className="muted">{server.description || "Brak opisu"}</p>
-                        </div>
-                        <div className={`status-pill ${server.moderationStatus === "approved" ? "ok" : server.moderationStatus === "rejected" ? "danger" : "warn"}`}>
-                          {server.moderationStatus}
-                        </div>
-                      </div>
-
-                      <div className="tag-list">
-                        {server.tags?.length ? server.tags.map((tag) => <span key={tag} className="tag">#{tag}</span>) : <span className="muted">Brak tagów</span>}
-                      </div>
-
-                      <div className="moderation-meta">
-                        <span className="metric">Bot: {server.botInstalled ? "tak" : "nie"}</span>
-                        <span className="metric">Bumpy: {server.bumpCount || 0}</span>
-                        <span className="metric">Invite: {server.inviteUrl ? "ustawiony" : "brak"}</span>
-                        <span className={`server-type-pill ${server.serverType === "nsfw" ? "nsfw" : "public"}`}>{server.serverType === "nsfw" ? "NSFW 🔞" : "Publiczny"}</span>
-                      </div>
-
-                      <div className="button-row">
-                        <button className="btn btn-primary" onClick={() => updateServer(server.id, { moderationStatus: "approved" })}>Zatwierdź</button>
-                        <button className="btn btn-ghost" onClick={() => updateServer(server.id, { moderationStatus: "pending" })}>Pending</button>
-                        <button className="btn btn-danger" onClick={() => updateServer(server.id, { moderationStatus: "rejected" })}>Odrzuć</button>
-                        <Link className="btn btn-ghost" href={`/servers/${server.id}`}>Podgląd</Link>
-                      </div>
-
-                      <div className="button-row top-gap">
-                        <button className={`btn ${server.serverType === "public" ? "btn-primary" : "btn-ghost"}`} onClick={() => updateServer(server.id, { serverType: "public" })}>Ustaw publiczny</button>
-                        <button className={`btn ${server.serverType === "nsfw" ? "btn-danger" : "btn-ghost"}`} onClick={() => updateServer(server.id, { serverType: "nsfw" })}>Ustaw NSFW</button>
-                      </div>
+                <>
+                  <div className="table-shell soft-card">
+                    <div className="table-scroll">
+                      <table className="server-table">
+                        <thead>
+                          <tr>
+                            <th>Serwer</th>
+                            <th>Status</th>
+                            <th>Typ</th>
+                            <th>Bot</th>
+                            <th>Bumpy</th>
+                            <th>Invite</th>
+                            <th>Akcje</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {paginatedServers.map((server) => {
+                            const expanded = expandedId === server.id;
+                            return (
+                              <>
+                                <tr key={server.id}>
+                                  <td>
+                                    <div className="server-cell-main">
+                                      <strong>{server.name}</strong>
+                                      <span>{server.description || "Brak opisu"}</span>
+                                      <div className="tag-list compact-tags">
+                                        {server.tags?.length ? server.tags.slice(0, 4).map((tag) => <span key={tag} className="tag">#{tag}</span>) : <span className="muted">Brak tagów</span>}
+                                      </div>
+                                    </div>
+                                  </td>
+                                  <td>
+                                    <span className={`status-pill ${server.moderationStatus === "approved" ? "ok" : server.moderationStatus === "rejected" ? "danger" : "warn"}`}>
+                                      {server.moderationStatus}
+                                    </span>
+                                  </td>
+                                  <td>
+                                    <span className={`server-type-pill ${server.serverType === "nsfw" ? "nsfw" : "public"}`}>
+                                      {server.serverType === "nsfw" ? "NSFW" : "Publiczny"}
+                                    </span>
+                                  </td>
+                                  <td><span className="metric inline-metric">{server.botInstalled ? "Tak" : "Nie"}</span></td>
+                                  <td><span className="metric inline-metric">{server.bumpCount || 0}</span></td>
+                                  <td><span className="metric inline-metric">{server.inviteUrl ? "Jest" : "Brak"}</span></td>
+                                  <td>
+                                    <div className="table-actions">
+                                      <button className="btn btn-primary btn-sm" onClick={() => updateServer(server.id, { moderationStatus: "approved" })}>Zatwierdź</button>
+                                      <button className="btn btn-ghost btn-sm" onClick={() => setExpandedId(expanded ? null : server.id)}>
+                                        {expanded ? "Ukryj" : "Szczegóły"}
+                                      </button>
+                                    </div>
+                                  </td>
+                                </tr>
+                                {expanded && (
+                                  <tr className="detail-row" key={`${server.id}-details`}>
+                                    <td colSpan={7}>
+                                      <div className="detail-panel">
+                                        <div className="detail-grid detail-grid-pro">
+                                          <div className="detail-block">
+                                            <span className="detail-label">Opis zgłoszenia</span>
+                                            <p>{server.description || "Brak opisu."}</p>
+                                          </div>
+                                          <div className="detail-block">
+                                            <span className="detail-label">Invite URL</span>
+                                            <p className="break-anywhere">{server.inviteUrl || "Nie ustawiono invite URL."}</p>
+                                          </div>
+                                          <div className="detail-block">
+                                            <span className="detail-label">Tagi</span>
+                                            <div className="tag-list">
+                                              {server.tags?.length ? server.tags.map((tag) => <span key={tag} className="tag">#{tag}</span>) : <span className="muted">Brak tagów</span>}
+                                            </div>
+                                          </div>
+                                          <div className="detail-block">
+                                            <span className="detail-label">Moderacja</span>
+                                            <div className="button-row card-actions">
+                                              <button className="btn btn-primary" onClick={() => updateServer(server.id, { moderationStatus: "approved" })}>Zatwierdź</button>
+                                              <button className="btn btn-ghost" onClick={() => updateServer(server.id, { moderationStatus: "pending" })}>Pending</button>
+                                              <button className="btn btn-danger" onClick={() => updateServer(server.id, { moderationStatus: "rejected" })}>Odrzuć</button>
+                                              <Link className="btn btn-ghost" href={`/servers/${server.id}`}>Podgląd</Link>
+                                            </div>
+                                          </div>
+                                          <div className="detail-block detail-block-wide">
+                                            <span className="detail-label">Rodzaj serwera</span>
+                                            <div className="button-row card-actions">
+                                              <button className={`btn ${server.serverType === "public" ? "btn-primary" : "btn-ghost"}`} onClick={() => updateServer(server.id, { serverType: "public" })}>Ustaw publiczny</button>
+                                              <button className={`btn ${server.serverType === "nsfw" ? "btn-danger" : "btn-ghost"}`} onClick={() => updateServer(server.id, { serverType: "nsfw" })}>Ustaw NSFW</button>
+                                            </div>
+                                          </div>
+                                        </div>
+                                      </div>
+                                    </td>
+                                  </tr>
+                                )}
+                              </>
+                            );
+                          })}
+                        </tbody>
+                      </table>
                     </div>
-                  ))}
-                  {!servers.length && <div className="state-card glass">Brak serwerów do moderacji.</div>}
-                </div>
+                  </div>
+
+                  <div className="pagination-row">
+                    <button className="btn btn-ghost" disabled={currentPage <= 1} onClick={() => setPage((prev) => Math.max(1, prev - 1))}>Poprzednia</button>
+                    <span className="metric">Strona {currentPage} / {totalPages}</span>
+                    <button className="btn btn-ghost" disabled={currentPage >= totalPages} onClick={() => setPage((prev) => Math.min(totalPages, prev + 1))}>Następna</button>
+                  </div>
+                </>
               )}
 
               {notice ? <div className="notice top-gap">{notice}</div> : null}
