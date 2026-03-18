@@ -14,7 +14,6 @@ function formatTimeAgo(dateString) {
   return `${days} dni temu`;
 }
 
-
 export default function AllServersPage() {
   const [servers, setServers] = useState([]);
   const [meta, setMeta] = useState({ categories: [] });
@@ -33,7 +32,7 @@ export default function AllServersPage() {
       const params = new URLSearchParams({
         query: q,
         category: c,
-        sort: s
+        sort: s,
       });
 
       const res = await fetch(`/api/public-servers?${params.toString()}`);
@@ -55,8 +54,11 @@ export default function AllServersPage() {
   return (
     <>
       <Head>
-        <title>Wszystkie serwery • DiscordBoard Premium</title>
-        <meta name="description" content="Pełna lista serwerów Discord w katalogu DiscordBoard Premium." />
+        <title>Wszystkie serwery • Bumply</title>
+        <meta
+          name="description"
+          content="Pełna lista serwerów Discord w katalogu Bumply."
+        />
       </Head>
 
       <main className="site-shell home-v9">
@@ -65,14 +67,16 @@ export default function AllServersPage() {
 
         <header className="topbar container">
           <Link href="/" className="brand brand-link">
-            <div className="brand-badge">DB</div>
-            <div>
-              <strong>DiscordBoard Premium</strong>
-              <span>Wszystkie serwery</span>
-            </div>
+            <img
+              src="/bumply-logo.png"
+              alt="Bumply"
+              style={{ height: "150px", width: "auto", display: "block" }}
+            />
           </Link>
 
-          <Link href="/" className="btn btn-ghost">Powrót</Link>
+          <Link href="/" className="btn btn-ghost">
+            Powrót
+          </Link>
         </header>
 
         <section className="container panel-card glass allservers-toolbar">
@@ -83,7 +87,7 @@ export default function AllServersPage() {
             </div>
           </div>
 
-          <div className="toolbar wide">
+          <div className="toolbar wide allservers-filters">
             <form
               className="searchbar"
               onSubmit={(e) => {
@@ -97,36 +101,44 @@ export default function AllServersPage() {
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
               />
-              <button className="btn btn-primary" type="submit">Szukaj</button>
+              <button className="btn btn-primary" type="submit">
+                Szukaj
+              </button>
             </form>
 
-            <select
-              className="select"
-              value={category}
-              onChange={(e) => {
-                setCategory(e.target.value);
-                loadServers({ category: e.target.value });
-              }}
-            >
-              <option value="all">Wszystkie kategorie</option>
-              {meta.categories.slice(0, 20).map((cat) => (
-                <option key={cat.name} value={cat.name}>#{cat.name}</option>
-              ))}
-            </select>
+            <div className="select-wrap">
+              <select
+                className="select select-dark"
+                value={category}
+                onChange={(e) => {
+                  setCategory(e.target.value);
+                  loadServers({ category: e.target.value });
+                }}
+              >
+                <option value="all">Wszystkie kategorie</option>
+                {meta.categories.slice(0, 20).map((cat) => (
+                  <option key={cat.name} value={cat.name}>
+                    #{cat.name}
+                  </option>
+                ))}
+              </select>
+            </div>
 
-            <select
-              className="select"
-              value={sort}
-              onChange={(e) => {
-                setSort(e.target.value);
-                loadServers({ sort: e.target.value });
-              }}
-            >
-              <option value="top">Top bumpy</option>
-              <option value="favorites">Najwięcej ulubionych</option>
-              <option value="recent">Najnowsze</option>
-              <option value="name">Nazwa A-Z</option>
-            </select>
+            <div className="select-wrap">
+              <select
+                className="select select-dark"
+                value={sort}
+                onChange={(e) => {
+                  setSort(e.target.value);
+                  loadServers({ sort: e.target.value });
+                }}
+              >
+                <option value="top">Top bumpy</option>
+                <option value="favorites">Najwięcej ulubionych</option>
+                <option value="recent">Najnowsze</option>
+                <option value="name">Nazwa A-Z</option>
+              </select>
+            </div>
           </div>
         </section>
 
@@ -152,15 +164,23 @@ export default function AllServersPage() {
                       <div className="home-list-copy">
                         <div className="home-list-topline">
                           <h3>{server.name}</h3>
-                          <span className="metric">Bumpów: {server.bumpCount || 0}</span>
-                          <span className="metric">⭐ {server.favoriteCount || 0}</span>
-                          <span className="metric">Ostatni: {formatTimeAgo(server.lastBumpAt)}</span>
+                          <span className="metric">
+                            Bumpów: {server.bumpCount || 0}
+                          </span>
+                          <span className="metric">
+                            ⭐ {server.favoriteCount || 0}
+                          </span>
+                          <span className="metric">
+                            Ostatni: {formatTimeAgo(server.lastBumpAt)}
+                          </span>
                         </div>
 
                         <div className="tag-list">
                           {server.tags?.length ? (
                             server.tags.slice(0, 6).map((tag) => (
-                              <span className="tag" key={tag}>#{tag}</span>
+                              <span className="tag" key={tag}>
+                                #{tag}
+                              </span>
                             ))
                           ) : (
                             <span className="muted">Brak tagów</span>
@@ -174,13 +194,25 @@ export default function AllServersPage() {
                     </div>
 
                     <div className="home-list-actions">
-                      <Link className="btn btn-ghost" href={`/servers/${server.id}`}>Szczegóły</Link>
+                      <Link
+                        className="btn btn-ghost"
+                        href={`/servers/${server.id}`}
+                      >
+                        Szczegóły
+                      </Link>
                       {server.inviteUrl ? (
-                        <a className="btn btn-primary" href={server.inviteUrl} target="_blank" rel="noreferrer">
+                        <a
+                          className="btn btn-primary"
+                          href={server.inviteUrl}
+                          target="_blank"
+                          rel="noreferrer"
+                        >
                           Dołącz
                         </a>
                       ) : (
-                        <button className="btn btn-disabled" disabled>Brak invite</button>
+                        <button className="btn btn-disabled" disabled>
+                          Brak invite
+                        </button>
                       )}
                     </div>
                   </article>
