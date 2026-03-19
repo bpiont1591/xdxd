@@ -8,6 +8,8 @@ export default function App({ Component, pageProps: { session, ...pageProps } })
   return (
     <SessionProvider session={session}>
       <Head>
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta charSet="utf-8" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
 

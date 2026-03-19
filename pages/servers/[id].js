@@ -1,4 +1,3 @@
-import Head from "next/head";
 import DiscordServerIcon, { getDiscordServerIconCandidates } from "../../components/DiscordServerIcon";
 import Link from "next/link";
 import { signIn, useSession } from "next-auth/react";
@@ -7,6 +6,8 @@ import { useState } from "react";
 import { prisma } from "../../lib/prisma";
 import { normalizeServer } from "../../lib/storage";
 import { fetchInviteStats } from "../../lib/discord-invite-stats";
+import SeoHead from "../../components/SeoHead";
+import { absoluteUrl, cleanText, SITE_URL } from "../../lib/seo";
 
 export async function getServerSideProps({ params }) {
   try {
@@ -120,16 +121,36 @@ export default function ServerDetail({ server }) {
   }
 
   const iconUrl = getDiscordServerIconCandidates(server, 256)[0] || null;
+  const canonicalPath = `/servers/${encodeURIComponent(server.slug || server.id)}`;
+  const description = cleanText(server.description || `Dołącz do serwera Discord ${server.name}. Zobacz opis, tagi i statystyki społeczności.`);
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "DiscussionForumPosting",
+    headline: `${server.name} - serwer Discord`,
+    description,
+    url: absoluteUrl(canonicalPath),
+    image: iconUrl || absoluteUrl("/allserver-logo.png"),
+    inLanguage: "pl-PL",
+    keywords: ["serwer discord", server.name, ...(server.tags || [])].filter(Boolean).join(", "),
+    author: {
+      "@type": "Organization",
+      name: "DISBUMPLY.PL",
+      url: SITE_URL
+    },
+    mainEntityOfPage: absoluteUrl(canonicalPath)
+  };
 
   return (
     <>
-      <Head>
-        <title>{server.name} DISBUMPLY.PL</title>
-        <meta name="description" content={server.description || `Strona serwera ${server.name}`} />
-        <meta property="og:title" content={`${server.name} DISCBUMPLY`} />
-        <meta property="og:description" content={server.description || `Dołącz do serwera ${server.name}`} />
-        {iconUrl ? <meta property="og:image" content={iconUrl} /> : null}
-      </Head>
+      <SeoHead
+        title={`${server.name} - serwer Discord`}
+        description={description}
+        path={canonicalPath}
+        image={iconUrl || "/allserver-logo.png"}
+        keywords={[server.name, ...(server.tags || []).slice(0, 8)]}
+        type="article"
+        jsonLd={jsonLd}
+      />
 
       <main className="site-shell">
         <div className="ambient ambient-a" />

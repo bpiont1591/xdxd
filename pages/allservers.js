@@ -1,9 +1,10 @@
-import Head from "next/head";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import DiscordServerIcon from "../components/DiscordServerIcon";
 import BrandLogo from "../components/BrandLogo";
 import ServerCommunityStats from "../components/ServerCommunityStats";
+import SeoHead from "../components/SeoHead";
+import { SITE_URL } from "../lib/seo";
 
 function formatTimeAgo(dateString) {
   if (!dateString) return "Nigdy";
@@ -151,13 +152,20 @@ export default function AllServersPage() {
 
   return (
     <>
-      <Head>
-        <title>Wszystkie serwery DISBUMPLY.PL</title>
-        <meta
-          name="description"
-          content="Pełna lista serwerów Discord w katalogu."
-        />
-      </Head>
+      <SeoHead
+        title="Wszystkie serwery Discord - lista Discord"
+        description="Przeglądaj wszystkie serwery Discord w katalogu DISBUMPLY.PL. Sortuj, filtruj i wyszukuj polskie społeczności Discord według kategorii i aktywności."
+        path="/allservers"
+        keywords={["wszystkie serwery discord", "lista serwerów discord", "serwery discord katalog"]}
+        jsonLd={{
+          "@context": "https://schema.org",
+          "@type": "CollectionPage",
+          name: "Wszystkie serwery Discord",
+          url: `${SITE_URL}/allservers`,
+          inLanguage: "pl-PL",
+          description: "Pełna lista publicznych serwerów Discord w katalogu DISBUMPLY.PL."
+        }}
+      />
 
       <main className="site-shell home-v9">
         <div className="ambient ambient-a" />
@@ -237,6 +245,12 @@ export default function AllServersPage() {
               </select>
             </div>
           </div>
+        </section>
+
+        <section className="container seo-copy-block glass">
+          <span className="badge">katalog discord</span>
+          <h1>Wszystkie serwery Discord w jednym miejscu</h1>
+          <p className="muted large">Ta podstrona zbiera pełną listę serwerów Discord, dzięki czemu Google ma jasny sygnał, że to katalog, a użytkownik może normalnie filtrować wyniki bez przekopywania się przez chaos internetu.</p>
         </section>
 
         <section className="servers-section container">

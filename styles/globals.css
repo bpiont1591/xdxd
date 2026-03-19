@@ -2529,3 +2529,41 @@ button.site-nav-link {
     padding-top: 10px;
   }
 }
+
+.seo-copy-block {
+  margin-top: 22px;
+  padding: 26px;
+}
+
+.seo-copy-block h1 {
+  margin: 10px 0 10px;
+  font-size: clamp(1.9rem, 4vw, 3rem);
+  line-height: 1.05;
+}
+
+.seo-copy-block h2,
+.seo-copy-block h3 {
+  margin-top: 0;
+}
+
+.seo-copy-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.seo-faq-block {
+  display: grid;
+  gap: 16px;
+  margin-bottom: 12px;
+}
+
+@media (max-width: 820px) {
+  .seo-copy-block {
+    padding: 18px;
+  }
+
+  .seo-copy-grid {
+    grid-template-columns: 1fr;
+  }
+}
