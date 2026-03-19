@@ -9,24 +9,39 @@ const csp = [
   "frame-ancestors 'none'",
   "base-uri 'self'",
   "form-action 'self'"
-].join("; ");
+].join('; ');
 
 const nextConfig = {
+  async redirects() {
+    return [
+      {
+        source: '/:path*',
+        has: [
+          {
+            type: 'host',
+            value: 'disbumply.pl',
+          },
+        ],
+        destination: 'https://www.disbumply.pl/:path*',
+        permanent: true,
+      },
+    ];
+  },
   async headers() {
     return [
       {
-        source: "/(.*)",
+        source: '/(.*)',
         headers: [
-          { key: "Content-Security-Policy", value: csp },
-          { key: "X-Frame-Options", value: "DENY" },
-          { key: "X-Content-Type-Options", value: "nosniff" },
-          { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
-          { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=()" },
-          { key: "Cross-Origin-Opener-Policy", value: "same-origin" }
-        ]
-      }
+          { key: 'Content-Security-Policy', value: csp },
+          { key: 'X-Frame-Options', value: 'DENY' },
+          { key: 'X-Content-Type-Options', value: 'nosniff' },
+          { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
+          { key: 'Permissions-Policy', value: 'camera=(), microphone=(), geolocation=()' },
+          { key: 'Cross-Origin-Opener-Policy', value: 'same-origin' },
+        ],
+      },
     ];
-  }
+  },
 };
 
 module.exports = nextConfig;

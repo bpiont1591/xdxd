@@ -1,9 +1,9 @@
-export async function getServerSideProps({ res }) {
-  const body = `User-agent: *\nAllow: /\n\nSitemap: https://www.disbumply.pl/sitemap.xml\n`;
+import { SITE_URL } from "../lib/seo";
 
+export async function getServerSideProps({ res }) {
   res.setHeader("Content-Type", "text/plain; charset=utf-8");
-  res.write(body);
-  res.end();
+  res.setHeader("Cache-Control", "public, s-maxage=3600, stale-while-revalidate=86400");
+  res.end(`User-agent: *\nAllow: /\n\nSitemap: ${SITE_URL}/sitemap.xml\n`);
 
   return { props: {} };
 }

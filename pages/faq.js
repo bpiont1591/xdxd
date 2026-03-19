@@ -1,32 +1,27 @@
 import SeoHead from "../components/SeoHead";
-import { SITE_URL, buildOrganizationSchema } from "../lib/seo";
+import { SITE_URL, buildOrganizationSchema, buildWebsiteSchema } from "../lib/seo";
 
 export default function FaqPage() {
   const faqItems = [
     {
       question: "Czym jest lista Discord?",
-      answer:
-        "To publiczny katalog serwerów Discord, w którym można wyszukiwać społeczności według kategorii, tagów i aktywności.",
+      answer: "To publiczny katalog serwerów Discord, w którym można wyszukiwać społeczności według kategorii, tagów i aktywności.",
     },
     {
       question: "Jak działa katalog serwerów Discord?",
-      answer:
-        "DISBUMPLY.PL porządkuje serwery Discord według tagów, kategorii i aktualnej aktywności. Dzięki temu użytkownik może łatwo znaleźć serwery gamingowe, społeczności tematyczne, serwery anime, roleplay, muzyczne, edukacyjne albo zwykłe miejsca do pogadania bez szukania igły w stogu cyfrowego siana.",
+      answer: "DISBUMPLY.PL porządkuje serwery Discord według tagów, kategorii i aktualnej aktywności. Dzięki temu użytkownik może łatwo znaleźć serwery gamingowe, społeczności tematyczne, serwery anime, roleplay, muzyczne, edukacyjne albo zwykłe miejsca do pogadania bez szukania igły w stogu cyfrowego siana.",
     },
     {
       question: "Po co komu lista Discord?",
-      answer:
-        "Taka lista Discord pomaga zarówno właścicielom serwerów, jak i ludziom szukającym nowej społeczności. Jeden chce widoczności w Google, drugi chce znaleźć aktywny serwer Discord po polsku. Niesłychane, obie strony mogą zyskać naraz.",
+      answer: "Taka lista Discord pomaga zarówno właścicielom serwerów, jak i ludziom szukającym nowej społeczności. Jeden chce widoczności w Google, drugi chce znaleźć aktywny serwer Discord po polsku.",
     },
     {
       question: "Jak dodać serwer Discord do katalogu?",
-      answer:
-        "Wystarczy zalogować się przez Discord, dodać swój serwer, uzupełnić opis, tagi i zaproszenie, a potem regularnie go bumpować.",
+      answer: "Wystarczy zalogować się przez Discord, dodać swój serwer, uzupełnić opis, tagi i zaproszenie, a potem regularnie go bumpować.",
     },
     {
       question: "Jak znaleźć polskie serwery Discord?",
-      answer:
-        "Najłatwiej użyć wyszukiwarki i filtrów kategorii, aby przeglądać aktywne polskie serwery Discord według zainteresowań.",
+      answer: "Najłatwiej użyć wyszukiwarki i filtrów kategorii, aby przeglądać aktywne polskie serwery Discord według zainteresowań.",
     },
   ];
 
@@ -49,13 +44,9 @@ export default function FaqPage() {
         title="FAQ - lista Discord i serwery Discord"
         description="FAQ o DISBUMPLY.PL. Sprawdź jak działa lista Discord, jak znaleźć polskie serwery Discord i jak dodać własny serwer do katalogu."
         path="/faq"
-        keywords={[
-          "faq lista discord",
-          "lista discord",
-          "serwery discord",
-          "polskie serwery discord",
-        ]}
+        keywords={["faq lista discord", "lista discord", "serwery discord", "polskie serwery discord"]}
         jsonLd={[
+          buildWebsiteSchema(),
           buildOrganizationSchema(),
           {
             "@context": "https://schema.org",
@@ -63,8 +54,7 @@ export default function FaqPage() {
             name: "FAQ - Lista Discord",
             url: `${SITE_URL}/faq`,
             inLanguage: "pl-PL",
-            description:
-              "Najważniejsze informacje o katalogu serwerów Discord DISBUMPLY.PL.",
+            description: "Najważniejsze informacje o katalogu serwerów Discord DISBUMPLY.PL.",
           },
           faqSchema,
         ]}
@@ -78,9 +68,7 @@ export default function FaqPage() {
           <span className="badge">lista discord</span>
           <h1>Lista Discord dla polskich społeczności</h1>
           <p className="muted large">
-            Szukasz miejsca, gdzie da się szybko znaleźć sensowny serwer Discord zamiast błądzić po przypadkowych
-            zaproszeniach z internetu? Tutaj masz publiczny katalog, czyli normalną listę Discord z wyszukiwarką,
-            kategoriami i aktywnością serwerów.
+            Szukasz miejsca, gdzie da się szybko znaleźć sensowny serwer Discord zamiast błądzić po przypadkowych zaproszeniach z internetu? Tutaj masz publiczny katalog, czyli normalną listę Discord z wyszukiwarką, kategoriami i aktywnością serwerów.
           </p>
         </section>
 
@@ -88,18 +76,14 @@ export default function FaqPage() {
           <article className="panel-card glass">
             <h2>Jak działa katalog serwerów Discord</h2>
             <p>
-              DISBUMPLY.PL porządkuje serwery Discord według tagów, kategorii i aktualnej aktywności. Dzięki temu
-              użytkownik może łatwo znaleźć serwery gamingowe, społeczności tematyczne, serwery anime, roleplay,
-              muzyczne, edukacyjne albo zwykłe miejsca do pogadania bez szukania igły w stogu cyfrowego siana.
+              DISBUMPLY.PL porządkuje serwery Discord według tagów, kategorii i aktualnej aktywności. Dzięki temu użytkownik może łatwo znaleźć serwery gamingowe, społeczności tematyczne, serwery anime, roleplay, muzyczne, edukacyjne albo zwykłe miejsca do pogadania bez szukania igły w stogu cyfrowego siana.
             </p>
           </article>
 
           <article className="panel-card glass">
             <h2>Po co komu lista Discord</h2>
             <p>
-              Taka lista Discord pomaga zarówno właścicielom serwerów, jak i ludziom szukającym nowej społeczności.
-              Jeden chce widoczności w Google, drugi chce znaleźć aktywny serwer Discord po polsku. Niesłychane, obie
-              strony mogą zyskać naraz.
+              Taka lista Discord pomaga zarówno właścicielom serwerów, jak i ludziom szukającym nowej społeczności. Jeden chce widoczności w Google, drugi chce znaleźć aktywny serwer Discord po polsku. Niesłychane, obie strony mogą zyskać naraz.
             </p>
           </article>
         </section>

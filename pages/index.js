@@ -1,12 +1,13 @@
 import Link from "next/link";
 import { signIn, signOut, useSession } from "next-auth/react";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo } from "react";
 import DiscordServerIcon from "../components/DiscordServerIcon";
 import BrandLogo from "../components/BrandLogo";
 import DiscordGlyph from "../components/DiscordGlyph";
 import ServerCommunityStats from "../components/ServerCommunityStats";
 import SeoHead from "../components/SeoHead";
-import { buildOrganizationSchema, SITE_URL } from "../lib/seo";
+import { buildOrganizationSchema, buildWebsiteSchema, SITE_URL } from "../lib/seo";
+import { getPublicServersPayload } from "../lib/public-servers";
 
 function formatTimeAgo(dateString) {
   if (!dateString) return "Nigdy";
@@ -19,62 +20,50 @@ function formatTimeAgo(dateString) {
   return `${days} dni temu`;
 }
 
-export default function Home() {
+export async function getServerSideProps() {
+  try {
+    const payload = await getPublicServersPayload({ sort: "top", limit: 12, page: 1, category: "all", query: "" });
+    return {
+      props: {
+        initialServers: payload.servers || [],
+        initialMeta: payload.meta || {
+          totalServers: 0,
+          totalBumps: 0,
+          totalFavorites: 0,
+          totalReports: 0,
+          categories: [],
+        },
+      },
+    };
+  } catch (error) {
+    console.error("home SSR error:", error);
+    return {
+      props: {
+        initialServers: [],
+        initialMeta: {
+          totalServers: 0,
+          totalBumps: 0,
+          totalFavorites: 0,
+          totalReports: 0,
+          categories: [],
+        },
+      },
+    };
+  }
+}
 
+export default function Home({ initialServers, initialMeta }) {
   const { data: session, status } = useSession();
-  const [servers, setServers] = useState([]);
-  const [meta, setMeta] = useState({
+  const servers = Array.isArray(initialServers) ? initialServers : [];
+  const meta = initialMeta || {
     totalServers: 0,
     totalBumps: 0,
     totalFavorites: 0,
     totalReports: 0,
     categories: [],
-  });
-  const [loading, setLoading] = useState(true);
-  const [query, setQuery] = useState("");
-  const [category, setCategory] = useState("all");
+  };
 
-  async function loadServers(next = {}) {
-    const q = next.query ?? query;
-    const c = next.category ?? category;
-
-    setLoading(true);
-    try {
-      const params = new URLSearchParams({
-        query: q,
-        category: c,
-        sort: "top",
-      });
-
-      const res = await fetch(`/api/public-servers?${params.toString()}`);
-      const data = await res.json();
-
-      if (res.ok) {
-        setServers((data.servers || []).slice(0, 12));
-        setMeta(
-          data.meta || {
-            totalServers: 0,
-            totalBumps: 0,
-            totalFavorites: 0,
-            totalReports: 0,
-            categories: [],
-          }
-        );
-      }
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  useEffect(() => {
-    loadServers();
-  }, []);
-
-  const featuredCategories = useMemo(
-    () => meta.categories.slice(0, 10),
-    [meta.categories]
-  );
-
+  const featuredCategories = useMemo(() => (meta.categories || []).slice(0, 10), [meta.categories]);
   const isModerator = String(session?.user?.id || "") === "1418289596457812088";
 
   return (
@@ -85,6 +74,7 @@ export default function Home() {
         path="/"
         keywords={["lista discord polska", "serwery discord polska", "polskie serwery discord", "katalog serwerów discord"]}
         jsonLd={[
+          buildWebsiteSchema(),
           buildOrganizationSchema(),
           {
             "@context": "https://schema.org",
@@ -93,8 +83,8 @@ export default function Home() {
             url: SITE_URL,
             inLanguage: "pl-PL",
             description: "Publiczna lista serwerów Discord w Polsce.",
-            about: ["Discord", "serwery Discord", "lista Discord", "społeczności online"]
-          }
+            about: ["Discord", "serwery Discord", "lista Discord", "społeczności online"],
+          },
         ]}
       />
 
@@ -108,26 +98,12 @@ export default function Home() {
           <div className="topbar-actions">
             {status === "authenticated" ? (
               <>
-                <Link href="/dashboard" className="btn btn-ghost">
-                DASHBOARD
-                </Link>
-                {isModerator ? (
-                  <Link href="/admin" className="btn btn-ghost">
-                MODERACJA
-                  </Link>
-                ) : null}
-                <button
-                  className="btn btn-ghost"
-                  onClick={() => signOut({ callbackUrl: "/" })}
-                >
-                WYLOGUJ SIĘ
-                </button>
+                <Link href="/dashboard" className="btn btn-ghost">DASHBOARD</Link>
+                {isModerator ? <Link href="/admin" className="btn btn-ghost">MODERACJA</Link> : null}
+                <button className="btn btn-ghost" onClick={() => signOut({ callbackUrl: "/" })}>WYLOGUJ SIĘ</button>
               </>
             ) : (
-              <button
-                className="btn btn-primary btn-discord"
-                onClick={() => signIn("discord")}
-              >
+              <button className="btn btn-primary btn-discord" onClick={() => signIn("discord")}>
                 <DiscordGlyph />
                 <span>​ZALOGUJ SIĘ PRZEZ DISCORD​</span>
               </button>
@@ -143,41 +119,21 @@ export default function Home() {
               <span>{meta.totalServers} serwerów</span>
               <span>{meta.totalBumps} bumpów</span>
               <span>{meta.totalFavorites} ulubionych</span>
-              <span>{meta.categories.length} kategorii</span>
+              <span>{(meta.categories || []).length} kategorii</span>
             </div>
           </div>
 
-          <form
-            className="directory-search home-v9-search searchbar-clean hero-search"
-            onSubmit={(e) => {
-              e.preventDefault();
-              loadServers();
-            }}
-          >
-            <input
-              type="text"
-              placeholder="Wpisz nazwę serwera, tag lub kategorię..."
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-            />
+          <form className="directory-search home-v9-search searchbar-clean hero-search" method="get" action="/allservers">
+            <input type="text" placeholder="Wpisz nazwę serwera, tag lub kategorię..." name="query" />
           </form>
 
           <div className="home-v9-actions">
             {status === "authenticated" ? (
-              <Link href="/dashboard" className="btn btn-primary">
-                DODAJ SERWER
-              </Link>
+              <Link href="/dashboard" className="btn btn-primary">DODAJ SERWER</Link>
             ) : (
-              <button
-                className="btn btn-primary"
-                onClick={() => signIn("discord")}
-              >
-                DODAJ SERWER
-              </button>
+              <button className="btn btn-primary" onClick={() => signIn("discord")}>DODAJ SERWER</button>
             )}
-            <Link href="/allservers" className="btn btn-ghost">
-              ​ZOBACZ WSZYSTKIE​
-            </Link>
+            <Link href="/allservers" className="btn btn-ghost">​ZOBACZ WSZYSTKIE​</Link>
           </div>
         </section>
 
@@ -190,33 +146,16 @@ export default function Home() {
           </div>
 
           <div className="category-grid compact-categories">
-            <button
-              className={`category-chip large ${
-                category === "all" ? "active" : ""
-              }`}
-              onClick={() => {
-                setCategory("all");
-                loadServers({ category: "all" });
-              }}
-            >
+            <Link className="category-chip large active" href="/allservers">
               <strong>Wszystkie</strong>
               <span>{meta.totalServers}</span>
-            </button>
+            </Link>
 
             {featuredCategories.map((item) => (
-              <button
-                key={item.name}
-                className={`category-chip large ${
-                  category === item.name ? "active" : ""
-                }`}
-                onClick={() => {
-                  setCategory(item.name);
-                  loadServers({ category: item.name });
-                }}
-              >
+              <Link key={item.name} className="category-chip large" href={`/allservers?category=${encodeURIComponent(item.name)}`}>
                 <strong>#{item.name}</strong>
                 <span>{item.count}</span>
-              </button>
+              </Link>
             ))}
           </div>
         </section>
@@ -227,48 +166,31 @@ export default function Home() {
               <span className="badge">Strona Główna</span>
               <h2>Najaktywniejsze serwery</h2>
             </div>
-            <Link href="/allservers" className="btn btn-ghost">
-              ​ZOBACZ WSZYSTKIE​
-            </Link>
+            <Link href="/allservers" className="btn btn-ghost">​ZOBACZ WSZYSTKIE​</Link>
           </div>
 
-          {loading ? (
-            <div className="state-card glass">Ładowanie serwerów...</div>
-          ) : servers.length === 0 ? (
+          {servers.length === 0 ? (
             <div className="state-card glass">
               <h3>Brak wyników</h3>
-              <p>Spróbuj innej kategorii albo wyszukiwania.</p>
+              <p>Lista serwerów jest chwilowo pusta albo baza akurat postanowiła utrudniać życie.</p>
             </div>
           ) : (
             <div className="home-list">
               {servers.map((server) => {
+                const detailHref = `/servers/${encodeURIComponent(server.slug || server.id)}`;
                 return (
                   <article key={server.id} className="home-list-card glass">
                     <div className="home-list-main">
                       <div className="server-avatar">
-                        {server.icon ? (
-                          <DiscordServerIcon server={server} size={128} />
-                        ) : (
-                          <span>{server.name.slice(0, 1)}</span>
-                        )}
+                        {server.icon ? <DiscordServerIcon server={server} size={128} /> : <span>{server.name?.slice(0, 1) || "?"}</span>}
                       </div>
 
                       <div className="home-list-copy">
                         <div className="home-list-topline">
                           <h3>{server.name}</h3>
-
-                          <span className="metric">
-                            Bumpów: {server.bumpCount || 0}
-                          </span>
-
-                          <span className="metric">
-                            ⭐ {server.favoriteCount || 0}
-                          </span>
-
-                          <span className="metric">
-                            Ostatni: {formatTimeAgo(server.lastBumpAt)}
-                          </span>
-
+                          <span className="metric">Bumpów: {server.bumpCount || 0}</span>
+                          <span className="metric">⭐ {server.favoriteCount || 0}</span>
+                          <span className="metric">Ostatni: {formatTimeAgo(server.lastBumpAt)}</span>
                           <span className={`server-type-pill ${server.serverType === "nsfw" ? "nsfw" : "public"}`}>
                             {server.serverType === "nsfw" ? "NSFW 🔞" : "Publiczny"}
                           </span>
@@ -281,8 +203,8 @@ export default function Home() {
                             Number.isFinite(Number(server.onlineCount)) || Number.isFinite(Number(server.memberCount))
                               ? "available"
                               : server.inviteUrl
-                              ? "idle"
-                              : "invalid"
+                                ? "idle"
+                                : "invalid"
                           }
                           compact
                           className="top-gap"
@@ -290,42 +212,22 @@ export default function Home() {
 
                         <div className="tag-list">
                           {server.tags?.length ? (
-                            server.tags.slice(0, 5).map((tag) => (
-                              <span className="tag" key={tag}>
-                                #{tag}
-                              </span>
-                            ))
+                            server.tags.slice(0, 5).map((tag) => <span className="tag" key={tag}>#{tag}</span>)
                           ) : (
                             <span className="muted">Brak tagów</span>
                           )}
                         </div>
 
-                        <p className="server-description clamp-5">
-                          {server.description || "Brak opisu serwera."}
-                        </p>
+                        <p className="server-description clamp-5">{server.description || "Brak opisu serwera."}</p>
                       </div>
                     </div>
 
                     <div className="home-list-actions">
-                      <Link
-                        className="btn btn-ghost"
-                        href={`/servers/${server.id}`}
-                      >
-                        Szczegóły
-                      </Link>
+                      <Link className="btn btn-ghost" href={detailHref}>Szczegóły</Link>
                       {server.inviteUrl ? (
-                        <a
-                          className="btn btn-primary"
-                          href={server.inviteUrl}
-                          target="_blank"
-                          rel="noreferrer"
-                        >
-                          Dołącz
-                        </a>
+                        <a className="btn btn-primary" href={server.inviteUrl} target="_blank" rel="noreferrer">Dołącz</a>
                       ) : (
-                        <button className="btn btn-disabled" disabled>
-                          Brak invite
-                        </button>
+                        <button className="btn btn-disabled" disabled>Brak invite</button>
                       )}
                     </div>
                   </article>

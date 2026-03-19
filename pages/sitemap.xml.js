@@ -7,7 +7,7 @@ function escapeXml(value = "") {
     .replace(/&/g, "&amp;")
     .replace(/</g, "&lt;")
     .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
+    .replace(/\"/g, "&quot;")
     .replace(/'/g, "&apos;");
 }
 
@@ -17,7 +17,7 @@ export async function getServerSideProps({ res }) {
     { loc: `${SITE_URL}/allservers`, changefreq: "hourly", priority: "0.9" },
     { loc: `${SITE_URL}/faq`, changefreq: "weekly", priority: "0.6" },
     { loc: `${SITE_URL}/privacy`, changefreq: "monthly", priority: "0.3" },
-    { loc: `${SITE_URL}/terms`, changefreq: "monthly", priority: "0.3" }
+    { loc: `${SITE_URL}/terms`, changefreq: "monthly", priority: "0.3" },
   ];
 
   let serverRoutes = [];
@@ -27,7 +27,7 @@ export async function getServerSideProps({ res }) {
       where: {
         botInstalled: true,
         moderationStatus: "approved",
-        NOT: { lastBumpAt: null }
+        NOT: { lastBumpAt: null },
       },
       select: {
         id: true,
@@ -35,10 +35,9 @@ export async function getServerSideProps({ res }) {
         updatedAt: true,
         lastBumpAt: true,
         name: true,
-        tags: true
       },
       orderBy: [{ updatedAt: "desc" }],
-      take: 5000
+      take: 5000,
     });
 
     serverRoutes = rows.map((row) => {
@@ -50,7 +49,7 @@ export async function getServerSideProps({ res }) {
         loc: `${SITE_URL}/servers/${encodeURIComponent(slug)}`,
         lastmod: new Date(lastmod).toISOString(),
         changefreq: "daily",
-        priority: "0.8"
+        priority: "0.8",
       };
     });
   } catch (error) {
@@ -59,15 +58,16 @@ export async function getServerSideProps({ res }) {
 
   const urls = [...staticRoutes, ...serverRoutes]
     .map(
-      (entry) => `<url><loc>${escapeXml(entry.loc)}</loc>${entry.lastmod ? `<lastmod>${escapeXml(entry.lastmod)}</lastmod>` : ""}<changefreq>${entry.changefreq}</changefreq><priority>${entry.priority}</priority></url>`
+      (entry) =>
+        `<url><loc>${escapeXml(entry.loc)}</loc>${entry.lastmod ? `<lastmod>${escapeXml(entry.lastmod)}</lastmod>` : ""}<changefreq>${entry.changefreq}</changefreq><priority>${entry.priority}</priority></url>`
     )
     .join("");
 
   const xml = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${urls}</urlset>`;
 
   res.setHeader("Content-Type", "application/xml; charset=utf-8");
-  res.write(xml);
-  res.end();
+  res.setHeader("Cache-Control", "public, s-maxage=3600, stale-while-revalidate=86400");
+  res.end(xml);
 
   return { props: {} };
 }
