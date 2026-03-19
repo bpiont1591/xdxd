@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/router";
 import DiscordServerIcon from "../components/DiscordServerIcon";
 import BrandLogo from "../components/BrandLogo";
 import ServerCommunityStats from "../components/ServerCommunityStats";
@@ -8,119 +9,248 @@ import { SITE_URL } from "../lib/seo";
 
 function formatTimeAgo(dateString) {
   if (!dateString) return "Nigdy";
+
   const diff = Date.now() - new Date(dateString).getTime();
   const minutes = Math.max(1, Math.floor(diff / 60000));
+
   if (minutes < 60) return `${minutes} min temu`;
+
   const hours = Math.floor(minutes / 60);
   if (hours < 24) return `${hours} godz. temu`;
+
   const days = Math.floor(hours / 24);
   return `${days} dni temu`;
 }
 
-export default function AllServersPage() {
-  const [servers, setServers] = useState([]);
-  const [meta, setMeta] = useState({
+function normalizeString(value, fallback = "") {
+  if (typeof value !== "string") return fallback;
+  return value.trim();
+}
+
+function normalizePositiveInt(value, fallback = 1) {
+  const parsed = Number.parseInt(String(value || ""), 10);
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : fallback;
+}
+
+function buildAllServersQuery(params = {}) {
+  const search = new URLSearchParams();
+
+  if (params.query) search.set("query", params.query);
+  if (params.category && params.category !== "all") {
+    search.set("category", params.category);
+  }
+  if (params.sort && params.sort !== "top") {
+    search.set("sort", params.sort);
+  }
+  if (params.page && Number(params.page) > 1) {
+    search.set("page", String(params.page));
+  }
+
+  return search.toString();
+}
+
+function buildAllServersHref(params = {}) {
+  const qs = buildAllServersQuery(params);
+  return qs ? `/allservers?${qs}` : "/allservers";
+}
+
+export async function getServerSideProps(context) {
+  const rawQuery = normalizeString(context.query.query, "");
+  const rawCategory = normalizeString(context.query.category, "all") || "all";
+  const rawSort = normalizeString(context.query.sort, "top") || "top";
+  const rawPage = normalizePositiveInt(context.query.page, 1);
+
+  const apiParams = new URLSearchParams({
+    query: rawQuery,
+    category: rawCategory,
+    sort: rawSort,
+    page: String(rawPage),
+    limit: "20",
+  });
+
+  const siteUrl =
+    process.env.NEXT_PUBLIC_SITE_URL ||
+    process.env.SITE_URL ||
+    SITE_URL ||
+    "https://www.disbumply.pl";
+
+  const fallbackMeta = {
+    categories: [],
+    page: rawPage,
+    totalPages: 1,
+    total: 0,
+    limit: 20,
+  };
+
+  try {
+    const response = await fetch(
+      `${siteUrl}/api/public-servers?${apiParams.toString()}`,
+      {
+        headers: {
+          Accept: "application/json",
+        },
+      }
+    );
+
+    if (!response.ok) {
+      return {
+        props: {
+          initialServers: [],
+          initialMeta: fallbackMeta,
+          initialQuery: rawQuery,
+          initialCategory: rawCategory,
+          initialSort: rawSort,
+        },
+      };
+    }
+
+    const data = await response.json();
+
+    return {
+      props: {
+        initialServers: Array.isArray(data.servers) ? data.servers : [],
+        initialMeta: data.meta || fallbackMeta,
+        initialQuery: rawQuery,
+        initialCategory: rawCategory,
+        initialSort: rawSort,
+      },
+    };
+  } catch (error) {
+    return {
+      props: {
+        initialServers: [],
+        initialMeta: fallbackMeta,
+        initialQuery: rawQuery,
+        initialCategory: rawCategory,
+        initialSort: rawSort,
+      },
+    };
+  }
+}
+
+export default function AllServersPage({
+  initialServers,
+  initialMeta,
+  initialQuery,
+  initialCategory,
+  initialSort,
+}) {
+  const router = useRouter();
+
+  const [query, setQuery] = useState(initialQuery || "");
+  const [category, setCategory] = useState(initialCategory || "all");
+  const [sort, setSort] = useState(initialSort || "top");
+
+  useEffect(() => {
+    setQuery(initialQuery || "");
+    setCategory(initialCategory || "all");
+    setSort(initialSort || "top");
+  }, [initialQuery, initialCategory, initialSort]);
+
+  const servers = Array.isArray(initialServers) ? initialServers : [];
+  const meta = initialMeta || {
     categories: [],
     page: 1,
     totalPages: 1,
     total: 0,
     limit: 20,
-  });
+  };
 
-  const [loading, setLoading] = useState(true);
-  const [query, setQuery] = useState("");
-  const [category, setCategory] = useState("all");
-  const [sort, setSort] = useState("top");
-  const [page, setPage] = useState(1);
+  const currentPage = meta.page || 1;
+  const totalPages = meta.totalPages || 1;
 
-  async function loadServers(next = {}) {
-    const q = next.query ?? query;
-    const c = next.category ?? category;
-    const s = next.sort ?? sort;
-    const p = next.page ?? page;
+  const currentPath = useMemo(() => {
+    const qs = buildAllServersQuery({
+      query: initialQuery,
+      category: initialCategory,
+      sort: initialSort,
+      page: currentPage,
+    });
 
-    setLoading(true);
-    try {
-      const params = new URLSearchParams({
-        query: q,
-        category: c,
-        sort: s,
-        page: String(p),
-        limit: "20",
-      });
+    return qs ? `/allservers?${qs}` : "/allservers";
+  }, [initialCategory, initialQuery, initialSort, currentPage]);
 
-      const res = await fetch(`/api/public-servers?${params.toString()}`);
-      const data = await res.json();
+  async function pushFilters(next = {}) {
+    const nextQuery = next.query ?? query;
+    const nextCategory = next.category ?? category;
+    const nextSort = next.sort ?? sort;
+    const nextPage = next.page ?? 1;
 
-      if (res.ok) {
-        setServers(data.servers || []);
-        setMeta(
-          data.meta || {
-            categories: [],
-            page: 1,
-            totalPages: 1,
-            total: 0,
-            limit: 20,
-          }
-        );
-        setPage(data.meta?.page || p);
-      }
-    } finally {
-      setLoading(false);
-    }
+    const href = buildAllServersHref({
+      query: nextQuery,
+      category: nextCategory,
+      sort: nextSort,
+      page: nextPage,
+    });
+
+    await router.push(href);
   }
 
-  useEffect(() => {
-    loadServers({ page: 1 });
-  }, []);
-
   function renderPagination() {
-    const currentPage = meta.page || 1;
-    const totalPages = meta.totalPages || 1;
-
     if (totalPages <= 1) return null;
 
     const pages = [];
     const start = Math.max(1, currentPage - 2);
     const end = Math.min(totalPages, currentPage + 2);
 
-    for (let i = start; i <= end; i++) {
+    for (let i = start; i <= end; i += 1) {
       pages.push(i);
     }
 
     return (
-      <div className="pagination glass">
-        <button
-          className="btn btn-ghost"
-          disabled={currentPage <= 1 || loading}
-          onClick={() => loadServers({ page: currentPage - 1 })}
-        >
-          ← Poprzednia
-        </button>
+      <nav className="pagination glass" aria-label="Paginacja wyników">
+        <div>
+          {currentPage > 1 ? (
+            <Link
+              className="btn btn-ghost"
+              href={buildAllServersHref({
+                query: initialQuery,
+                category: initialCategory,
+                sort: initialSort,
+                page: currentPage - 1,
+              })}
+            >
+              ← Poprzednia
+            </Link>
+          ) : (
+            <span className="btn btn-ghost disabled" aria-disabled="true">
+              ← Poprzednia
+            </span>
+          )}
+        </div>
 
         <div className="pagination-pages">
           {start > 1 && (
             <>
-              <button
+              <Link
                 className={`page-btn ${currentPage === 1 ? "active" : ""}`}
-                onClick={() => loadServers({ page: 1 })}
-                disabled={loading}
+                href={buildAllServersHref({
+                  query: initialQuery,
+                  category: initialCategory,
+                  sort: initialSort,
+                  page: 1,
+                })}
               >
                 1
-              </button>
+              </Link>
               {start > 2 && <span className="pagination-dots">...</span>}
             </>
           )}
 
           {pages.map((p) => (
-            <button
+            <Link
               key={p}
               className={`page-btn ${currentPage === p ? "active" : ""}`}
-              onClick={() => loadServers({ page: p })}
-              disabled={loading}
+              href={buildAllServersHref({
+                query: initialQuery,
+                category: initialCategory,
+                sort: initialSort,
+                page: p,
+              })}
+              aria-current={currentPage === p ? "page" : undefined}
             >
               {p}
-            </button>
+            </Link>
           ))}
 
           {end < totalPages && (
@@ -128,25 +258,43 @@ export default function AllServersPage() {
               {end < totalPages - 1 && (
                 <span className="pagination-dots">...</span>
               )}
-              <button
-                className={`page-btn ${currentPage === totalPages ? "active" : ""}`}
-                onClick={() => loadServers({ page: totalPages })}
-                disabled={loading}
+              <Link
+                className={`page-btn ${
+                  currentPage === totalPages ? "active" : ""
+                }`}
+                href={buildAllServersHref({
+                  query: initialQuery,
+                  category: initialCategory,
+                  sort: initialSort,
+                  page: totalPages,
+                })}
               >
                 {totalPages}
-              </button>
+              </Link>
             </>
           )}
         </div>
 
-        <button
-          className="btn btn-ghost"
-          disabled={currentPage >= totalPages || loading}
-          onClick={() => loadServers({ page: currentPage + 1 })}
-        >
-          Następna →
-        </button>
-      </div>
+        <div>
+          {currentPage < totalPages ? (
+            <Link
+              className="btn btn-ghost"
+              href={buildAllServersHref({
+                query: initialQuery,
+                category: initialCategory,
+                sort: initialSort,
+                page: currentPage + 1,
+              })}
+            >
+              Następna →
+            </Link>
+          ) : (
+            <span className="btn btn-ghost disabled" aria-disabled="true">
+              Następna →
+            </span>
+          )}
+        </div>
+      </nav>
     );
   }
 
@@ -155,15 +303,21 @@ export default function AllServersPage() {
       <SeoHead
         title="Wszystkie serwery Discord - lista Discord"
         description="Przeglądaj wszystkie serwery Discord w katalogu DISBUMPLY.PL. Sortuj, filtruj i wyszukuj polskie społeczności Discord według kategorii i aktywności."
-        path="/allservers"
-        keywords={["wszystkie serwery discord", "lista serwerów discord", "serwery discord katalog"]}
+        path={currentPath}
+        keywords={[
+          "wszystkie serwery discord",
+          "lista serwerów discord",
+          "serwery discord katalog",
+          "polskie serwery discord",
+        ]}
         jsonLd={{
           "@context": "https://schema.org",
           "@type": "CollectionPage",
           name: "Wszystkie serwery Discord",
-          url: `${SITE_URL}/allservers`,
+          url: `${SITE_URL}${currentPath}`,
           inLanguage: "pl-PL",
-          description: "Pełna lista publicznych serwerów Discord w katalogu DISBUMPLY.PL."
+          description:
+            "Pełna lista publicznych serwerów Discord w katalogu DISBUMPLY.PL.",
         }}
       />
 
@@ -184,8 +338,8 @@ export default function AllServersPage() {
               <span className="badge">pełna lista</span>
               <h2>Wszystkie serwery</h2>
               <p className="muted">
-                Łącznie: {meta.total || 0} • Strona {meta.page || 1} z{" "}
-                {meta.totalPages || 1}
+                Łącznie: {meta.total || 0} • Strona {currentPage} z{" "}
+                {totalPages}
               </p>
             </div>
           </div>
@@ -195,8 +349,7 @@ export default function AllServersPage() {
               className="searchbar searchbar-clean"
               onSubmit={(e) => {
                 e.preventDefault();
-                setPage(1);
-                loadServers({ page: 1 });
+                pushFilters({ page: 1 });
               }}
             >
               <input
@@ -204,6 +357,7 @@ export default function AllServersPage() {
                 placeholder="Szukaj serwera..."
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
+                name="query"
               />
             </form>
 
@@ -214,12 +368,12 @@ export default function AllServersPage() {
                 onChange={(e) => {
                   const value = e.target.value;
                   setCategory(value);
-                  setPage(1);
-                  loadServers({ category: value, page: 1 });
+                  pushFilters({ category: value, page: 1 });
                 }}
+                name="category"
               >
                 <option value="all">Wszystkie kategorie</option>
-                {meta.categories.slice(0, 20).map((cat) => (
+                {(meta.categories || []).slice(0, 50).map((cat) => (
                   <option key={cat.name} value={cat.name}>
                     #{cat.name}
                   </option>
@@ -234,9 +388,9 @@ export default function AllServersPage() {
                 onChange={(e) => {
                   const value = e.target.value;
                   setSort(value);
-                  setPage(1);
-                  loadServers({ sort: value, page: 1 });
+                  pushFilters({ sort: value, page: 1 });
                 }}
+                name="sort"
               >
                 <option value="top">Top bumpy</option>
                 <option value="favorites">Najwięcej ulubionych</option>
@@ -250,112 +404,117 @@ export default function AllServersPage() {
         <section className="container seo-copy-block glass">
           <span className="badge">katalog discord</span>
           <h1>Wszystkie serwery Discord w jednym miejscu</h1>
-          <p className="muted large">Ta podstrona zbiera pełną listę serwerów Discord, dzięki czemu Google ma jasny sygnał, że to katalog, a użytkownik może normalnie filtrować wyniki bez przekopywania się przez chaos internetu.</p>
+          <p className="muted large">
+            Ta podstrona zbiera pełną listę serwerów Discord, dzięki czemu
+            Google dostaje czytelny katalog, a użytkownik może filtrować wyniki
+            bez przekopywania się przez internetowy śmietnik.
+          </p>
         </section>
 
         <section className="servers-section container">
-          {!loading && renderPagination()}
+          {renderPagination()}
 
-          {loading ? (
-            <div className="state-card glass">Ładowanie serwerów...</div>
-          ) : servers.length === 0 ? (
+          {servers.length === 0 ? (
             <div className="state-card glass">Brak wyników.</div>
           ) : (
             <>
               <div className="home-list">
-                {servers.map((server) => {
-                  return (
-                    <article key={server.id} className="home-list-card glass">
-                      <div className="home-list-main">
-                        <div className="server-avatar">
-                          {server.icon ? (
-                            <DiscordServerIcon server={server} size={128} />
+                {servers.map((server) => (
+                  <article key={server.id} className="home-list-card glass">
+                    <div className="home-list-main">
+                      <div className="server-avatar">
+                        {server.icon ? (
+                          <DiscordServerIcon server={server} size={128} />
+                        ) : (
+                          <span>{server.name?.slice(0, 1) || "?"}</span>
+                        )}
+                      </div>
+
+                      <div className="home-list-copy">
+                        <div className="home-list-topline">
+                          <h3>{server.name}</h3>
+
+                          <span className="metric">
+                            Bumpów: {server.bumpCount || 0}
+                          </span>
+
+                          <span className="metric">
+                            ⭐ {server.favoriteCount || 0}
+                          </span>
+
+                          <span className="metric">
+                            Ostatni: {formatTimeAgo(server.lastBumpAt)}
+                          </span>
+
+                          <span
+                            className={`server-type-pill ${
+                              server.serverType === "nsfw" ? "nsfw" : "public"
+                            }`}
+                          >
+                            {server.serverType === "nsfw"
+                              ? "NSFW 🔞"
+                              : "Publiczny"}
+                          </span>
+                        </div>
+
+                        <ServerCommunityStats
+                          online={server.onlineCount}
+                          total={server.memberCount}
+                          status={
+                            Number.isFinite(Number(server.onlineCount)) ||
+                            Number.isFinite(Number(server.memberCount))
+                              ? "available"
+                              : server.inviteUrl
+                              ? "idle"
+                              : "invalid"
+                          }
+                          compact
+                          className="top-gap"
+                        />
+
+                        <div className="tag-list">
+                          {server.tags?.length ? (
+                            server.tags.slice(0, 6).map((tag) => (
+                              <span className="tag" key={tag}>
+                                #{tag}
+                              </span>
+                            ))
                           ) : (
-                            <span>{server.name.slice(0, 1)}</span>
+                            <span className="muted">Brak tagów</span>
                           )}
                         </div>
 
-                        <div className="home-list-copy">
-                          <div className="home-list-topline">
-                            <h3>{server.name}</h3>
-                            <span className="metric">
-                              Bumpów: {server.bumpCount || 0}
-                            </span>
-                            <span className="metric">
-                              ⭐ {server.favoriteCount || 0}
-                            </span>
-                            <span className="metric">
-                              Ostatni: {formatTimeAgo(server.lastBumpAt)}
-                            </span>
-                            <span
-                              className={`server-type-pill ${
-                                server.serverType === "nsfw" ? "nsfw" : "public"
-                              }`}
-                            >
-                              {server.serverType === "nsfw"
-                                ? "NSFW 🔞"
-                                : "Publiczny"}
-                            </span>
-                          </div>
-
-                          <ServerCommunityStats
-                            online={server.onlineCount}
-                            total={server.memberCount}
-                            status={
-                              Number.isFinite(Number(server.onlineCount)) ||
-                              Number.isFinite(Number(server.memberCount))
-                                ? "available"
-                                : server.inviteUrl
-                                ? "idle"
-                                : "invalid"
-                            }
-                            compact
-                            className="top-gap"
-                          />
-
-                          <div className="tag-list">
-                            {server.tags?.length ? (
-                              server.tags.slice(0, 6).map((tag) => (
-                                <span className="tag" key={tag}>
-                                  #{tag}
-                                </span>
-                              ))
-                            ) : (
-                              <span className="muted">Brak tagów</span>
-                            )}
-                          </div>
-
-                          <p className="server-description clamp-5">
-                            {server.description || "Brak opisu serwera."}
-                          </p>
-                        </div>
+                        <p className="server-description clamp-5">
+                          {server.description || "Brak opisu serwera."}
+                        </p>
                       </div>
+                    </div>
 
-                      <div className="home-list-actions">
-                        <Link
-                          className="btn btn-ghost"
-                          href={`/servers/${server.id}`}
+                    <div className="home-list-actions">
+                      <Link
+                        className="btn btn-ghost"
+                        href={`/servers/${server.id}`}
+                      >
+                        Szczegóły
+                      </Link>
+
+                      {server.inviteUrl ? (
+                        <a
+                          className="btn btn-primary"
+                          href={server.inviteUrl}
+                          target="_blank"
+                          rel="noreferrer"
                         >
-                          Szczegóły
-                        </Link>
-                        {server.inviteUrl ? (
-                          <a
-                            className="btn btn-primary"
-                            href={server.inviteUrl}
-                            target="_blank"
-                            rel="noreferrer"
-                          >
-                            Dołącz
-                          </a>
-                        ) : (
-                          <button className="btn btn-disabled" disabled>
-                            Brak invite
-                          </button>
-                        )}
-                      </div>
-                    </article>
-                  );
-                })}
+                          Dołącz
+                        </a>
+                      ) : (
+                        <button className="btn btn-disabled" disabled>
+                          Brak invite
+                        </button>
+                      )}
+                    </div>
+                  </article>
+                ))}
               </div>
 
               {renderPagination()}
