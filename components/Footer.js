@@ -110,8 +110,8 @@ export default function Footer() {
                   className="footer-image-logo"
                 />
                 <div>
-                  <p className="footer-overline">Polski katalog Discord</p>
-                  <h2>disbumply.pl</h2>
+                  <p className="footer-overline">BAZA POLSKICH SERWERÓW DISCORD</p>
+                  <h2>DISBUMPLY.PL</h2>
                 </div>
               </div>
 
@@ -170,7 +170,7 @@ export default function Footer() {
         </div>
 
         <div className="footer-bottom compact">
-          <p>© 2026 disbumply.pl</p>
+          <p>© 2026 DISBUMPLY.PL</p>
           <p>Projekt niezależny, bez powiązania z Discord Inc.</p>
         </div>
       </div>
