@@ -1,6 +1,6 @@
 Wprowadzone poprawki:
 
-1. Ujednolicono SEO pod domenę https://www.disbumply.pl
+1. Ujednolicono SEO pod domenę https://disbumply.pl
 2. Dodano redirect apex -> www w next.config.js
 3. Naprawiono robots.txt i sitemap.xml
 4. Dodano cache headers dla robots.txt i sitemap.xml
@@ -16,10 +16,10 @@ Wprowadzone poprawki:
 11. Naprawiono importy schema na stronie głównej i FAQ
 
 Po wdrożeniu ustaw w Vercel:
-- www.disbumply.pl jako Primary Domain
-- disbumply.pl jako redirect do www
+- disbumply.pl jako Primary Domain
+- www.disbumply.pl jako redirect do bez www
 
 Po wdrożeniu zgłoś w Search Console:
-- https://www.disbumply.pl/sitemap.xml
+- https://disbumply.pl/sitemap.xml
 
 Usuń błędny wpis starej mapy HTML, jeśli dalej jest w GSC.

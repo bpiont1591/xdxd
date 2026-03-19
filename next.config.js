@@ -19,7 +19,7 @@ const nextConfig = {
         has: [
           {
             type: 'host',
-            value: 'disbumply.pl',
+            value: 'www.disbumply.pl',
           },
         ],
         destination: 'https://disbumply.pl/:path*',
