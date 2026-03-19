@@ -2165,3 +2165,14 @@ button.site-nav-link {
     width: 100%;
   }
 }
+
+
+/* ===== privacy page ===== */
+.privacy-page .terms-badge {
+  background: rgba(88, 101, 242, 0.14);
+}
+
+.privacy-page .terms-card h2,
+.privacy-page .terms-sidebar-card h2 {
+  letter-spacing: -0.02em;
+}

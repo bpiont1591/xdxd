@@ -1,0 +1,3 @@
+Dodano stronę pages/privacy.js
+Tekst został napisany od nowa na bazie Twojego szkicu i dopasowany do disbumply.pl.
+Styl korzysta z istniejącego layoutu terms/privacy, więc pasuje do reszty serwisu.
