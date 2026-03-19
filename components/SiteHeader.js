@@ -145,7 +145,7 @@ export default function SiteHeader() {
       <header className="site-header container">
         <Link href="/" className="site-header-logo" aria-label="Przejdź na stronę główną" onClick={closeMenus}>
           <img src="/allserver-logo.png" alt="disbumply.pl" />
-          <span>disbumply.pl</span>
+          <span>DISCBUMPLY.PL</span>
         </Link>
 
         <button
