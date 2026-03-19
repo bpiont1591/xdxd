@@ -28,6 +28,10 @@ model Server {
 
   favorites        Favorite[]
   reports          Report[]
+
+  @@index([botInstalled, moderationStatus, lastBumpAt])
+  @@index([ownerDiscordId])
+  @@index([bumpCount, lastBumpAt])
 }
 
 model Favorite {
@@ -39,6 +43,7 @@ model Favorite {
   server        Server   @relation(fields: [serverId], references: [id], onDelete: Cascade)
 
   @@unique([userDiscordId, serverId])
+  @@index([serverId, createdAt])
 }
 
 model Report {
@@ -49,4 +54,7 @@ model Report {
   createdAt     DateTime @default(now())
 
   server        Server   @relation(fields: [serverId], references: [id], onDelete: Cascade)
+
+  @@index([serverId, createdAt])
+  @@index([userDiscordId, serverId, createdAt])
 }
