@@ -22,7 +22,7 @@ const nextConfig = {
             value: 'disbumply.pl',
           },
         ],
-        destination: 'https://www.disbumply.pl/:path*',
+        destination: 'https://disbumply.pl/:path*',
         permanent: true,
       },
     ];
