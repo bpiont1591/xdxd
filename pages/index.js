@@ -69,8 +69,8 @@ export default function Home({ initialServers, initialMeta }) {
   return (
     <>
       <SeoHead
-        title="Lista Discord i serwery Discord Polska"
-        description="DISBUMPLY.PL to polska lista Discord i katalog serwerów Discord. Wyszukuj aktywne społeczności, odkrywaj kategorie i promuj własny serwer Discord."
+        title="Serwery Discord Polska 2026 - lista serwerów Discord"
+        description="DISBUMPLY.PL to polska lista serwerów Discord i katalog aktywnych społeczności. Odkrywaj kategorie, przeglądaj publiczne serwery Discord i promuj własny serwer."
         path="/"
         keywords={["lista discord polska", "serwery discord polska", "polskie serwery discord", "katalog serwerów discord"]}
         jsonLd={[
@@ -157,6 +157,24 @@ export default function Home({ initialServers, initialMeta }) {
                 <span>{item.count}</span>
               </Link>
             ))}
+          </div>
+        </section>
+
+        <section className="container panel-card glass" style={{ marginBottom: 24 }}>
+          <div className="section-head compact">
+            <div>
+              <span className="badge">o katalogu</span>
+              <h2>Polska lista serwerów Discord</h2>
+              <p className="muted">DISBUMPLY.PL pomaga znaleźć publiczne serwery Discord w Polsce. Przeglądaj najaktywniejsze społeczności, odkrywaj popularne kategorie i przechodź do pełnej listy serwerów albo szczegółowych profili.</p>
+            </div>
+          </div>
+
+          <div className="tag-list">
+            <Link className="tag" href="/allservers">Wszystkie serwery</Link>
+            <Link className="tag" href="/allservers?sort=recent">Ostatnio aktywne</Link>
+            <Link className="tag" href="/faq">FAQ</Link>
+            <Link className="tag" href="/terms">Regulamin</Link>
+            <Link className="tag" href="/privacy">Prywatność</Link>
           </div>
         </section>
 

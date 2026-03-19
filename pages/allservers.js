@@ -87,7 +87,8 @@ export default function AllServersPage({ initialServers, initialMeta, filters })
     page: currentPage,
   });
 
-  const noindex = Boolean(filters?.query);
+  const hasActiveFilters = Boolean(filters?.query) || (filters?.category && filters.category !== "all") || (filters?.sort && filters.sort !== "top") || Number(currentPage) > 1;
+  const noindex = hasActiveFilters;
 
   function renderPagination() {
     if (totalPages <= 1) return null;
@@ -170,8 +171,8 @@ export default function AllServersPage({ initialServers, initialMeta, filters })
   return (
     <>
       <SeoHead
-        title="Wszystkie serwery Discord - lista Discord"
-        description="Przeglądaj wszystkie serwery Discord w katalogu DISBUMPLY.PL. Sortuj, filtruj i wyszukuj polskie społeczności Discord według kategorii i aktywności."
+        title="Wszystkie serwery Discord Polska - pełna lista"
+        description="Przeglądaj wszystkie publiczne serwery Discord w katalogu DISBUMPLY.PL. Odkrywaj polskie społeczności, znajdź aktywne grupy i dołącz do nowych serwerów Discord."
         path={currentPath}
         noindex={noindex}
         keywords={[
