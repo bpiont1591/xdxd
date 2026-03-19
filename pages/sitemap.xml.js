@@ -7,17 +7,19 @@ function escapeXml(value = "") {
     .replace(/&/g, "&amp;")
     .replace(/</g, "&lt;")
     .replace(/>/g, "&gt;")
-    .replace(/\"/g, "&quot;")
+    .replace(/"/g, "&quot;")
     .replace(/'/g, "&apos;");
 }
 
 export async function getServerSideProps({ res }) {
+  const now = new Date().toISOString();
+
   const staticRoutes = [
-    { loc: `${SITE_URL}/`, changefreq: "daily", priority: "1.0" },
-    { loc: `${SITE_URL}/allservers`, changefreq: "hourly", priority: "0.9" },
-    { loc: `${SITE_URL}/faq`, changefreq: "weekly", priority: "0.6" },
-    { loc: `${SITE_URL}/privacy`, changefreq: "monthly", priority: "0.3" },
-    { loc: `${SITE_URL}/terms`, changefreq: "monthly", priority: "0.3" },
+    { loc: `${SITE_URL}/`, lastmod: now, changefreq: "daily", priority: "1.0" },
+    { loc: `${SITE_URL}/allservers`, lastmod: now, changefreq: "daily", priority: "0.9" },
+    { loc: `${SITE_URL}/faq`, lastmod: now, changefreq: "weekly", priority: "0.6" },
+    { loc: `${SITE_URL}/privacy`, lastmod: now, changefreq: "monthly", priority: "0.3" },
+    { loc: `${SITE_URL}/terms`, lastmod: now, changefreq: "monthly", priority: "0.3" },
   ];
 
   let serverRoutes = [];
@@ -59,14 +61,26 @@ export async function getServerSideProps({ res }) {
   const urls = [...staticRoutes, ...serverRoutes]
     .map(
       (entry) =>
-        `<url><loc>${escapeXml(entry.loc)}</loc>${entry.lastmod ? `<lastmod>${escapeXml(entry.lastmod)}</lastmod>` : ""}<changefreq>${entry.changefreq}</changefreq><priority>${entry.priority}</priority></url>`
+        `<url>` +
+        `<loc>${escapeXml(entry.loc)}</loc>` +
+        `${entry.lastmod ? `<lastmod>${escapeXml(entry.lastmod)}</lastmod>` : ""}` +
+        `<changefreq>${escapeXml(entry.changefreq)}</changefreq>` +
+        `<priority>${escapeXml(entry.priority)}</priority>` +
+        `</url>`
     )
     .join("");
 
-  const xml = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${urls}</urlset>`;
+  const xml =
+    `<?xml version="1.0" encoding="UTF-8"?>` +
+    `\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">` +
+    `${urls}` +
+    `</urlset>`;
 
   res.setHeader("Content-Type", "application/xml; charset=utf-8");
-  res.setHeader("Cache-Control", "public, s-maxage=3600, stale-while-revalidate=86400");
+  res.setHeader(
+    "Cache-Control",
+    "public, s-maxage=3600, stale-while-revalidate=86400"
+  );
   res.end(xml);
 
   return { props: {} };
