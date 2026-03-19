@@ -4,25 +4,67 @@ import Link from "next/link";
 import { signIn, useSession } from "next-auth/react";
 import ServerCommunityStats from "../../components/ServerCommunityStats";
 import { useState } from "react";
+import { prisma } from "../../lib/prisma";
+import { normalizeServer } from "../../lib/storage";
+import { fetchInviteStats } from "../../lib/discord-invite-stats";
 
+export async function getServerSideProps({ params }) {
+  try {
+    const row = await prisma.server.findFirst({
+      where: {
+        OR: [{ id: params.id }, { slug: params.id }]
+      },
+      select: {
+        id: true,
+        name: true,
+        slug: true,
+        icon: true,
+        description: true,
+        tags: true,
+        inviteUrl: true,
+        lastBumpAt: true,
+        bumpCount: true,
+        botInstalled: true,
+        moderationStatus: true,
+        moderationNote: true,
+        ownerDiscordId: true,
+        permissionLabel: true,
+        serverType: true,
+        createdAt: true,
+        updatedAt: true,
+        _count: {
+          select: {
+            favorites: true,
+            reports: true
+          }
+        }
+      }
+    });
 
-export async function getServerSideProps({ params, req }) {
-  const proto = req.headers["x-forwarded-proto"] || "http";
-  const host = req.headers.host;
-  const base = `${proto}://${host}`;
+    if (!row) {
+      return { notFound: true };
+    }
 
-  const res = await fetch(`${base}/api/server/${params.id}`);
-  const data = await res.json();
+    const server = normalizeServer(row);
+    if (server.moderationStatus !== "approved" || !server.botInstalled || !server.lastBumpAt) {
+      return { notFound: true };
+    }
 
-  if (!res.ok) {
+    const inviteStats = await fetchInviteStats(server.inviteUrl);
+
+    return {
+      props: {
+        server: {
+          ...server,
+          favoriteCount: row._count.favorites,
+          reportCount: row._count.reports,
+          ...inviteStats
+        }
+      }
+    };
+  } catch {
     return { notFound: true };
   }
-
-  return {
-    props: {
-      server: data.server
-    }
-  };
 }
 
 export default function ServerDetail({ server }) {
@@ -70,7 +112,7 @@ export default function ServerDetail({ server }) {
     const data = await res.json();
     if (res.ok) {
       setReportCount(data.count || 0);
-      setNotice("Zgłoszenie zostało zapisane.");
+      setNotice(data.deduplicated ? "To zgłoszenie już zostało zapisane w ostatnich 24h." : "Zgłoszenie zostało zapisane.");
       setReportReason("");
     } else {
       setNotice(data.error || "Nie udało się wysłać zgłoszenia.");
@@ -137,6 +179,7 @@ export default function ServerDetail({ server }) {
                 <button className="btn btn-disabled" disabled>Brak invite</button>
               )}
               <button className="btn btn-ghost" onClick={toggleFavorite}>⭐ Dodaj do ulubionych</button>
+              <Link className="btn btn-ghost" href="/allservers">Powrót do listy</Link>
             </div>
           </div>
 

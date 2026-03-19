@@ -1,30 +1,34 @@
 import Link from "next/link";
+import { signIn, signOut, useSession } from "next-auth/react";
 
 export default function Navbar() {
+  const { data: session, status } = useSession();
+
   return (
     <header className="navbar">
       <div className="navbar-container">
-        
-        {/* LOGO */}
         <Link href="/" className="navbar-logo">
           <img src="/allserver-logo.png" alt="disbumply" />
           <span>disbumply.pl</span>
         </Link>
 
-        {/* MENU */}
         <nav className="navbar-links">
-          <Link href="/servers">Serwery</Link>
-          <Link href="/add-server">Dodaj</Link>
+          <Link href="/allservers">Serwery</Link>
+          <Link href="/dashboard">Dodaj</Link>
           <Link href="/terms">Regulamin</Link>
         </nav>
 
-        {/* AKCJA */}
         <div className="navbar-actions">
-          <Link href="/login" className="navbar-btn">
-            Zaloguj się
-          </Link>
+          {status === "authenticated" ? (
+            <button className="navbar-btn" onClick={() => signOut({ callbackUrl: "/" })}>
+              Wyloguj się
+            </button>
+          ) : (
+            <button className="navbar-btn" onClick={() => signIn("discord")}>
+              Zaloguj się
+            </button>
+          )}
         </div>
-
       </div>
     </header>
   );

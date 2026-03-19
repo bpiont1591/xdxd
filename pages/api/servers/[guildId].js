@@ -2,6 +2,8 @@ import { getServerSession } from "next-auth/next";
 import { authOptions } from "../auth/[...nextauth]";
 import { prisma } from "../../../lib/prisma";
 import { normalizeServer, slugify, upsertJsonServer, getJsonServerById } from "../../../lib/storage";
+import { checkRateLimit, getClientIp } from "../../../lib/rate-limit";
+import { denyIfCrossOrigin } from "../../../lib/request-security";
 
 const MANAGE_GUILD = 32n;
 const DISCORD_API_BASE = "https://discord.com/api/v10";
@@ -26,6 +28,17 @@ function isValidInviteUrl(value) {
   return /^https:\/\/(discord\.gg|discord\.com\/invite)\/[A-Za-z0-9-]+$/i.test(value);
 }
 
+function parseBody(body) {
+  if (typeof body === "string") {
+    try {
+      return JSON.parse(body);
+    } catch {
+      return {};
+    }
+  }
+  return body || {};
+}
+
 export default async function handler(req, res) {
   res.setHeader("Cache-Control", "no-store");
   const session = await getServerSession(req, res, authOptions);
@@ -34,13 +47,49 @@ export default async function handler(req, res) {
     return res.status(401).json({ error: "Brak sesji Discord. Zaloguj się ponownie." });
   }
 
-  const { guildId } = req.query;
-
   if (req.method !== "PUT") {
     return res.status(405).json({ error: "Method not allowed" });
   }
 
+  if (denyIfCrossOrigin(req, res)) return;
+
+  const ip = getClientIp(req);
+  const rate = checkRateLimit(`save-server:${ip}:${session.user?.id || "anon"}`, 30, 1000 * 60 * 10);
+  if (!rate.allowed) {
+    return res.status(429).json({ error: "Za dużo zapisów serwera. Spróbuj ponownie później." });
+  }
+
+  const { guildId } = req.query;
+
   try {
+    let existing = null;
+    try {
+      existing = await prisma.server.findUnique({ where: { id: guildId } });
+    } catch (error) {
+      console.error("Prisma findUnique failed in PUT /api/servers/[guildId]:", error);
+      existing = await getJsonServerById(guildId);
+    }
+
+    const body = parseBody(req.body);
+    const description = String(body.description || "").trim().slice(0, 450);
+    const rawTags = Array.isArray(body.tags) ? body.tags : String(body.tags || "").split(",");
+    const tags = rawTags
+      .map((tag) => String(tag || "").trim().toLowerCase().replace(/^#+/, "").replace(/\s+/g, "-"))
+      .filter(Boolean)
+      .filter((tag, index, arr) => arr.indexOf(tag) === index)
+      .slice(0, 5);
+    const inviteUrl = String(body.inviteUrl || "").trim();
+    const serverType =
+      String(body.serverType || existing?.serverType || "public").toLowerCase() === "nsfw"
+        ? "nsfw"
+        : "public";
+
+    if (!isValidInviteUrl(inviteUrl)) {
+      return res.status(400).json({
+        error: "Invite URL musi wyglądać jak https://discord.gg/... albo https://discord.com/invite/..."
+      });
+    }
+
     const discordRes = await fetch(`${DISCORD_API_BASE}/users/@me/guilds`, {
       headers: { Authorization: `Bearer ${session.accessToken}` }
     });
@@ -70,31 +119,6 @@ export default async function handler(req, res) {
       return res.status(403).json({
         error: "Ten serwer nie należy do listy owner/manage server zalogowanego użytkownika"
       });
-    }
-
-    const body = req.body || {};
-    const description = String(body.description || "").trim().slice(0, 450);
-    const rawTags = Array.isArray(body.tags) ? body.tags : String(body.tags || "").split(",");
-    const tags = rawTags
-      .map((tag) => String(tag || "").trim().toLowerCase().replace(/^#+/, "").replace(/\s+/g, "-"))
-      .filter(Boolean)
-      .filter((tag, index, arr) => arr.indexOf(tag) === index)
-      .slice(0, 5);
-    const inviteUrl = String(body.inviteUrl || "").trim();
-    const serverType = String(body.serverType || existing?.serverType || "public").toLowerCase() === "nsfw" ? "nsfw" : "public";
-
-    if (!isValidInviteUrl(inviteUrl)) {
-      return res.status(400).json({
-        error: "Invite URL musi wyglądać jak https://discord.gg/... albo https://discord.com/invite/..."
-      });
-    }
-
-    let existing = null;
-    try {
-      existing = await prisma.server.findUnique({ where: { id: guildId } });
-    } catch (error) {
-      console.error("Prisma findUnique failed in PUT /api/servers/[guildId]:", error);
-      existing = await getJsonServerById(guildId);
     }
 
     const safeSlug = `${slugify(targetGuild.name)}-${guildId}`;
