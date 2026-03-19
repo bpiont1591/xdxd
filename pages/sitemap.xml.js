@@ -15,6 +15,7 @@ export async function getServerSideProps({ res }) {
   const staticRoutes = [
     { loc: `${SITE_URL}/`, changefreq: "daily", priority: "1.0" },
     { loc: `${SITE_URL}/allservers`, changefreq: "hourly", priority: "0.9" },
+    { loc: `${SITE_URL}/faq`, changefreq: "weekly", priority: "0.6" },
     { loc: `${SITE_URL}/privacy`, changefreq: "monthly", priority: "0.3" },
     { loc: `${SITE_URL}/terms`, changefreq: "monthly", priority: "0.3" }
   ];

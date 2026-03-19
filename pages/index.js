@@ -20,36 +20,6 @@ function formatTimeAgo(dateString) {
 }
 
 export default function Home() {
-  const faqSchema = {
-    "@context": "https://schema.org",
-    "@type": "FAQPage",
-    mainEntity: [
-      {
-        "@type": "Question",
-        name: "Czym jest lista Discord?",
-        acceptedAnswer: {
-          "@type": "Answer",
-          text: "To katalog publicznych serwerów Discord, w którym użytkownik może wyszukiwać społeczności według kategorii, tematu i aktywności."
-        }
-      },
-      {
-        "@type": "Question",
-        name: "Jak dodać serwer Discord do katalogu?",
-        acceptedAnswer: {
-          "@type": "Answer",
-          text: "Wystarczy zalogować się przez Discord, dodać swój serwer, uzupełnić opis, tagi i zaproszenie, a potem regularnie go bumpować."
-        }
-      },
-      {
-        "@type": "Question",
-        name: "Jak znaleźć polskie serwery Discord?",
-        acceptedAnswer: {
-          "@type": "Answer",
-          text: "Najłatwiej użyć wyszukiwarki i filtrów kategorii, aby przeglądać aktywne polskie serwery Discord według zainteresowań."
-        }
-      }
-    ]
-  };
 
   const { data: session, status } = useSession();
   const [servers, setServers] = useState([]);
@@ -124,8 +94,7 @@ export default function Home() {
             inLanguage: "pl-PL",
             description: "Publiczna lista serwerów Discord w Polsce.",
             about: ["Discord", "serwery Discord", "lista Discord", "społeczności online"]
-          },
-          faqSchema
+          }
         ]}
       />
 
@@ -212,32 +181,6 @@ export default function Home() {
           </div>
         </section>
 
-        <section className="container seo-copy-block glass">
-          <span className="badge">lista discord</span>
-          <h1>Lista Discord dla polskich społeczności</h1>
-          <p className="muted large">
-            Szukasz miejsca, gdzie da się szybko znaleźć sensowny serwer Discord zamiast błądzić po przypadkowych zaproszeniach z internetu?
-            Tutaj masz publiczny katalog, czyli normalną listę Discord z wyszukiwarką, kategoriami i aktywnością serwerów.
-          </p>
-          <div className="seo-copy-grid top-gap">
-            <div className="panel-card glass">
-              <h2>Jak działa katalog serwerów Discord</h2>
-              <p>
-                DISBUMPLY.PL porządkuje serwery Discord według tagów, kategorii i aktualnej aktywności. Dzięki temu użytkownik może łatwo
-                znaleźć serwery gamingowe, społeczności tematyczne, serwery anime, roleplay, muzyczne, edukacyjne albo zwykłe miejsca do
-                pogadania bez szukania igły w stogu cyfrowego siana.
-              </p>
-            </div>
-            <div className="panel-card glass">
-              <h2>Po co komu lista Discord</h2>
-              <p>
-                Taka lista Discord pomaga zarówno właścicielom serwerów, jak i ludziom szukającym nowej społeczności. Jeden chce widoczności w Google,
-                drugi chce znaleźć aktywny serwer Discord po polsku. Niesłychane, obie strony mogą zyskać naraz.
-              </p>
-            </div>
-          </div>
-        </section>
-
         <section className="category-strip container">
           <div className="section-head compact">
             <div>
@@ -275,30 +218,6 @@ export default function Home() {
                 <span>{item.count}</span>
               </button>
             ))}
-          </div>
-        </section>
-
-        <section className="container seo-faq-block">
-          <div className="section-head compact">
-            <div>
-              <span className="badge">FAQ</span>
-              <h2>Najczęstsze pytania o serwery Discord</h2>
-            </div>
-          </div>
-
-          <div className="seo-copy-grid">
-            <article className="panel-card glass">
-              <h3>Jak znaleźć dobry serwer Discord?</h3>
-              <p>Najlepiej filtrować po kategorii, sprawdzić opis, liczbę ulubionych i aktywność. Martwe serwery są jak martwe fora, tylko bardziej smutne.</p>
-            </article>
-            <article className="panel-card glass">
-              <h3>Jak wypromować własny serwer?</h3>
-              <p>Dodaj unikalny opis, trafne tagi i regularnie bumpuj serwer. Osobna podstrona serwera pomaga także w indeksacji w Google.</p>
-            </article>
-            <article className="panel-card glass">
-              <h3>Czy lista Discord jest po polsku?</h3>
-              <p>Tak. Strona jest nastawiona na polskie serwery Discord i frazy, których ludzie naprawdę szukają, zamiast pisać tekst tylko dla robotów.</p>
-            </article>
           </div>
         </section>
 
