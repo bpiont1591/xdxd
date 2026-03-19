@@ -31,6 +31,13 @@ export default async function handler(req, res) {
       return res.status(403).json({ error: "Bot nie jest aktywowany dla tego serwera" });
     }
 
+    if (existing.moderationStatus !== "approved") {
+      return res.status(412).json({
+        error: "Serwer nie ma jeszcze potwierdzonego statusu",
+        moderationStatus: existing.moderationStatus || "pending"
+      });
+    }
+
     const now = Date.now();
     const last = existing.lastBumpAt ? new Date(existing.lastBumpAt).getTime() : 0;
     const nextAllowed = last + BUMP_COOLDOWN_MS;
