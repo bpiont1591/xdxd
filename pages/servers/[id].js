@@ -2,7 +2,6 @@ import Head from "next/head";
 import DiscordServerIcon, { getDiscordServerIconCandidates } from "../../components/DiscordServerIcon";
 import Link from "next/link";
 import { signIn, useSession } from "next-auth/react";
-import BrandLogo from "../../components/BrandLogo";
 import ServerCommunityStats from "../../components/ServerCommunityStats";
 import { useState } from "react";
 
@@ -94,16 +93,9 @@ export default function ServerDetail({ server }) {
         <div className="ambient ambient-a" />
         <div className="ambient ambient-b" />
 
-        <header className="topbar container">
-          <Link href="/" className="brand brand-link">
-            <div className="brand-badge image-mark"><img src="/allserver-logo.png" alt="" /></div>
-            <div>
-              <strong>​DISCBUMPLY.PL​</strong>
-            </div>
-          </Link>
-        </header>
+        <div className="detail-page-spacer container" />
 
-        <section className="server-detail container">
+        <section className="server-detail server-detail-pretty container">
           <div className="detail-hero glass">
             <div className="detail-left detail-left-stacked">
               <div className="server-avatar xl">
@@ -148,7 +140,7 @@ export default function ServerDetail({ server }) {
             </div>
           </div>
 
-          <div className="detail-grid">
+          <div className="detail-grid detail-grid-pretty">
             <div className="panel-card glass">
               <span className="badge">tagi</span>
               <div className="tag-list top-gap">
@@ -189,7 +181,7 @@ export default function ServerDetail({ server }) {
             </div>
           </div>
 
-          <div className="panel-card glass top-gap">
+          <div className="panel-card glass top-gap detail-report-card">
             <span className="badge">zgłoś serwer</span>
             <form className="form-grid top-gap" onSubmit={sendReport}>
               <label className="field">
