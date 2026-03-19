@@ -63,9 +63,9 @@ const contactLinks = [
 ];
 
 const footerStats = [
-  "Katalog polskich społeczności",
-  "Szybkie zgłoszenia i moderacja",
-  "Przejrzyste promowanie serwera",
+  "Polskie społeczności",
+  "Szybka moderacja",
+  "Lepsza widoczność",
 ];
 
 function FooterLink({ href, icon, label, children }) {
@@ -100,10 +100,10 @@ export default function Footer() {
   return (
     <footer className="site-footer">
       <div className="footer-container">
-        <div className="footer-shell">
-          <div className="footer-main-card">
-            <div className="footer-brand-row">
-              <div className="footer-brand">
+        <div className="footer-shell compact">
+          <div className="footer-main-card compact">
+            <div className="footer-brand-row compact">
+              <div className="footer-brand compact">
                 <img
                   src="/allserver-logo.png"
                   alt="disbumply.pl logo"
@@ -115,67 +115,63 @@ export default function Footer() {
                 </div>
               </div>
 
-              <div className="footer-status-badge">online 24/7</div>
+              <span className="footer-status-badge compact">online 24/7</span>
             </div>
 
-            <p className="footer-description">
-              Odkrywaj aktywne społeczności, promuj własny serwer i ogarniaj
-              wszystko w jednym miejscu, bez tego typowego bałaganu z losowych
-              list i martwych linków.
+            <p className="footer-description compact">
+              Odkrywaj aktywne społeczności i promuj własny serwer bez syfu z martwych list.
             </p>
 
-            <div className="footer-highlights">
+            <div className="footer-highlights compact">
               {footerStats.map((item) => (
-                <span key={item} className="footer-highlight-pill">
+                <span key={item} className="footer-highlight-pill compact">
                   {item}
                 </span>
               ))}
             </div>
           </div>
 
-          <div className="footer-side-grid">
-            <section className="footer-section-card">
-              <div className="footer-section-head">
-                <p>Nawigacja</p>
-                <h3>Szybkie skróty</h3>
-              </div>
-              <div className="footer-links footer-links-grid">
-                {quickLinks.map((link) => (
-                  <FooterLink
-                    key={link.name}
-                    href={link.href}
-                    icon={link.icon}
-                  >
-                    {link.name}
-                  </FooterLink>
-                ))}
-              </div>
-            </section>
+          <section className="footer-section-card compact">
+            <div className="footer-section-head compact">
+              <p>Nawigacja</p>
+              <h3>Najważniejsze linki</h3>
+            </div>
+            <div className="footer-links footer-links-grid compact">
+              {quickLinks.map((link) => (
+                <FooterLink
+                  key={link.name}
+                  href={link.href}
+                  icon={link.icon}
+                >
+                  {link.name}
+                </FooterLink>
+              ))}
+            </div>
+          </section>
 
-            <section className="footer-section-card">
-              <div className="footer-section-head">
-                <p>Kontakt i pomoc</p>
-                <h3>Masz sprawę? Załatw to tutaj</h3>
-              </div>
-              <div className="footer-links">
-                {contactLinks.map((link) => (
-                  <FooterLink
-                    key={link.name}
-                    href={link.href}
-                    icon={link.icon}
-                    label={link.label}
-                  >
-                    {link.name}
-                  </FooterLink>
-                ))}
-              </div>
-            </section>
-          </div>
+          <section className="footer-section-card compact">
+            <div className="footer-section-head compact">
+              <p>Kontakt</p>
+              <h3>Pomoc i kontakt</h3>
+            </div>
+            <div className="footer-links compact">
+              {contactLinks.map((link) => (
+                <FooterLink
+                  key={link.name}
+                  href={link.href}
+                  icon={link.icon}
+                  label={link.label}
+                >
+                  {link.name}
+                </FooterLink>
+              ))}
+            </div>
+          </section>
         </div>
 
-        <div className="footer-bottom">
-          <p>© 2026 disbumply.pl. Wszelkie prawa zastrzeżone.</p>
-          <p>Projekt niezależny. Nie jest powiązany z Discord Inc.</p>
+        <div className="footer-bottom compact">
+          <p>© 2026 disbumply.pl</p>
+          <p>Projekt niezależny, bez powiązania z Discord Inc.</p>
         </div>
       </div>
     </footer>
