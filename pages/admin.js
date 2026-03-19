@@ -1,6 +1,6 @@
 import Head from "next/head";
 import Link from "next/link";
-import { Fragment, useEffect, useMemo, useState } from "react";
+import { Fragment, useEffect, useMemo, useRef, useState } from "react";
 import { signIn, signOut, useSession } from "next-auth/react";
 import BrandLogo from "../components/BrandLogo";
 import DiscordGlyph from "../components/DiscordGlyph";
@@ -18,6 +18,26 @@ const TYPE_LABELS = {
   public: "Publiczny",
   nsfw: "NSFW"
 };
+
+
+const STATUS_FILTER_OPTIONS = [
+  { value: "all", label: "Wszystkie" },
+  { value: "pending", label: "Oczekuje" },
+  { value: "approved", label: "Zatwierdzony" },
+  { value: "rejected", label: "Odrzucony" }
+];
+
+const TYPE_FILTER_OPTIONS = [
+  { value: "all", label: "Wszystkie" },
+  { value: "public", label: "Publiczny" },
+  { value: "nsfw", label: "NSFW" }
+];
+
+const BOT_FILTER_OPTIONS = [
+  { value: "all", label: "Dowolnie" },
+  { value: "withBot", label: "Z botem" },
+  { value: "withoutBot", label: "Bez bota" }
+];
 
 function getStatusLabel(status) {
   return STATUS_LABELS[status] || status;
@@ -75,6 +95,69 @@ function getReportCount(server) {
     .find((value) => value !== null);
 
   return Math.max(reports.length, numericCount ?? 0);
+}
+
+function AdminSelect({ label, value, onChange, options }) {
+  const [open, setOpen] = useState(false);
+  const rootRef = useRef(null);
+  const selectedOption = options.find((option) => option.value === value) || options[0];
+
+  useEffect(() => {
+    if (!open) return undefined;
+
+    function handlePointerDown(event) {
+      if (!rootRef.current?.contains(event.target)) {
+        setOpen(false);
+      }
+    }
+
+    function handleKeyDown(event) {
+      if (event.key === "Escape") {
+        setOpen(false);
+      }
+    }
+
+    document.addEventListener("mousedown", handlePointerDown);
+    document.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      document.removeEventListener("mousedown", handlePointerDown);
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [open]);
+
+  return (
+    <label className="field compact-field">
+      <span className="field-label">{label}</span>
+      <div className={`custom-select ${open ? "is-open" : ""}`} ref={rootRef}>
+        <button
+          type="button"
+          className="select select-button"
+          aria-haspopup="listbox"
+          aria-expanded={open}
+          onClick={() => setOpen((prev) => !prev)}
+        >
+          <span>{selectedOption?.label}</span>
+        </button>
+
+        <div className="custom-select-menu" role="listbox">
+          {options.map((option) => (
+            <button
+              key={option.value}
+              type="button"
+              className={`custom-select-option ${option.value === value ? "is-active" : ""}`}
+              onClick={() => {
+                onChange(option.value);
+                setOpen(false);
+              }}
+            >
+              <span>{option.label}</span>
+            </button>
+          ))}
+        </div>
+      </div>
+    </label>
+  );
 }
 
 export default function AdminPage() {
@@ -380,51 +463,26 @@ export default function AdminPage() {
                     />
                   </label>
 
-                  <label className="field compact-field">
-                    <span className="field-label">Status</span>
-                    <div className="select-wrap">
-                      <select
-                        className="select"
-                        value={statusFilter}
-                        onChange={(e) => setStatusFilter(e.target.value)}
-                      >
-                        <option value="all">Wszystkie</option>
-                        <option value="pending">Oczekuje</option>
-                        <option value="approved">Zatwierdzony</option>
-                        <option value="rejected">Odrzucony</option>
-                      </select>
-                    </div>
-                  </label>
+                  <AdminSelect
+                    label="Status"
+                    value={statusFilter}
+                    onChange={setStatusFilter}
+                    options={STATUS_FILTER_OPTIONS}
+                  />
 
-                  <label className="field compact-field">
-                    <span className="field-label">Typ serwera</span>
-                    <div className="select-wrap">
-                      <select
-                        className="select"
-                        value={typeFilter}
-                        onChange={(e) => setTypeFilter(e.target.value)}
-                      >
-                        <option value="all">Wszystkie</option>
-                        <option value="public">Publiczny</option>
-                        <option value="nsfw">NSFW</option>
-                      </select>
-                    </div>
-                  </label>
+                  <AdminSelect
+                    label="Typ serwera"
+                    value={typeFilter}
+                    onChange={setTypeFilter}
+                    options={TYPE_FILTER_OPTIONS}
+                  />
 
-                  <label className="field compact-field">
-                    <span className="field-label">Bot</span>
-                    <div className="select-wrap">
-                      <select
-                        className="select"
-                        value={botFilter}
-                        onChange={(e) => setBotFilter(e.target.value)}
-                      >
-                        <option value="all">Dowolnie</option>
-                        <option value="withBot">Z botem</option>
-                        <option value="withoutBot">Bez bota</option>
-                      </select>
-                    </div>
-                  </label>
+                  <AdminSelect
+                    label="Bot"
+                    value={botFilter}
+                    onChange={setBotFilter}
+                    options={BOT_FILTER_OPTIONS}
+                  />
                 </div>
 
                 <div className="toolbar-row toolbar-summary">
