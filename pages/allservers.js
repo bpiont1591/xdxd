@@ -260,9 +260,6 @@ export default function AllServersPage({ initialServers, initialMeta, filters })
         <section className="container seo-copy-block glass">
           <span className="badge">katalog discord</span>
           <h1>Wszystkie serwery Discord w jednym miejscu</h1>
-          <p className="muted large">
-            Ta podstrona zbiera pełną listę serwerów Discord, dzięki czemu Google dostaje czytelny katalog, a użytkownik może filtrować wyniki bez przekopywania się przez internetowy śmietnik.
-          </p>
         </section>
 
         <section className="servers-section container">
