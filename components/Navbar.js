@@ -9,7 +9,7 @@ export default function Navbar() {
       <div className="navbar-container">
         <Link href="/" className="navbar-logo">
           <img src="/allserver-logo.png" alt="disbumply" />
-          <span>disbumply.pl</span>
+          <span>DISBUMPLY.PL</span>
         </Link>
 
         <nav className="navbar-links">
