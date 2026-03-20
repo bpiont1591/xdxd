@@ -23,7 +23,7 @@ export default function Footer() {
                 <p className="footer-v3__eyebrow">DISBUMPLY.PL</p>
                 <h2>Polskie serwery Discord w jednym miejscu</h2>
                 <p className="footer-v3__text">
-                  Przeglądaj aktywne społeczności, odkrywaj nowe miejsca i dodawaj własny serwer bez zbędnego bałaganu.
+                  Odkrywaj najlepsze polskie serwery Discord w jednym miejscu. Niezależnie czy szukasz ekipy do grania, nauki czy po prostu rozmów — tutaj znajdziesz społeczność dla siebie. Wbijaj i poznawaj ludzi, którzy jarają się tym co Ty.
                 </p>
               </div>
             </div>
