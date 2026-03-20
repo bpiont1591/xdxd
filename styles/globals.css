@@ -1687,8 +1687,8 @@ html { scroll-behavior: smooth; }
   background: rgba(7, 10, 23, 0.88);
   border: 1px solid rgba(255, 255, 255, 0.06);
   box-shadow: 0 14px 34px rgba(0, 0, 0, 0.22);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  
+  -webkit-
 }
 .site-header-logo {
   display: flex;
@@ -2739,9 +2739,9 @@ footer div{background:none;border:none;padding:0;margin:0}
 }
 
 .footer-v3__panel{
-  background: rgba(15,23,42,0.6);
-  backdrop-filter: blur(12px);
-  border: 1px solid rgba(255,255,255,0.08);
+  background: transparent;
+  
+  border: none;
 }
 .footer-v3 h2,
 .footer-v3__link,
@@ -2751,4 +2751,9 @@ footer div{background:none;border:none;padding:0;margin:0}
 .footer-v3__text,
 .footer-v3__bottom p{
   color:#9ca3af;
+}
+
+.footer-v3__panel{
+  background: transparent;
+  border: none;
 }
