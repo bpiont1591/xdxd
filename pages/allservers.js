@@ -5,7 +5,6 @@ import ServerCommunityStats from "../components/ServerCommunityStats";
 import SeoHead from "../components/SeoHead";
 import { SITE_URL } from "../lib/seo";
 import { getPublicServersPayload, normalizeListQuery } from "../lib/public-servers";
-import { getServerAchievements } from "../lib/server-achievements";
 
 function formatTimeAgo(dateString) {
   if (!dateString) return "Nigdy";
@@ -22,6 +21,15 @@ function formatTimeAgo(dateString) {
   return `${days} dni temu`;
 }
 
+function isNewServer(dateString) {
+  if (!dateString) return false;
+
+  const createdAt = new Date(dateString).getTime();
+  if (Number.isNaN(createdAt)) return false;
+
+  const fourteenDays = 14 * 24 * 60 * 60 * 1000;
+  return Date.now() - createdAt <= fourteenDays;
+}
 
 function buildAllServersQuery(params = {}) {
   const search = new URLSearchParams();
@@ -290,11 +298,9 @@ export default function AllServersPage({ initialServers, initialMeta, filters })
                             <span className="metric">Bumpów: {server.bumpCount || 0}</span>
                             <span className="metric">⭐ {server.favoriteCount || 0}</span>
                             <span className="metric">Ostatni: {formatTimeAgo(server.lastBumpAt)}</span>
-                            {getServerAchievements(server).map((badge) => (
-                              <span key={badge.key} className={`tiny-badge ${badge.tone || "ok"}`}>
-                                {badge.label}
-                              </span>
-                            ))}
+                            {isNewServer(server.createdAt) ? (
+                              <span className="server-type-pill public">🆕 Nowy serwer</span>
+                            ) : null}
                             <span className={`server-type-pill ${server.serverType === "nsfw" ? "nsfw" : "public"}`}>
                               {server.serverType === "nsfw" ? "NSFW 🔞" : "Publiczny"}
                             </span>

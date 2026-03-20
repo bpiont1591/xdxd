@@ -185,7 +185,7 @@ export default function Home({ initialServers, initialMeta }) {
           </div>
         </header>
 
-        <section className="home-v9-hero container glass home-v9-hero-upgraded">
+        <section className="home-v9-hero container glass">
           <div className="home-v9-hero-copy compact">
             <span className="badge">lista serwerów discord</span>
             <div className="hero-mini-stats">
@@ -204,20 +204,12 @@ export default function Home({ initialServers, initialMeta }) {
             <input type="text" placeholder="Wpisz nazwę serwera, tag lub kategorię..." name="query" />
           </form>
 
-          <div className="hero-cta-panel glass-lite">
-            <div>
-              <span className="badge">dodaj serwer</span>
-              <h3>Dodaj swój serwer i wbij do katalogu</h3>
-              <p className="muted">Lepszy panel, lepszy wygląd i mniej bólu oczu. Cywilizacja dotarła także tutaj.</p>
-            </div>
-            <div className="home-v9-actions">
-              {status === "authenticated" ? (
-                <Link href="/dashboard" className="btn btn-primary">Dodaj serwer</Link>
-              ) : (
-                <button className="btn btn-primary" onClick={() => signIn("discord")}>Dodaj serwer</button>
-              )}
-              <Link href="/allservers?sort=recent" className="btn btn-ghost">Nowe serwery</Link>
-            </div>
+          <div className="home-v9-actions">
+            {status === "authenticated" ? (
+              <Link href="/dashboard" className="btn btn-primary">Dodaj serwer</Link>
+            ) : (
+              <button className="btn btn-primary" onClick={() => signIn("discord")}>Dodaj serwer</button>
+            )}
           </div>
         </section>
 

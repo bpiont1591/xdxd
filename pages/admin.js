@@ -8,12 +8,6 @@ import DiscordGlyph from "../components/DiscordGlyph";
 const ADMIN_DISCORD_ID = "1418289596457812088";
 const PAGE_SIZE = 8;
 
-const REPORT_STATUS_LABELS = {
-  new: "Nowe",
-  in_progress: "W trakcie",
-  closed: "Zamknięte"
-};
-
 const STATUS_LABELS = {
   pending: "Oczekuje",
   approved: "Zatwierdzony",
@@ -80,18 +74,7 @@ function getReports(server) {
   ];
 
   const reports = possibleReports.find(Array.isArray);
-  return Array.isArray(reports)
-    ? reports.map((report) => ({
-        ...report,
-        status: ["new", "in_progress", "closed"].includes(String(report?.status || "").toLowerCase())
-          ? String(report.status).toLowerCase()
-          : "new"
-      }))
-    : [];
-}
-
-function getReportStatusLabel(status) {
-  return REPORT_STATUS_LABELS[status] || "Nowe";
+  return Array.isArray(reports) ? reports : [];
 }
 
 function getReportCount(server) {
@@ -279,32 +262,6 @@ export default function AdminPage() {
     setServers((prev) => prev.map((server) => (server.id === id ? data.server : server)));
   }
 
-  async function updateReport(reportId, payload = {}) {
-    if (!reportId) return;
-
-    setNotice("");
-    const res = await fetch(`/api/admin/reports/${reportId}`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload)
-    });
-
-    const data = await res.json();
-    if (!res.ok) {
-      setNotice(data.error || "Nie udało się zaktualizować zgłoszenia");
-      return;
-    }
-
-    setServers((prev) =>
-      prev.map((server) => ({
-        ...server,
-        reports: getReports(server).map((report) =>
-          report.id === data.report.id ? { ...report, ...data.report } : report
-        )
-      }))
-    );
-  }
-
   async function deleteReport(reportId) {
     if (!reportId) return;
 
@@ -344,21 +301,13 @@ export default function AdminPage() {
     const pending = servers.filter((server) => server.moderationStatus === "pending").length;
     const rejected = servers.filter((server) => server.moderationStatus === "rejected").length;
     const withBot = servers.filter((server) => server.botInstalled).length;
-    const reportStats = servers.flatMap((server) => getReports(server)).reduce((acc, report) => {
-      const key = report.status || "new";
-      acc[key] = (acc[key] || 0) + 1;
-      return acc;
-    }, { new: 0, in_progress: 0, closed: 0 });
 
     return {
       total: servers.length,
       approved,
       pending,
       rejected,
-      withBot,
-      reportNew: reportStats.new || 0,
-      reportInProgress: reportStats.in_progress || 0,
-      reportClosed: reportStats.closed || 0
+      withBot
     };
   }, [servers]);
 
@@ -367,15 +316,13 @@ export default function AdminPage() {
     return servers
       .flatMap((server) =>
         getReports(server).map((report, index) => ({
-          id: report.id || `${server.id}-${index}`,
+          id: report.id || `${server.id}-${index}` ,
           serverId: server.id,
           serverName: server.name,
           reason: report.reason || "Brak podanego powodu.",
           createdAt: report.createdAt || null,
-          updatedAt: report.updatedAt || null,
           userDiscordId: report.userDiscordId || "Brak danych",
-          moderatorNote: report.moderatorNote || "",
-          status: report.status || "new"
+          status: server.moderationStatus === "rejected" ? "Zamknięte" : server.moderationStatus === "approved" ? "W trakcie" : "Nowe"
         }))
       )
       .sort((a, b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime());
@@ -553,18 +500,6 @@ export default function AdminPage() {
                   <span>Z botem</span>
                   <strong>{stats.withBot}</strong>
                 </div>
-                <div className="metric-box soft-card">
-                  <span>Nowe zgłoszenia</span>
-                  <strong>{stats.reportNew}</strong>
-                </div>
-                <div className="metric-box soft-card">
-                  <span>W trakcie</span>
-                  <strong>{stats.reportInProgress}</strong>
-                </div>
-                <div className="metric-box soft-card">
-                  <span>Zamknięte zgłoszenia</span>
-                  <strong>{stats.reportClosed}</strong>
-                </div>
               </div>
 
               <div className="toolbar-panel soft-card">
@@ -626,7 +561,7 @@ export default function AdminPage() {
                     <div>
                       <span className="badge">zgłoszenia</span>
                       <h3>Kolejka zgłoszeń</h3>
-                      <p className="muted">Zgłoszenia pojawiają się tutaj od razu. Status działa już niezależnie od moderacji serwera, więc zgłoszenia nie giną w próżni jak ostatnio.</p>
+                      <p className="muted">Zgłoszenia pojawiają się tutaj od razu. Status nadal jest uproszczony: nowe, w trakcie albo zamknięte na podstawie moderacji serwera.</p>
                     </div>
                   </div>
                   <div className="reports-cards">
@@ -634,41 +569,19 @@ export default function AdminPage() {
                       <div key={item.id} className="report-item">
                         <div className="report-item-top">
                           <strong>{item.serverName}</strong>
-                          <span className={`tiny-badge ${item.status === "new" ? "warn" : item.status === "closed" ? "danger" : "info"}`}>
-                            {getReportStatusLabel(item.status)}
+                          <span className={`tiny-badge ${item.status === "Nowe" ? "warn" : item.status === "Zamknięte" ? "danger" : "ok"}`}>
+                            {item.status}
                           </span>
                         </div>
                         <p>{item.reason}</p>
-                        {item.moderatorNote ? <p className="muted small">Notatka moda: {item.moderatorNote}</p> : null}
                         <span className="muted small">Autor: {item.userDiscordId} • {item.createdAt ? new Date(item.createdAt).toLocaleString("pl-PL") : "Brak daty"}</span>
-                        <div className="report-actions top-gap wrap-actions">
+                        <div className="report-actions top-gap">
                           <button
                             type="button"
                             className="btn btn-ghost btn-sm"
                             onClick={() => setExpandedId(item.serverId)}
                           >
                             Pokaż serwer
-                          </button>
-                          <button
-                            type="button"
-                            className="btn btn-ghost btn-sm"
-                            onClick={() => updateReport(item.id, { status: "new" })}
-                          >
-                            Nowe
-                          </button>
-                          <button
-                            type="button"
-                            className="btn btn-primary btn-sm"
-                            onClick={() => updateReport(item.id, { status: "in_progress" })}
-                          >
-                            W trakcie
-                          </button>
-                          <button
-                            type="button"
-                            className="btn btn-ghost btn-sm"
-                            onClick={() => updateReport(item.id, { status: "closed" })}
-                          >
-                            Zamknij
                           </button>
                           <button
                             type="button"
@@ -899,7 +812,7 @@ export default function AdminPage() {
                                                           <div className="report-item-top">
                                                             <strong>Zgłoszenie #{index + 1}</strong>
                                                             <span className="tiny-badge">
-                                                              {getReportStatusLabel(report.status)} • {report.createdAt
+                                                              {report.createdAt
                                                                 ? new Date(report.createdAt).toLocaleString("pl-PL")
                                                                 : "Brak daty"}
                                                             </span>
@@ -910,29 +823,7 @@ export default function AdminPage() {
                                                           <span className="muted small">
                                                             Autor: {report.userDiscordId || "Brak danych"}
                                                           </span>
-                                                          {report.moderatorNote ? <p className="muted small">Notatka moda: {report.moderatorNote}</p> : null}
-                                                          <div className="report-actions top-gap wrap-actions">
-                                                            <button
-                                                              type="button"
-                                                              className="btn btn-ghost btn-sm"
-                                                              onClick={() => updateReport(report.id, { status: "new" })}
-                                                            >
-                                                              Nowe
-                                                            </button>
-                                                            <button
-                                                              type="button"
-                                                              className="btn btn-primary btn-sm"
-                                                              onClick={() => updateReport(report.id, { status: "in_progress" })}
-                                                            >
-                                                              W trakcie
-                                                            </button>
-                                                            <button
-                                                              type="button"
-                                                              className="btn btn-ghost btn-sm"
-                                                              onClick={() => updateReport(report.id, { status: "closed" })}
-                                                            >
-                                                              Zamknij
-                                                            </button>
+                                                          <div className="report-actions top-gap">
                                                             <button
                                                               type="button"
                                                               className="btn btn-danger btn-sm"
