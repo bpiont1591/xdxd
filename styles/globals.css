@@ -2593,9 +2593,7 @@ footer div{background:none;border:none;padding:0;margin:0}
   overflow: hidden;
   border-radius: 28px;
   padding: 24px 26px 18px;
-  background:
-    radial-gradient(circle at top right, rgba(96,165,250,.20), transparent 0 34%),
-    linear-gradient(180deg, rgba(255,255,255,.86), rgba(241,245,249,.82));
+  background: transparent;
 }
 
 .footer-v3__panel::before {
@@ -2738,4 +2736,19 @@ footer div{background:none;border:none;padding:0;margin:0}
     flex-direction: column;
     align-items: flex-start;
   }
+}
+
+.footer-v3__panel{
+  background: rgba(15,23,42,0.6);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255,255,255,0.08);
+}
+.footer-v3 h2,
+.footer-v3__link,
+.footer-v3__mail{
+  color:#e5e7eb;
+}
+.footer-v3__text,
+.footer-v3__bottom p{
+  color:#9ca3af;
 }
