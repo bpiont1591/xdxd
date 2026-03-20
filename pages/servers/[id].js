@@ -8,6 +8,7 @@ import { normalizeServer } from "../../lib/storage";
 import { fetchInviteStats } from "../../lib/discord-invite-stats";
 import SeoHead from "../../components/SeoHead";
 import { absoluteUrl, cleanText, SITE_URL } from "../../lib/seo";
+import { getServerAchievements } from "../../lib/server-achievements";
 
 export async function getServerSideProps({ params }) {
   try {
@@ -68,12 +69,22 @@ export async function getServerSideProps({ params }) {
   }
 }
 
+const REPORT_REASON_OPTIONS = [
+  { value: "", label: "Wybierz powód zgłoszenia" },
+  { value: "Scam / phishing", label: "Scam / phishing" },
+  { value: "NSFW bez oznaczenia", label: "NSFW bez oznaczenia" },
+  { value: "Martwy invite", label: "Martwy invite" },
+  { value: "Podszywanie się", label: "Podszywanie się" },
+  { value: "Spam", label: "Spam" },
+];
+
 export default function ServerDetail({ server }) {
   const { data: session } = useSession();
   const [favoriteCount, setFavoriteCount] = useState(server.favoriteCount || 0);
   const [reportCount, setReportCount] = useState(server.reportCount || 0);
   const [notice, setNotice] = useState("");
   const [reportReason, setReportReason] = useState("");
+  const [reportDetails, setReportDetails] = useState("");
 
   async function toggleFavorite() {
     if (!session) {
@@ -104,23 +115,31 @@ export default function ServerDetail({ server }) {
       return;
     }
 
+    if (!reportReason) {
+      setNotice("Wybierz powód zgłoszenia.");
+      return;
+    }
+
+    const finalReason = [reportReason, reportDetails.trim()].filter(Boolean).join(" — ").slice(0, 300);
     const res = await fetch("/api/reports", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ serverId: server.id, reason: reportReason })
+      body: JSON.stringify({ serverId: server.id, reason: finalReason })
     });
 
     const data = await res.json();
     if (res.ok) {
       setReportCount(data.count || 0);
-      setNotice(data.deduplicated ? "To zgłoszenie już zostało zapisane w ostatnich 24h." : "Zgłoszenie zostało zapisane.");
+      setNotice(data.deduplicated ? "To zgłoszenie już zostało zapisane w ostatnich 24h." : "Dziękujemy — zwykle odpowiadamy w ciągu 24 h.");
       setReportReason("");
+      setReportDetails("");
     } else {
       setNotice(data.error || "Nie udało się wysłać zgłoszenia.");
     }
   }
 
   const iconUrl = getDiscordServerIconCandidates(server, 256)[0] || null;
+  const achievements = getServerAchievements(server);
   const canonicalPath = `/servers/${encodeURIComponent(server.slug || server.id)}`;
   const description = cleanText(server.description || `Dołącz do serwera Discord ${server.name}. Zobacz opis, tagi i statystyki społeczności.`);
   const jsonLd = {
@@ -188,6 +207,16 @@ export default function ServerDetail({ server }) {
                   }
                   className="detail-community-stats top-gap"
                 />
+
+                {achievements.length ? (
+                  <div className="tag-list top-gap">
+                    {achievements.map((badge) => (
+                      <span key={badge.key} className={`tiny-badge ${badge.tone || "ok"}`}>
+                        {badge.label}
+                      </span>
+                    ))}
+                  </div>
+                ) : null}
               </div>
             </div>
 
@@ -250,13 +279,29 @@ export default function ServerDetail({ server }) {
             <form className="form-grid top-gap" onSubmit={sendReport}>
               <label className="field">
                 <span>Powód zgłoszenia</span>
+                <select value={reportReason} onChange={(e) => setReportReason(e.target.value)} className="select">
+                  {REPORT_REASON_OPTIONS.map((option) => (
+                    <option key={option.value || 'empty'} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+              </label>
+
+              <label className="field">
+                <span>Dodatkowe informacje</span>
                 <textarea
                   rows={4}
-                  value={reportReason}
-                  onChange={(e) => setReportReason(e.target.value)}
-                  placeholder="Np. spam, oszustwo, niezgodna treść..."
+                  value={reportDetails}
+                  onChange={(e) => setReportDetails(e.target.value.slice(0, 220))}
+                  placeholder="Opcjonalnie: opisz sytuację, podaj szczegóły, screeny, datę albo co dokładnie jest nie tak."
                 />
               </label>
+
+              <p className="muted small">
+                Dostępne powody: scam/phishing, NSFW bez oznaczenia, martwy invite, podszywanie się, spam. Po wysłaniu zgłoszenie trafia do kolejki moderatora.
+              </p>
+
               <div className="button-row">
                 <button className="btn btn-danger" type="submit">🚩 Zgłoś</button>
               </div>

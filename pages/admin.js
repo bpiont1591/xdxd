@@ -277,6 +277,23 @@ export default function AdminPage() {
     };
   }, [servers]);
 
+
+  const reportQueue = useMemo(() => {
+    return servers
+      .flatMap((server) =>
+        getReports(server).map((report, index) => ({
+          id: report.id || `${server.id}-${index}` ,
+          serverId: server.id,
+          serverName: server.name,
+          reason: report.reason || "Brak podanego powodu.",
+          createdAt: report.createdAt || null,
+          userDiscordId: report.userDiscordId || "Brak danych",
+          status: server.moderationStatus === "rejected" ? "Zamknięte" : server.moderationStatus === "approved" ? "W trakcie" : "Nowe"
+        }))
+      )
+      .sort((a, b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime());
+  }, [servers]);
+
   const filteredServers = useMemo(() => {
     const phrase = query.trim().toLowerCase();
 
@@ -503,6 +520,32 @@ export default function AdminPage() {
                   </button>
                 </div>
               </div>
+
+              {reportQueue.length ? (
+                <div className="panel-card glass" style={{ marginBottom: 18 }}>
+                  <div className="section-head compact">
+                    <div>
+                      <span className="badge">zgłoszenia</span>
+                      <h3>Kolejka zgłoszeń</h3>
+                      <p className="muted">Status jest na razie uproszczony: nowe, w trakcie albo zamknięte na podstawie moderacji serwera. Nadal lepsze to niż zgadywanie w próżni.</p>
+                    </div>
+                  </div>
+                  <div className="reports-cards">
+                    {reportQueue.slice(0, 8).map((item) => (
+                      <div key={item.id} className="report-item">
+                        <div className="report-item-top">
+                          <strong>{item.serverName}</strong>
+                          <span className={`tiny-badge ${item.status === "Nowe" ? "warn" : item.status === "Zamknięte" ? "danger" : "ok"}`}>
+                            {item.status}
+                          </span>
+                        </div>
+                        <p>{item.reason}</p>
+                        <span className="muted small">Autor: {item.userDiscordId} • {item.createdAt ? new Date(item.createdAt).toLocaleString("pl-PL") : "Brak daty"}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ) : null}
 
               {loading ? (
                 <div className="state-card glass">Ładowanie serwerów...</div>

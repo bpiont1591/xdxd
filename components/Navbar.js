@@ -13,9 +13,9 @@ export default function Navbar() {
         </Link>
 
         <nav className="navbar-links">
-          <Link href="/allservers">Serwery</Link>
-          <Link href="/dashboard">Dodaj</Link>
-          <Link href="/terms">Regulamin</Link>
+          <Link href="/allservers">Lista serwerów Discord</Link>
+          <Link href="/dashboard">Dodaj serwer</Link>
+          <Link href="/faq">FAQ</Link>
         </nav>
 
         <div className="navbar-actions">

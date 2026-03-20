@@ -8,6 +8,7 @@ import ServerCommunityStats from "../components/ServerCommunityStats";
 import SeoHead from "../components/SeoHead";
 import { buildOrganizationSchema, buildWebsiteSchema, SITE_URL } from "../lib/seo";
 import { getPublicServersPayload } from "../lib/public-servers";
+import { getServerAchievements } from "../lib/server-achievements";
 
 function formatTimeAgo(dateString) {
   if (!dateString) return "Nigdy";
@@ -20,19 +21,148 @@ function formatTimeAgo(dateString) {
   return `${days} dni temu`;
 }
 
+function AchievementStrip({ server, isTopTen = false }) {
+  const badges = getServerAchievements(server, { isTopTen });
+  if (!badges.length) return null;
+
+  return (
+    <div className="tag-list top-gap">
+      {badges.map((badge) => (
+        <span key={badge.key} className={`tiny-badge ${badge.tone || "ok"}`}>
+          {badge.label}
+        </span>
+      ))}
+    </div>
+  );
+}
+
+function HomeServerCard({ server, isTopTen = false, compact = false }) {
+  const detailHref = `/servers/${encodeURIComponent(server.slug || server.id)}`;
+
+  return (
+    <article className="home-list-card glass">
+      <div className="home-list-main">
+        <div className="server-avatar">
+          {server.icon ? <DiscordServerIcon server={server} size={128} /> : <span>{server.name?.slice(0, 1) || "?"}</span>}
+        </div>
+
+        <div className="home-list-copy">
+          <div className="home-list-topline">
+            <h3>{server.name}</h3>
+            <span className="metric">Bumpów: {server.bumpCount || 0}</span>
+            <span className="metric">⭐ {server.favoriteCount || 0}</span>
+            <span className="metric">Ostatni: {formatTimeAgo(server.lastBumpAt)}</span>
+            <span className={`server-type-pill ${server.serverType === "nsfw" ? "nsfw" : "public"}`}>
+              {server.serverType === "nsfw" ? "NSFW 🔞" : "Publiczny"}
+            </span>
+          </div>
+
+          <AchievementStrip server={server} isTopTen={isTopTen} />
+
+          <ServerCommunityStats
+            online={server.onlineCount}
+            total={server.memberCount}
+            status={
+              Number.isFinite(Number(server.onlineCount)) || Number.isFinite(Number(server.memberCount))
+                ? "available"
+                : server.inviteUrl
+                  ? "idle"
+                  : "invalid"
+            }
+            compact
+            className="top-gap"
+          />
+
+          <div className="tag-list">
+            {server.tags?.length ? (
+              server.tags.slice(0, compact ? 4 : 5).map((tag) => <span className="tag" key={tag}>#{tag}</span>)
+            ) : (
+              <span className="muted">Brak tagów</span>
+            )}
+          </div>
+
+          <p className="server-description clamp-5">{server.description || "Brak opisu serwera."}</p>
+        </div>
+      </div>
+
+      <div className="home-list-actions">
+        <Link className="btn btn-ghost" href={detailHref}>Szczegóły</Link>
+        {server.inviteUrl ? (
+          <a className="btn btn-primary" href={server.inviteUrl} target="_blank" rel="noreferrer">Dołącz</a>
+        ) : (
+          <button className="btn btn-disabled" disabled>Brak invite</button>
+        )}
+      </div>
+    </article>
+  );
+}
+
 export async function getServerSideProps() {
+  const emptyMeta = {
+    totalServers: 0,
+    totalBumps: 0,
+    totalFavorites: 0,
+    totalReports: 0,
+    categories: [],
+  };
+
   try {
-    const payload = await getPublicServersPayload({ sort: "top", limit: 12, page: 1, category: "all", query: "" });
+    const [{ prisma }, { normalizeServer }, { enrichServersWithInviteStats }] = await Promise.all([
+      import("../lib/prisma"),
+      import("../lib/storage"),
+      import("../lib/discord-invite-stats"),
+    ]);
+
+    const [topPayload, recentRows] = await Promise.all([
+      getPublicServersPayload({ sort: "top", limit: 12, page: 1, category: "all", query: "" }),
+      prisma.server.findMany({
+        where: {
+          botInstalled: true,
+          moderationStatus: "approved",
+        },
+        select: {
+          id: true,
+          name: true,
+          slug: true,
+          icon: true,
+          description: true,
+          tags: true,
+          inviteUrl: true,
+          lastBumpAt: true,
+          bumpCount: true,
+          botInstalled: true,
+          moderationStatus: true,
+          moderationNote: true,
+          ownerDiscordId: true,
+          permissionLabel: true,
+          serverType: true,
+          createdAt: true,
+          updatedAt: true,
+          _count: {
+            select: {
+              favorites: true,
+              reports: true,
+            },
+          },
+        },
+        orderBy: [{ createdAt: "desc" }],
+        take: 8,
+      }),
+    ]);
+
+    const recentServers = await enrichServersWithInviteStats(
+      recentRows.map((row) => ({
+        ...normalizeServer(row),
+        favoriteCount: row._count?.favorites || 0,
+        reportCount: row._count?.reports || 0,
+      }))
+    );
+
     return {
       props: {
-        initialServers: payload.servers || [],
-        initialMeta: payload.meta || {
-          totalServers: 0,
-          totalBumps: 0,
-          totalFavorites: 0,
-          totalReports: 0,
-          categories: [],
-        },
+        initialServers: topPayload.servers || [],
+        initialMeta: topPayload.meta || emptyMeta,
+        recentServers: recentServers || [],
       },
     };
   } catch (error) {
@@ -40,21 +170,17 @@ export async function getServerSideProps() {
     return {
       props: {
         initialServers: [],
-        initialMeta: {
-          totalServers: 0,
-          totalBumps: 0,
-          totalFavorites: 0,
-          totalReports: 0,
-          categories: [],
-        },
+        initialMeta: emptyMeta,
+        recentServers: [],
       },
     };
   }
 }
 
-export default function Home({ initialServers, initialMeta }) {
+export default function Home({ initialServers, initialMeta, recentServers }) {
   const { data: session, status } = useSession();
   const servers = Array.isArray(initialServers) ? initialServers : [];
+  const newest = Array.isArray(recentServers) ? recentServers : [];
   const meta = initialMeta || {
     totalServers: 0,
     totalBumps: 0,
@@ -69,21 +195,21 @@ export default function Home({ initialServers, initialMeta }) {
   return (
     <>
       <SeoHead
-        title="Serwery Discord Polska 2026 - lista serwerów Discord"
-        description="DISBUMPLY.PL to polska lista serwerów Discord i katalog aktywnych społeczności. Odkrywaj kategorie, przeglądaj publiczne serwery Discord i promuj własny serwer."
+        title="Lista serwerów Discord Polska 2026 - serwery Discord"
+        description="DISBUMPLY.PL to polska lista serwerów Discord i katalog aktywnych społeczności. Odkrywaj publiczne serwery Discord, nowe społeczności i promuj własny serwer."
         path="/"
-        keywords={["lista discord polska", "serwery discord polska", "polskie serwery discord", "katalog serwerów discord"]}
+        keywords={["lista serwerów discord", "serwery discord polska", "polskie serwery discord", "katalog serwerów discord"]}
         jsonLd={[
           buildWebsiteSchema(),
           buildOrganizationSchema(),
           {
             "@context": "https://schema.org",
             "@type": "CollectionPage",
-            name: "Lista Discord i serwery Discord Polska",
+            name: "Lista serwerów Discord / Serwery Discord Polska",
             url: SITE_URL,
             inLanguage: "pl-PL",
             description: "Publiczna lista serwerów Discord w Polsce.",
-            about: ["Discord", "serwery Discord", "lista Discord", "społeczności online"],
+            about: ["Discord", "serwery Discord", "lista serwerów Discord", "społeczności online"],
           },
         ]}
       />
@@ -105,7 +231,7 @@ export default function Home({ initialServers, initialMeta }) {
             ) : (
               <button className="btn btn-primary btn-discord" onClick={() => signIn("discord")}>
                 <DiscordGlyph />
-                <span>​ZALOGUJ SIĘ PRZEZ DISCORD​</span>
+                <span>ZALOGUJ SIĘ PRZEZ DISCORD</span>
               </button>
             )}
           </div>
@@ -113,14 +239,20 @@ export default function Home({ initialServers, initialMeta }) {
 
         <section className="home-v9-hero container glass">
           <div className="home-v9-hero-copy compact">
-            <span className="badge">katalog serwerów</span>
-
+            <span className="badge">lista serwerów discord</span>
             <div className="hero-mini-stats">
               <span>{meta.totalServers} serwerów</span>
               <span>{meta.totalBumps} bumpów</span>
               <span>{meta.totalFavorites} ulubionych</span>
               <span>{(meta.categories || []).length} kategorii</span>
             </div>
+          </div>
+
+          <div>
+            <h1>Serwery Discord Polska i lista aktywnych społeczności</h1>
+            <p className="muted large">
+              Szukaj po kategoriach, sprawdzaj aktywność, odkrywaj nowe serwery Discord i wyciągaj własny projekt z cyfrowego bagna niewidzialności.
+            </p>
           </div>
 
           <form className="directory-search home-v9-search searchbar-clean hero-search" method="get" action="/allservers">
@@ -133,7 +265,7 @@ export default function Home({ initialServers, initialMeta }) {
             ) : (
               <button className="btn btn-primary" onClick={() => signIn("discord")}>DODAJ SERWER</button>
             )}
-            <Link href="/allservers" className="btn btn-ghost">​ZOBACZ WSZYSTKIE​</Link>
+            <Link href="/allservers" className="btn btn-ghost">ZOBACZ WSZYSTKIE</Link>
           </div>
         </section>
 
@@ -141,7 +273,7 @@ export default function Home({ initialServers, initialMeta }) {
           <div className="section-head compact">
             <div>
               <span className="badge">kategorie</span>
-              <h2>Popularne kategorie</h2>
+              <h2>Popularne kategorie serwerów Discord</h2>
             </div>
           </div>
 
@@ -165,26 +297,26 @@ export default function Home({ initialServers, initialMeta }) {
             <div>
               <span className="badge">o katalogu</span>
               <h2>Polska lista serwerów Discord</h2>
-              <p className="muted">DISBUMPLY.PL pomaga znaleźć publiczne serwery Discord w Polsce. Przeglądaj najaktywniejsze społeczności, odkrywaj popularne kategorie i przechodź do pełnej listy serwerów albo szczegółowych profili.</p>
+              <p className="muted">Home celuje w frazy typu lista serwerów Discord i serwery Discord Polska, a FAQ łapie longtaile o dodawaniu serwera, bumpach i rankingu. SEO też czasem chce odrobiny porządku, nie tylko chaosu i modlitwy.</p>
             </div>
           </div>
 
           <div className="tag-list">
-            <Link className="tag" href="/allservers">Wszystkie serwery</Link>
-            <Link className="tag" href="/allservers?sort=recent">Ostatnio aktywne</Link>
-            <Link className="tag" href="/faq">FAQ</Link>
-            <Link className="tag" href="/terms">Regulamin</Link>
-            <Link className="tag" href="/privacy">Prywatność</Link>
+            <Link className="tag" href="/allservers">Lista serwerów Discord</Link>
+            <Link className="tag" href="/allservers?sort=recent">Serwery Discord Polska</Link>
+            <Link className="tag" href="/faq">FAQ: jak dodać serwer</Link>
+            <Link className="tag" href="/faq#bumpowanie">FAQ: jak bumpować</Link>
+            <Link className="tag" href="/faq#ranking">FAQ: jak działa ranking</Link>
           </div>
         </section>
 
         <section id="listing" className="servers-section container">
           <div className="section-head">
             <div>
-              <span className="badge">Strona Główna</span>
-              <h2>Najaktywniejsze serwery</h2>
+              <span className="badge">ranking</span>
+              <h2>Najaktywniejsze serwery Discord</h2>
             </div>
-            <Link href="/allservers" className="btn btn-ghost">​ZOBACZ WSZYSTKIE​</Link>
+            <Link href="/allservers" className="btn btn-ghost">ZOBACZ WSZYSTKIE</Link>
           </div>
 
           {servers.length === 0 ? (
@@ -194,63 +326,32 @@ export default function Home({ initialServers, initialMeta }) {
             </div>
           ) : (
             <div className="home-list">
-              {servers.map((server) => {
-                const detailHref = `/servers/${encodeURIComponent(server.slug || server.id)}`;
-                return (
-                  <article key={server.id} className="home-list-card glass">
-                    <div className="home-list-main">
-                      <div className="server-avatar">
-                        {server.icon ? <DiscordServerIcon server={server} size={128} /> : <span>{server.name?.slice(0, 1) || "?"}</span>}
-                      </div>
+              {servers.map((server, index) => (
+                <HomeServerCard key={server.id} server={server} isTopTen={index < 10} />
+              ))}
+            </div>
+          )}
+        </section>
 
-                      <div className="home-list-copy">
-                        <div className="home-list-topline">
-                          <h3>{server.name}</h3>
-                          <span className="metric">Bumpów: {server.bumpCount || 0}</span>
-                          <span className="metric">⭐ {server.favoriteCount || 0}</span>
-                          <span className="metric">Ostatni: {formatTimeAgo(server.lastBumpAt)}</span>
-                          <span className={`server-type-pill ${server.serverType === "nsfw" ? "nsfw" : "public"}`}>
-                            {server.serverType === "nsfw" ? "NSFW 🔞" : "Publiczny"}
-                          </span>
-                        </div>
+        <section className="servers-section container" style={{ paddingTop: 0, marginBottom: 40 }}>
+          <div className="section-head">
+            <div>
+              <span className="badge">nowe serwery</span>
+              <h2>Ostatnio dodane</h2>
+              <p className="muted">Nowe serwery dostają własny kawałek widoczności od razu, zamiast czekać aż algorytm łaskawie mrugnie.</p>
+            </div>
+            <Link href="/allservers?sort=recent" className="btn btn-ghost">ZOBACZ NOWE</Link>
+          </div>
 
-                        <ServerCommunityStats
-                          online={server.onlineCount}
-                          total={server.memberCount}
-                          status={
-                            Number.isFinite(Number(server.onlineCount)) || Number.isFinite(Number(server.memberCount))
-                              ? "available"
-                              : server.inviteUrl
-                                ? "idle"
-                                : "invalid"
-                          }
-                          compact
-                          className="top-gap"
-                        />
-
-                        <div className="tag-list">
-                          {server.tags?.length ? (
-                            server.tags.slice(0, 5).map((tag) => <span className="tag" key={tag}>#{tag}</span>)
-                          ) : (
-                            <span className="muted">Brak tagów</span>
-                          )}
-                        </div>
-
-                        <p className="server-description clamp-5">{server.description || "Brak opisu serwera."}</p>
-                      </div>
-                    </div>
-
-                    <div className="home-list-actions">
-                      <Link className="btn btn-ghost" href={detailHref}>Szczegóły</Link>
-                      {server.inviteUrl ? (
-                        <a className="btn btn-primary" href={server.inviteUrl} target="_blank" rel="noreferrer">Dołącz</a>
-                      ) : (
-                        <button className="btn btn-disabled" disabled>Brak invite</button>
-                      )}
-                    </div>
-                  </article>
-                );
-              })}
+          {newest.length === 0 ? (
+            <div className="state-card glass">
+              <p>Brak świeżo dodanych serwerów do pokazania.</p>
+            </div>
+          ) : (
+            <div className="home-list">
+              {newest.map((server) => (
+                <HomeServerCard key={`recent-${server.id}`} server={server} compact />
+              ))}
             </div>
           )}
         </section>

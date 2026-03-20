@@ -50,6 +50,7 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [notice, setNotice] = useState("");
+  const [sessionTimedOut, setSessionTimedOut] = useState(false);
 
   async function loadServers() {
     setLoading(true);
@@ -80,8 +81,27 @@ export default function Dashboard() {
   }
 
   useEffect(() => {
-    if (status === "authenticated") loadServers();
-    if (status === "unauthenticated") setLoading(false);
+    if (status === "authenticated") {
+      setSessionTimedOut(false);
+      loadServers();
+    }
+    if (status === "unauthenticated") {
+      setSessionTimedOut(false);
+      setLoading(false);
+    }
+  }, [status]);
+
+  useEffect(() => {
+    if (status !== "loading") {
+      setSessionTimedOut(false);
+      return undefined;
+    }
+
+    const timeout = window.setTimeout(() => {
+      setSessionTimedOut(true);
+    }, 4000);
+
+    return () => window.clearTimeout(timeout);
   }, [status]);
 
   const selectedServer = useMemo(
@@ -146,7 +166,27 @@ export default function Dashboard() {
   if (status === "loading") {
     return (
       <main className="panel-page">
-        <div className="panel-only glass">Ładowanie sesji...</div>
+        <div className="panel-only glass">
+          <span className="badge">dashboard</span>
+          <h1>{sessionTimedOut ? "Nie udało się pobrać sesji" : "Sprawdzanie sesji Discord"}</h1>
+          <p className="muted">
+            {sessionTimedOut
+              ? "Sesja nie odpowiedziała w sensownym czasie. Zaloguj się ponownie albo odśwież stronę, bo wiszenie na samym loaderze to tani dramat UI."
+              : "Panel sprawdza, czy masz aktywną sesję. To powinno zająć chwilę, nie całą epokę."}
+          </p>
+          <div className="button-row top-gap">
+            <button
+              className="btn btn-primary btn-discord"
+              onClick={() => signIn("discord", { callbackUrl: "/dashboard" })}
+            >
+              <DiscordGlyph />
+              <span>Zaloguj przez Discord</span>
+            </button>
+            <button className="btn btn-ghost" onClick={() => window.location.reload()}>
+              Odśwież
+            </button>
+          </div>
+        </div>
       </main>
     );
   }
@@ -155,14 +195,23 @@ export default function Dashboard() {
     return (
       <main className="panel-page">
         <div className="panel-only glass">
-          <h1>Musisz się zalogować</h1>
-          <button
-            className="btn btn-primary btn-discord"
-            onClick={() => signIn("discord")}
-          >
-            <DiscordGlyph />
-            <span>ZALOGUJ SIĘ PRZEZ DISCORD</span>
-          </button>
+          <span className="badge">dodaj serwer</span>
+          <h1>Zaloguj, aby dodać serwer</h1>
+          <p className="muted">
+            Dashboard działa dopiero po zalogowaniu przez Discord. Bez tego nie pobierzemy Twoich serwerów i nie ma sensu udawać, że coś się ładuje.
+          </p>
+          <div className="button-row top-gap">
+            <button
+              className="btn btn-primary btn-discord"
+              onClick={() => signIn("discord", { callbackUrl: "/dashboard" })}
+            >
+              <DiscordGlyph />
+              <span>Zaloguj przez Discord</span>
+            </button>
+            <Link href="/allservers" className="btn btn-ghost">
+              Zobacz listę serwerów
+            </Link>
+          </div>
         </div>
       </main>
     );

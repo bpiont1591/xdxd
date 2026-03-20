@@ -4,24 +4,29 @@ import { SITE_URL, buildOrganizationSchema, buildWebsiteSchema } from "../lib/se
 export default function FaqPage() {
   const faqItems = [
     {
-      question: "Czym jest lista Discord?",
-      answer: "To publiczny katalog serwerów Discord, w którym można wyszukiwać społeczności według kategorii, tagów i aktywności.",
-    },
-    {
-      question: "Jak działa katalog serwerów Discord?",
-      answer: "DISBUMPLY.PL porządkuje serwery Discord według tagów, kategorii i aktualnej aktywności. Dzięki temu użytkownik może łatwo znaleźć serwery gamingowe, społeczności tematyczne, serwery anime, roleplay, muzyczne, edukacyjne albo zwykłe miejsca do pogadania bez szukania igły w stogu cyfrowego siana.",
-    },
-    {
-      question: "Po co komu lista Discord?",
-      answer: "Taka lista Discord pomaga zarówno właścicielom serwerów, jak i ludziom szukającym nowej społeczności. Jeden chce widoczności w Google, drugi chce znaleźć aktywny serwer Discord po polsku.",
-    },
-    {
+      id: "dodac-serwer",
       question: "Jak dodać serwer Discord do katalogu?",
-      answer: "Wystarczy zalogować się przez Discord, dodać swój serwer, uzupełnić opis, tagi i zaproszenie, a potem regularnie go bumpować.",
+      answer: "Zaloguj się przez Discord, przejdź do dashboardu, wybierz serwer, uzupełnij opis, tagi i invite, a potem zapisz zmiany. Jeśli bot nie jest jeszcze dodany, panel od razu pokaże dalszy krok zamiast bezsensownie wisieć na ładowaniu.",
     },
     {
+      id: "bumpowanie",
+      question: "Jak bumpować serwer Discord?",
+      answer: "Bump zwiększa widoczność serwera w katalogu. Im regularniej bumpujesz, tym częściej lądujesz wysoko na liście aktywnych serwerów. To nie jest magia, tylko prosty sygnał aktywności, choć internet lubi udawać, że to alchemia.",
+    },
+    {
+      id: "ranking",
+      question: "Jak działa ranking serwerów Discord?",
+      answer: "Na pozycję wpływają przede wszystkim bumpy i świeżość aktywności. Dodatkowo profil serwera może pokazywać odznaki zaufania i aktywności, takie jak Pierwszy bump, 100 bumpów, Top 10 tygodnia, Zweryfikowany czy Aktywna społeczność.",
+    },
+    {
+      id: "polskie-serwery",
       question: "Jak znaleźć polskie serwery Discord?",
-      answer: "Najłatwiej użyć wyszukiwarki i filtrów kategorii, aby przeglądać aktywne polskie serwery Discord według zainteresowań.",
+      answer: "Najłatwiej użyć wyszukiwarki i filtrów kategorii, a potem sprawdzić opis, tagi, liczbę użytkowników online i status invite. Dzięki temu nie klikasz w martwe zaproszenia jak ofiara własnego optymizmu.",
+    },
+    {
+      id: "zgloszenia",
+      question: "Jak działa zgłoszenie serwera?",
+      answer: "Na profilu serwera można wybrać konkretny powód zgłoszenia, dodać szczegóły i wysłać formularz. Zgłoszenie trafia do kolejki moderacji, a użytkownik dostaje jasny komunikat, co dalej i w jakim czasie zwykle jest odpowiedź.",
     },
   ];
 
@@ -41,17 +46,22 @@ export default function FaqPage() {
   return (
     <>
       <SeoHead
-        title="FAQ - lista Discord i serwery Discord"
-        description="FAQ o DISBUMPLY.PL. Sprawdź jak działa lista Discord, jak znaleźć polskie serwery Discord i jak dodać własny serwer do katalogu."
+        title="FAQ - serwery Discord Polska i lista serwerów Discord"
+        description="FAQ o DISBUMPLY.PL. Sprawdź jak dodać serwer Discord, jak bumpować, jak działa ranking i jak działa zgłaszanie serwerów w katalogu."
         path="/faq"
-        keywords={["faq lista discord", "lista discord", "serwery discord", "polskie serwery discord"]}
+        keywords={[
+          "faq serwery discord polska",
+          "jak dodać serwer discord",
+          "jak bumpować serwer discord",
+          "jak działa ranking discord",
+        ]}
         jsonLd={[
           buildWebsiteSchema(),
           buildOrganizationSchema(),
           {
             "@context": "https://schema.org",
             "@type": "WebPage",
-            name: "FAQ - Lista Discord",
+            name: "FAQ - serwery Discord Polska",
             url: `${SITE_URL}/faq`,
             inLanguage: "pl-PL",
             description: "Najważniejsze informacje o katalogu serwerów Discord DISBUMPLY.PL.",
@@ -65,35 +75,51 @@ export default function FaqPage() {
         <div className="ambient ambient-b" />
 
         <section className="container seo-copy-block glass" style={{ marginTop: "7rem" }}>
-          <span className="badge">lista discord</span>
-          <h1>Lista Discord dla polskich społeczności</h1>
+          <span className="badge">faq serwerów discord</span>
+          <h1>FAQ: lista serwerów Discord i serwery Discord Polska</h1>
           <p className="muted large">
-            Szukasz miejsca, gdzie da się szybko znaleźć sensowny serwer Discord zamiast błądzić po przypadkowych zaproszeniach z internetu? Tutaj masz publiczny katalog, czyli normalną listę Discord z wyszukiwarką, kategoriami i aktywnością serwerów.
+            Tutaj siedzą odpowiedzi pod longtail: jak dodać serwer, jak bumpować, jak działa ranking i co dzieje się po zgłoszeniu. Zadziwiające, ale ludzie faktycznie wolą jasne instrukcje niż zgadywanie.
           </p>
         </section>
 
-        <section className="container seo-copy-grid top-gap" style={{ marginBottom: "4rem" }}>
-          <article className="panel-card glass">
-            <h2>Jak działa katalog serwerów Discord</h2>
+        <section className="container seo-copy-grid top-gap" style={{ marginBottom: "2rem" }}>
+          <article className="panel-card glass" id="dodac-serwer">
+            <h2>Jak dodać serwer Discord</h2>
             <p>
-              DISBUMPLY.PL porządkuje serwery Discord według tagów, kategorii i aktualnej aktywności. Dzięki temu użytkownik może łatwo znaleźć serwery gamingowe, społeczności tematyczne, serwery anime, roleplay, muzyczne, edukacyjne albo zwykłe miejsca do pogadania bez szukania igły w stogu cyfrowego siana.
+              Zaloguj się przez Discord, przejdź do dashboardu, wybierz serwer, uzupełnij opis, tagi i invite. Jeśli nie masz sesji, panel pokaże od razu ekran logowania zamiast udawać, że coś robi.
             </p>
           </article>
 
-          <article className="panel-card glass">
-            <h2>Po co komu lista Discord</h2>
+          <article className="panel-card glass" id="bumpowanie">
+            <h2>Jak bumpować serwer Discord</h2>
             <p>
-              Taka lista Discord pomaga zarówno właścicielom serwerów, jak i ludziom szukającym nowej społeczności. Jeden chce widoczności w Google, drugi chce znaleźć aktywny serwer Discord po polsku. Niesłychane, obie strony mogą zyskać naraz.
+              Bump to sygnał aktywności. Regularne bumpowanie pomaga wskoczyć wyżej na listach i zgarnąć odznaki widoczności. Proste, brutalne i skuteczne.
+            </p>
+          </article>
+        </section>
+
+        <section className="container seo-copy-grid top-gap" style={{ marginBottom: "4rem" }}>
+          <article className="panel-card glass" id="ranking">
+            <h2>Jak działa ranking serwerów Discord</h2>
+            <p>
+              Ranking bierze pod uwagę aktywność i bumpy. Profil serwera może też pokazywać odznaki, które zwiększają zaufanie: Pierwszy bump, 100 bumpów, Top 10 tygodnia, Zweryfikowany i Aktywna społeczność.
+            </p>
+          </article>
+
+          <article className="panel-card glass" id="zgloszenia">
+            <h2>Jak działają zgłoszenia serwerów</h2>
+            <p>
+              Formularz zgłoszeń ma konkretne powody, walidację i komunikat po wysłaniu. Dzięki temu katalog trochę mniej przypomina śmietnik z zaproszeniami i scamem.
             </p>
           </article>
         </section>
 
         <section className="container seo-copy-block glass" style={{ marginBottom: "4rem" }}>
-          <span className="badge">faq</span>
-          <h2>Najczęstsze pytania</h2>
+          <span className="badge">najczęstsze pytania</span>
+          <h2>Pytania i odpowiedzi</h2>
           <div className="seo-copy-grid top-gap">
             {faqItems.map((item) => (
-              <article key={item.question} className="panel-card glass">
+              <article key={item.id} id={item.id} className="panel-card glass">
                 <h3>{item.question}</h3>
                 <p>{item.answer}</p>
               </article>
