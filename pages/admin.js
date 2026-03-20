@@ -262,6 +262,40 @@ export default function AdminPage() {
     setServers((prev) => prev.map((server) => (server.id === id ? data.server : server)));
   }
 
+  async function deleteReport(reportId) {
+    if (!reportId) return;
+
+    setNotice("");
+    const res = await fetch(`/api/admin/reports/${reportId}`, {
+      method: "DELETE"
+    });
+
+    const data = await res.json();
+    if (!res.ok) {
+      setNotice(data.error || "Nie udało się usunąć zgłoszenia");
+      return;
+    }
+
+    setServers((prev) =>
+      prev.map((server) => {
+        if (server.id !== data.serverId) return server;
+
+        const nextReports = getReports(server).filter((report) => report.id !== reportId);
+        const currentCount = getReportCount(server);
+
+        return {
+          ...server,
+          reports: nextReports,
+          reportCount: Math.max(0, currentCount - 1),
+          _count: {
+            ...(server._count || {}),
+            reports: Math.max(0, currentCount - 1)
+          }
+        };
+      })
+    );
+  }
+
   const stats = useMemo(() => {
     const approved = servers.filter((server) => server.moderationStatus === "approved").length;
     const pending = servers.filter((server) => server.moderationStatus === "pending").length;
@@ -527,7 +561,7 @@ export default function AdminPage() {
                     <div>
                       <span className="badge">zgłoszenia</span>
                       <h3>Kolejka zgłoszeń</h3>
-                      <p className="muted">Status jest na razie uproszczony: nowe, w trakcie albo zamknięte na podstawie moderacji serwera. Nadal lepsze to niż zgadywanie w próżni.</p>
+                      <p className="muted">Zgłoszenia pojawiają się tutaj od razu. Status nadal jest uproszczony: nowe, w trakcie albo zamknięte na podstawie moderacji serwera.</p>
                     </div>
                   </div>
                   <div className="reports-cards">
@@ -541,6 +575,22 @@ export default function AdminPage() {
                         </div>
                         <p>{item.reason}</p>
                         <span className="muted small">Autor: {item.userDiscordId} • {item.createdAt ? new Date(item.createdAt).toLocaleString("pl-PL") : "Brak daty"}</span>
+                        <div className="report-actions top-gap">
+                          <button
+                            type="button"
+                            className="btn btn-ghost btn-sm"
+                            onClick={() => setExpandedId(item.serverId)}
+                          >
+                            Pokaż serwer
+                          </button>
+                          <button
+                            type="button"
+                            className="btn btn-danger btn-sm"
+                            onClick={() => deleteReport(item.id)}
+                          >
+                            Usuń zgłoszenie
+                          </button>
+                        </div>
                       </div>
                     ))}
                   </div>
@@ -724,6 +774,7 @@ export default function AdminPage() {
                                                             <th>Powód</th>
                                                             <th>Autor</th>
                                                             <th>Data</th>
+                                                            <th>Akcja</th>
                                                           </tr>
                                                         </thead>
                                                         <tbody>
@@ -736,6 +787,15 @@ export default function AdminPage() {
                                                                 {report.createdAt
                                                                   ? new Date(report.createdAt).toLocaleString("pl-PL")
                                                                   : "Brak daty"}
+                                                              </td>
+                                                              <td>
+                                                                <button
+                                                                  type="button"
+                                                                  className="btn btn-danger btn-sm"
+                                                                  onClick={() => deleteReport(report.id)}
+                                                                >
+                                                                  Usuń
+                                                                </button>
                                                               </td>
                                                             </tr>
                                                           ))}
@@ -763,6 +823,15 @@ export default function AdminPage() {
                                                           <span className="muted small">
                                                             Autor: {report.userDiscordId || "Brak danych"}
                                                           </span>
+                                                          <div className="report-actions top-gap">
+                                                            <button
+                                                              type="button"
+                                                              className="btn btn-danger btn-sm"
+                                                              onClick={() => deleteReport(report.id)}
+                                                            >
+                                                              Usuń zgłoszenie
+                                                            </button>
+                                                          </div>
                                                         </div>
                                                       ))}
                                                     </div>
