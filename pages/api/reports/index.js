@@ -18,12 +18,25 @@ export default async function handler(req, res) {
   if (denyIfCrossOrigin(req, res)) return;
 
   const ip = getClientIp(req);
-  const rate = checkRateLimit(`reports:${session.user.id}:${ip}`, 10, 1000 * 60 * 30);
+  const rate = checkRateLimit(
+    `reports:${session.user.id}:${ip}`,
+    10,
+    1000 * 60 * 30
+  );
+
   if (!rate.allowed) {
     return res.status(429).json({ error: "Za dużo zgłoszeń. Spróbuj później." });
   }
 
-  const body = typeof req.body === "string" ? JSON.parse(req.body) : req.body || {};
+  let body = req.body || {};
+  if (typeof req.body === "string") {
+    try {
+      body = JSON.parse(req.body);
+    } catch {
+      return res.status(400).json({ error: "Nieprawidłowe dane wejściowe" });
+    }
+  }
+
   const serverId = String(body.serverId || "").trim();
   const reason = String(body.reason || "").trim().slice(0, 300);
 
@@ -33,7 +46,11 @@ export default async function handler(req, res) {
 
   const server = await prisma.server.findUnique({
     where: { id: serverId },
-    select: { id: true, moderationStatus: true, botInstalled: true }
+    select: {
+      id: true,
+      moderationStatus: true,
+      botInstalled: true
+    }
   });
 
   if (!server || server.moderationStatus !== "approved" || !server.botInstalled) {
@@ -48,12 +65,24 @@ export default async function handler(req, res) {
         gte: new Date(Date.now() - 1000 * 60 * 60 * 24)
       }
     },
-    orderBy: { createdAt: "desc" }
+    orderBy: {
+      createdAt: "desc"
+    },
+    select: {
+      id: true
+    }
   });
 
   if (recentReport) {
-    const count = await prisma.report.count({ where: { serverId } });
-    return res.status(200).json({ ok: true, count, deduplicated: true });
+    const count = await prisma.report.count({
+      where: { serverId }
+    });
+
+    return res.status(200).json({
+      ok: true,
+      count,
+      deduplicated: true
+    });
   }
 
   await prisma.report.create({
@@ -64,6 +93,12 @@ export default async function handler(req, res) {
     }
   });
 
-  const count = await prisma.report.count({ where: { serverId } });
-  return res.status(200).json({ ok: true, count });
+  const count = await prisma.report.count({
+    where: { serverId }
+  });
+
+  return res.status(200).json({
+    ok: true,
+    count
+  });
 }
