@@ -2570,3 +2570,6 @@ button.site-nav-link {
 
 footer{background:linear-gradient(180deg,#111,#000);color:#fff;padding:30px 20px;border-top:1px solid rgba(255,255,255,0.1);}
 footer a{color:#ccc}
+
+footer{background:#0d0d0d;color:#eaeaea;padding:20px 15px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px;border:none;}
+footer div{background:none;border:none;padding:0;margin:0}
