@@ -51,10 +51,12 @@ model Report {
   serverId      String
   userDiscordId String?
   reason        String?
+  status        String   @default("new")
   createdAt     DateTime @default(now())
 
   server        Server   @relation(fields: [serverId], references: [id], onDelete: Cascade)
 
   @@index([serverId, createdAt])
   @@index([userDiscordId, serverId, createdAt])
+  @@index([status, createdAt])
 }
