@@ -6,7 +6,7 @@ const sections = [
     title: "Postanowienia ogólne",
     content: [
       "Niniejsza Polityka Prywatności opisuje, w jaki sposób disbumply.pl zbiera, wykorzystuje, przechowuje i zabezpiecza dane użytkowników korzystających z serwisu.",
-      "Administratorem danych jest operator disbumply.pl. W sprawach dotyczących prywatności możesz skontaktować się pod adresem: privacy@disbumply.pl.",
+      "Administratorem danych jest operator disbumply.pl. W sprawach dotyczących prywatności możesz skontaktować się pod adresem: kontakt@disbumply.pl.",
       "Korzystanie z serwisu oznacza zapoznanie się z niniejszą Polityką. Jeżeli nie akceptujesz jej zasad, nie korzystaj z funkcji wymagających przekazania danych.",
       "Serwis korzysta z API Discord, ale nie jest przez Discord certyfikowany, zatwierdzony ani wspierany."
     ]
@@ -106,7 +106,7 @@ const sections = [
     id: "12",
     title: "Kontakt i zmiany Polityki",
     content: [
-      "W sprawach związanych z prywatnością, żądaniami dotyczącymi danych lub pytaniami o sposób przetwarzania możesz napisać na adres: privacy@disbumply.pl.",
+      "W sprawach związanych z prywatnością, żądaniami dotyczącymi danych lub pytaniami o sposób przetwarzania możesz napisać na adres: kontakt@disbumply.pl.",
       "Polityka Prywatności może być aktualizowana w przypadku zmian prawnych, technicznych lub organizacyjnych. Aktualna wersja jest publikowana na stronie.",
       "Ostatnia aktualizacja: 07.01.2026"
     ]
