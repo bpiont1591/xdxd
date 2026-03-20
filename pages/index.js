@@ -338,7 +338,6 @@ export default function Home({ initialServers, initialMeta, recentServers }) {
             <div>
               <span className="badge">nowe serwery</span>
               <h2>Ostatnio dodane</h2>
-              <p className="muted">Nowe serwery dostają własny kawałek widoczności od razu, zamiast czekać aż algorytm łaskawie mrugnie.</p>
             </div>
             <Link href="/allservers?sort=recent" className="btn btn-ghost">ZOBACZ NOWE</Link>
           </div>
