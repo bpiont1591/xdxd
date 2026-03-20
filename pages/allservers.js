@@ -21,6 +21,16 @@ function formatTimeAgo(dateString) {
   return `${days} dni temu`;
 }
 
+function isNewServer(dateString) {
+  if (!dateString) return false;
+
+  const createdAt = new Date(dateString).getTime();
+  if (Number.isNaN(createdAt)) return false;
+
+  const fourteenDays = 14 * 24 * 60 * 60 * 1000;
+  return Date.now() - createdAt <= fourteenDays;
+}
+
 function buildAllServersQuery(params = {}) {
   const search = new URLSearchParams();
 
@@ -208,7 +218,7 @@ export default function AllServersPage({ initialServers, initialMeta, filters })
               <span className="badge">pełna lista</span>
               <h2>Wszystkie serwery</h2>
               <p className="muted">
-                Łącznie: {meta.total || 0} • Strona {currentPage} z {totalPages}
+                Masz tu {meta.total || 0} serwerów. Strona {currentPage} z {totalPages}.
               </p>
             </div>
           </div>
@@ -251,7 +261,7 @@ export default function AllServersPage({ initialServers, initialMeta, filters })
               >
                 <option value="top">Top bumpy</option>
                 <option value="favorites">Najwięcej ulubionych</option>
-                <option value="recent">Najnowsze</option>
+                <option value="recent">Nowe serwery</option>
                 <option value="name">Nazwa A-Z</option>
               </select>
             </div>
@@ -261,6 +271,7 @@ export default function AllServersPage({ initialServers, initialMeta, filters })
         <section className="container seo-copy-block glass">
           <span className="badge">katalog discord</span>
           <h1>Wszystkie serwery Discord w jednym miejscu</h1>
+          <p className="muted">Nowe serwery znajdziesz tutaj po przełączeniu sortowania na &quot;Nowe serwery&quot;.</p>
         </section>
 
         <section className="servers-section container">
@@ -287,6 +298,9 @@ export default function AllServersPage({ initialServers, initialMeta, filters })
                             <span className="metric">Bumpów: {server.bumpCount || 0}</span>
                             <span className="metric">⭐ {server.favoriteCount || 0}</span>
                             <span className="metric">Ostatni: {formatTimeAgo(server.lastBumpAt)}</span>
+                            {isNewServer(server.createdAt) ? (
+                              <span className="server-type-pill public">🆕 Nowy serwer</span>
+                            ) : null}
                             <span className={`server-type-pill ${server.serverType === "nsfw" ? "nsfw" : "public"}`}>
                               {server.serverType === "nsfw" ? "NSFW 🔞" : "Publiczny"}
                             </span>
