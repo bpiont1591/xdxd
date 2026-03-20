@@ -50,7 +50,7 @@ export default function Footer() {
 
           <div className="footer-v3__bottom">
             <p>© 2026 DISBUMPLY.PL</p>
-            <p>Katalog serwerów Discord zaprojektowany spójnie z resztą strony.</p>
+            <p>Ta strona nie jest powiązana z Discord Inc.</p>
           </div>
         </div>
       </div>
