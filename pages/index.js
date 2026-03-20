@@ -197,7 +197,7 @@ export default function Home({ initialServers, initialMeta }) {
           </div>
 
           <div>
-            <h1>Serwery Discord Polska</h1>
+            <h1>DISBUMPLY.PL - BAZA POLSKICH SERWERÓW DISCORD</h1>
           </div>
 
           <form className="directory-search home-v9-search searchbar-clean hero-search" method="get" action="/allservers">
