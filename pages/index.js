@@ -249,10 +249,7 @@ export default function Home({ initialServers, initialMeta, recentServers }) {
           </div>
 
           <div>
-            <h1>Serwery Discord Polska i lista aktywnych społeczności</h1>
-            <p className="muted large">
-              Szukaj po kategoriach, sprawdzaj aktywność, odkrywaj nowe serwery Discord i wyciągaj własny projekt z cyfrowego bagna niewidzialności.
-            </p>
+            <h1>SERWERY DISCORD POLSKA</h1>
           </div>
 
           <form className="directory-search home-v9-search searchbar-clean hero-search" method="get" action="/allservers">
@@ -297,7 +294,7 @@ export default function Home({ initialServers, initialMeta, recentServers }) {
             <div>
               <span className="badge">o katalogu</span>
               <h2>Polska lista serwerów Discord</h2>
-              <p className="muted">Home celuje w frazy typu lista serwerów Discord i serwery Discord Polska, a FAQ łapie longtaile o dodawaniu serwera, bumpach i rankingu. SEO też czasem chce odrobiny porządku, nie tylko chaosu i modlitwy.</p>
+              <p className="muted">Na stronie głównej znajdziesz listę serwerów Discord. W FAQ wyjaśniamy, jak dodać swój serwer, czym są bumpy i jak działa ranking.</p>
             </div>
           </div>
 
