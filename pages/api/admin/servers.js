@@ -18,13 +18,24 @@ function safeJsonParse(value, fallback = {}) {
   }
 }
 
+function mapReport(report) {
+  return {
+    id: report.id,
+    reason: report.reason || "",
+    userDiscordId: report.userDiscordId || null,
+    status: report.status || "new",
+    moderatorNote: report.moderatorNote || "",
+    reviewedAt: report.reviewedAt || null,
+    reviewedByDiscordId: report.reviewedByDiscordId || null,
+    createdAt: report.createdAt || null,
+    updatedAt: report.updatedAt || null
+  };
+}
+
 function mapServerForAdmin(row) {
   const normalized = normalizeServer(row);
-  const reports = Array.isArray(row.reports) ? row.reports : [];
-  const reportCount =
-    typeof row?._count?.reports === "number"
-      ? row._count.reports
-      : reports.length;
+  const reports = Array.isArray(row.reports) ? row.reports.map(mapReport) : [];
+  const reportCount = typeof row?._count?.reports === "number" ? row._count.reports : reports.length;
 
   return {
     ...normalized,
@@ -33,12 +44,8 @@ function mapServerForAdmin(row) {
       ...(normalized._count || {}),
       reports: reportCount
     },
-    reports: reports.map((report) => ({
-      id: report.id,
-      reason: report.reason || "",
-      userDiscordId: report.userDiscordId || null,
-      createdAt: report.createdAt || null
-    }))
+    reports,
+    latestReportAt: reports[0]?.createdAt || null
   };
 }
 
@@ -50,21 +57,13 @@ export default async function handler(req, res) {
   }
 
   const ip = getClientIp(req);
-  const rate = checkRateLimit(
-    `admin-servers:${ip}:${req.method}`,
-    req.method === "GET" ? 120 : 40,
-    1000 * 60 * 10
-  );
-
+  const rate = checkRateLimit(`admin-servers:${ip}:${req.method}`, req.method === "GET" ? 120 : 40, 1000 * 60 * 10);
   if (!rate.allowed) {
     return res.status(429).json({ error: "Za dużo żądań. Spróbuj później." });
   }
 
   if (req.method === "GET") {
     const rows = await prisma.server.findMany({
-      where: {
-        ownerDiscordId: { not: null }
-      },
       include: {
         _count: {
           select: {
@@ -79,16 +78,26 @@ export default async function handler(req, res) {
             id: true,
             reason: true,
             userDiscordId: true,
-            createdAt: true
+            status: true,
+            moderatorNote: true,
+            reviewedAt: true,
+            reviewedByDiscordId: true,
+            createdAt: true,
+            updatedAt: true
           }
         }
       },
-      orderBy: { updatedAt: "desc" }
+      orderBy: [{ updatedAt: "desc" }]
     });
 
-    return res.status(200).json({
-      servers: rows.map(mapServerForAdmin)
+    const mapped = rows.map(mapServerForAdmin).sort((a, b) => {
+      const aHasReports = a.reportCount > 0 ? 1 : 0;
+      const bHasReports = b.reportCount > 0 ? 1 : 0;
+      if (aHasReports !== bHasReports) return bHasReports - aHasReports;
+      return new Date(b.latestReportAt || b.updatedAt || 0).getTime() - new Date(a.latestReportAt || a.updatedAt || 0).getTime();
     });
+
+    return res.status(200).json({ servers: mapped });
   }
 
   if (req.method === "PUT") {
@@ -98,10 +107,7 @@ export default async function handler(req, res) {
     const id = String(body.id || "").trim();
     const moderationStatus = String(body.moderationStatus || "").trim();
     const moderationNote = String(body.moderationNote || "").trim().slice(0, 300);
-    const serverType =
-      String(body.serverType || "public").toLowerCase() === "nsfw"
-        ? "nsfw"
-        : "public";
+    const serverType = String(body.serverType || "public").toLowerCase() === "nsfw" ? "nsfw" : "public";
 
     if (!id) {
       return res.status(400).json({ error: "Brak ID serwera" });
@@ -111,10 +117,7 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: "Nieprawidłowy status moderacji" });
     }
 
-    const existing = await prisma.server.findUnique({
-      where: { id }
-    });
-
+    const existing = await prisma.server.findUnique({ where: { id } });
     if (!existing) {
       return res.status(404).json({ error: "Nie znaleziono serwera" });
     }
@@ -140,15 +143,18 @@ export default async function handler(req, res) {
             id: true,
             reason: true,
             userDiscordId: true,
-            createdAt: true
+            status: true,
+            moderatorNote: true,
+            reviewedAt: true,
+            reviewedByDiscordId: true,
+            createdAt: true,
+            updatedAt: true
           }
         }
       }
     });
 
-    return res.status(200).json({
-      server: mapServerForAdmin(row)
-    });
+    return res.status(200).json({ server: mapServerForAdmin(row) });
   }
 
   return res.status(405).json({ error: "Method not allowed" });

@@ -60,7 +60,8 @@ export default async function handler(req, res) {
     data: {
       userDiscordId: session.user.id,
       serverId,
-      reason
+      reason,
+      status: "new"
     }
   });
 
