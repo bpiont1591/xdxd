@@ -210,7 +210,6 @@ export default function Home({ initialServers, initialMeta }) {
             ) : (
               <button className="btn btn-primary" onClick={() => signIn("discord")}>Dodaj serwer</button>
             )}
-            <Link href="/allservers" className="btn btn-ghost">Przejdź do listy</Link>
           </div>
         </section>
 
